@@ -42,12 +42,6 @@ int main() {
     app.width = 1024;
     app.height = 768;
     phi::InitWindow(app);
-    phi::BufferDesc buffer_desc;
-    buffer_desc.type = phi::BufferType::Vertex;
-    buffer_desc.usage = phi::BufferUsage::Static;
-    buffer_desc.data = nullptr;
-    buffer_desc.size = 64666;
-    phi::Buffer vbo(buffer_desc);
 
     bool running = true;
     while (running) {
