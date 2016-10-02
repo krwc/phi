@@ -68,6 +68,8 @@ class Texture2D : public Texture {
 public:
     Texture2D(int width, int height, TextureFormat format);
     virtual ~Texture2D();
+
+    virtual void Write(int level, int x, int y, int w, int h, const void *data);
 };
 
 } // namespace phi

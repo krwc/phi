@@ -62,6 +62,27 @@ GLenum TexturePixelType(TextureFormat format) {
     }
 }
 
+size_t TexturePixelSize(TextureFormat format) {
+    switch (format) {
+    case TextureFormat::R_8:
+        return 1;
+    case TextureFormat::R_16F:
+        return 2;
+    case TextureFormat::RGB_888:
+    case TextureFormat::DEPTH_24:
+        return 3;
+    case TextureFormat::RGBA_8888:
+    case TextureFormat::R_32F:
+    case TextureFormat::RG_16F:
+    case TextureFormat::DEPTH_32:
+        return 4;
+    case TextureFormat::RG_32F:
+        return 8;
+    default:
+        throw runtime_error("Invalid format");
+    }
+}
+
 } // namespace
 
 Texture2D::Texture2D(int width, int height, TextureFormat format)
@@ -78,6 +99,20 @@ Texture2D::Texture2D(int width, int height, TextureFormat format)
 
 Texture2D::~Texture2D() {
     PHI_LOG(TRACE, "Texture2D: deleted texture (ID=%u)", m_bind);
+}
+
+void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {
+    size_t size = m_width * m_height * TexturePixelType(m_format);
+    assert(size >= w * h * TexturePixelType(m_format));
+    GLint current = GL_NONE;
+    CheckedCall(glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
+    CheckedCall(glBindTexture, GL_TEXTURE_2D, m_bind);
+    PHI_LOG(TRACE, "Texture2D: writing %u bytes",
+            w * h * TexturePixelSize(m_format));
+    CheckedCall(glTexSubImage2D, GL_TEXTURE_2D, level, x, y, w, h,
+                TextureInternalFormat(m_format), TexturePixelType(m_format),
+                data);
+    CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
 }
 
 } // namespace phi
