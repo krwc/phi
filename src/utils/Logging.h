@@ -31,7 +31,7 @@ static inline void LogMethod(LogLevel level,
                                     "ERROR" };
     va_list args;
     va_start(args, format);
-    fprintf(stderr, "[%s](%s:%d) ", levels[static_cast<int>(level)],
+    fprintf(stderr, "[%s]\t(%s:%d) ", levels[static_cast<int>(level)],
             RootdirRelativeFilename(file), line);
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");
