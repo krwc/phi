@@ -5,11 +5,12 @@
 
 #include <map>
 
+#include "Resource.h"
 #include "Texture.h"
 
 namespace phi {
 
-class FrameBuffer {
+class FrameBuffer : virtual public Resource {
     void Destroy();
 
     GLuint m_bind;

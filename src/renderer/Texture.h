@@ -3,6 +3,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
+#include "Resource.h"
+
 namespace phi {
 
 enum class TextureFormat {
@@ -30,7 +32,7 @@ struct TextureDesc {
     int height;
 };
 
-class Texture {
+class Texture : virtual public Resource {
 private:
     void Destroy();
 

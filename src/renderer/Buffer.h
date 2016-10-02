@@ -3,6 +3,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
+#include "Resource.h"
+
 namespace phi {
 
 enum class BufferType {
@@ -15,7 +17,7 @@ enum class BufferUsage {
     Dynamic = GL_DYNAMIC_DRAW
 };
 
-class Buffer {
+class Buffer : virtual public Resource {
     void Destroy();
 
     BufferType m_type;
@@ -36,7 +38,7 @@ public:
         return m_type;
     }
 
-    GLuint GetId() const {
+    virtual GLuint GetId() const {
         return m_bind;
     }
 };
