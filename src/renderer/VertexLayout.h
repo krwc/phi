@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_VERTEX_FORMAT_H
-#define PHI_RENDERER_VERTEX_FORMAT_H
+#ifndef PHI_RENDERER_VERTEX_LAYOUT_H
+#define PHI_RENDERER_VERTEX_LAYOUT_H
 #include <GL/gl.h>
 
 #include <initializer_list>
