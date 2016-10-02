@@ -56,12 +56,16 @@ public:
         return m_depth;
     }
 
-    virtual TextureFormat GetTextureFormat() const {
+    virtual TextureFormat GetFormat() const {
         return m_format;
     }
 
     virtual TextureType GetType() const {
         return m_type;
+    }
+
+    virtual GLuint GetId() const {
+        return m_bind;
     }
 
     virtual void GenerateMipmaps() = 0;
