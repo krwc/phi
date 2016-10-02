@@ -115,4 +115,13 @@ void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {
     CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
 }
 
+void Texture2D::GenerateMipmaps() {
+    GLint current = GL_NONE;
+    CheckedCall(glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
+    CheckedCall(glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(glGenerateMipmap, GL_TEXTURE_2D);
+    CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
+    PHI_LOG(TRACE, "Texture2D: generated mipmaps");
+}
+
 } // namespace phi

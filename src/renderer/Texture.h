@@ -1,5 +1,6 @@
 #ifndef PHI_RENDERER_TEXTURE_H
 #define PHI_RENDERER_TEXTURE_H
+#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
 namespace phi {
@@ -62,6 +63,8 @@ public:
     virtual TextureType GetType() const {
         return m_type;
     }
+
+    virtual void GenerateMipmaps() = 0;
 };
 
 class Texture2D : public Texture {
@@ -70,6 +73,7 @@ public:
     virtual ~Texture2D();
 
     virtual void Write(int level, int x, int y, int w, int h, const void *data);
+    virtual void GenerateMipmaps();
 };
 
 } // namespace phi
