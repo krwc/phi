@@ -12,8 +12,8 @@ FrameBuffer &FrameBuffer::operator=(FrameBuffer &&other) {
         m_bind = other.m_bind;
         m_width = other.m_width;
         m_height = other.m_height;
-        m_color_attachments = other.m_color_attachments;
-        m_depth_attachment = other.m_depth_attachment;
+        m_color_attachments = move(other.m_color_attachments);
+        m_depth_attachment = move(other.m_depth_attachment);
     }
     return *this;
 }
@@ -40,6 +40,7 @@ FrameBuffer::~FrameBuffer() {
 }
 
 void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {
+    assert(color_texture);
     TextureFormat format = color_texture->GetFormat();
     assert(format != TextureFormat::DEPTH_24
            && format != TextureFormat::DEPTH_32);
@@ -49,6 +50,7 @@ void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {
 }
 
 void FrameBuffer::SetDepthAttachment(Texture2D *depth_texture) {
+    assert(depth_texture);
     TextureFormat format = depth_texture->GetFormat();
     assert(format == TextureFormat::DEPTH_24
            || format == TextureFormat::DEPTH_32);
