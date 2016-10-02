@@ -6,11 +6,14 @@
 namespace phi {
 using namespace std;
 
-Buffer::Buffer(const BufferDesc &desc)
-        : m_type(desc.type), m_bind(GL_NONE), m_size(desc.size) {
+Buffer::Buffer(BufferType type,
+               BufferUsage usage,
+               const void *data,
+               size_t size)
+        : m_type(type), m_bind(GL_NONE), m_size(size) {
     CheckedCall(glCreateBuffers, 1, &m_bind);
-    CheckedCall(glNamedBufferData, m_bind, desc.size, desc.data, (GLenum) desc.usage);
-    PHI_LOG(TRACE, "Buffer: created (ID=%u) of size %u", m_bind, desc.size);
+    CheckedCall(glNamedBufferData, m_bind, size, data, (GLenum) usage);
+    PHI_LOG(TRACE, "Buffer: created (ID=%u) of size %u", m_bind, size);
 }
 
 Buffer::~Buffer() {
