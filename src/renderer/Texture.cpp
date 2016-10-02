@@ -6,8 +6,33 @@
 namespace phi {
 using namespace std;
 
+void Texture::Destroy() {
+    if (m_bind) {
+        PHI_LOG(TRACE, "Deleting texture (ID=%u)", m_bind);
+        CheckedCall(glDeleteTextures, 1, &m_bind);
+    }
+}
+
+Texture &Texture::operator=(Texture &&other) {
+    if (&other != this) {
+        Destroy();
+        m_bind = other.m_bind;
+        m_type = other.m_type;
+        m_format = other.m_format;
+        m_depth = other.m_depth;
+        m_width = other.m_width;
+        m_height = other.m_height;
+        other.m_bind = GL_NONE;
+    }
+    return *this;
+}
+
+Texture::Texture(Texture &&other) : m_bind(GL_NONE) {
+    *this = move(other);
+}
+
 Texture::Texture(const TextureDesc &desc)
-        : m_bind(0),
+        : m_bind(GL_NONE),
           m_type(desc.type),
           m_format(desc.format),
           m_depth(desc.depth),
@@ -17,7 +42,7 @@ Texture::Texture(const TextureDesc &desc)
 }
 
 Texture::~Texture() {
-    CheckedCall(glDeleteTextures, 1, &m_bind);
+    Destroy();
 }
 
 namespace {
@@ -98,7 +123,9 @@ Texture2D::Texture2D(int width, int height, TextureFormat format)
 }
 
 Texture2D::~Texture2D() {
-    PHI_LOG(TRACE, "Texture2D: deleted texture (ID=%u)", m_bind);
+    if (m_bind) {
+        PHI_LOG(TRACE, "Texture2D: deleted texture (ID=%u)", m_bind);
+    }
 }
 
 void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {

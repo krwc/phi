@@ -6,6 +6,28 @@
 namespace phi {
 using namespace std;
 
+void Buffer::Destroy() {
+    if (m_bind) {
+        CheckedCall(glDeleteBuffers, 1, &m_bind);
+        PHI_LOG(TRACE, "Buffer: deleted (ID=%u)", m_bind);
+    }
+}
+
+Buffer &Buffer::operator=(Buffer &&other) {
+    if (&other != this) {
+        Destroy();
+        m_type = other.m_type;
+        m_bind = other.m_bind;
+        m_size = other.m_size;
+        other.m_bind = GL_NONE;
+    }
+    return *this;
+}
+
+Buffer::Buffer(Buffer &&other) : m_bind(GL_NONE) {
+    *this = move(other);
+}
+
 Buffer::Buffer(BufferType type,
                BufferUsage usage,
                const void *data,
@@ -17,8 +39,7 @@ Buffer::Buffer(BufferType type,
 }
 
 Buffer::~Buffer() {
-    CheckedCall(glDeleteBuffers, 1, &m_bind);
-    PHI_LOG(TRACE, "Buffer: deleted (ID=%u)", m_bind);
+    Destroy();
 }
 
 void Buffer::UpdateData(const void *data, size_t size, size_t offset) {

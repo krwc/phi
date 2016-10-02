@@ -16,11 +16,18 @@ enum class BufferUsage {
 };
 
 class Buffer {
+    void Destroy();
+
     BufferType m_type;
     GLuint m_bind;
     size_t m_size;
 
 public:
+    Buffer &operator=(const Buffer &) = delete;
+    Buffer(const Buffer &) = delete;
+
+    Buffer &operator=(Buffer &&);
+    Buffer(Buffer &&);
     Buffer(BufferType type, BufferUsage usage, const void *data, size_t size);
     virtual ~Buffer();
     void UpdateData(const void *data, size_t size, size_t offset = 0);
