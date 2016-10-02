@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "Resource.h"
+
 #include "utils/Logging.h"
 
 namespace phi {
@@ -18,7 +20,7 @@ enum class ShaderType {
     Compute = GL_COMPUTE_SHADER
 };
 
-class Shader {
+class Shader : virtual public Resource {
     void Destroy();
 
     GLuint m_bind;
@@ -44,7 +46,7 @@ public:
     }
 };
 
-class Program {
+class Program : virtual public Resource {
     void Destroy();
 
 public:
