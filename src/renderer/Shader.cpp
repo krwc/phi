@@ -43,8 +43,8 @@ void Shader::Compile() {
     CheckedCall(glCompileShader, m_bind);
     CheckedCall(glGetShaderiv, m_bind, GL_COMPILE_STATUS, &status);
     CheckedCall(glGetShaderiv, m_bind, GL_INFO_LOG_LENGTH, &log_length);
+    string compilation_log;
     if (status == GL_FALSE) {
-        string compilation_log;
         compilation_log.resize(log_length - 1, '\0');
         CheckedCall(glGetShaderInfoLog, m_bind, log_length - 1, &log_length,
                     &compilation_log[0]);
@@ -98,26 +98,31 @@ void Program::SetConstant(GLint location, GLenum type, const void *data) {
     case GL_BOOL:
     case GL_SAMPLER_2D:
     case GL_SAMPLER_2D_ARRAY:
-        CheckedCall(glUniform1i, location, *((const GLint *) data));
+        CheckedCall(glProgramUniform1i, m_bind, location,
+                    *((const GLint *) data));
         break;
     case GL_FLOAT:
-        CheckedCall(glUniform1fv, location, 1, (const GLfloat *) data);
+        CheckedCall(glProgramUniform1fv, m_bind, location, 1,
+                    (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC2:
-        CheckedCall(glUniform2fv, location, 1, (const GLfloat *) data);
+        CheckedCall(glProgramUniform2fv, m_bind, location, 1,
+                    (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC3:
-        CheckedCall(glUniform3fv, location, 1, (const GLfloat *) data);
+        CheckedCall(glProgramUniform3fv, m_bind, location, 1,
+                    (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC4:
-        CheckedCall(glUniform4fv, location, 1, (const GLfloat *) data);
+        CheckedCall(glProgramUniform4fv, m_bind, location, 1,
+                    (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT3:
-        CheckedCall(glUniformMatrix3fv, location, 1, GL_FALSE,
+        CheckedCall(glProgramUniformMatrix3fv, m_bind, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT4:
-        CheckedCall(glUniformMatrix4fv, location, 1, GL_FALSE,
+        CheckedCall(glProgramUniformMatrix4fv, m_bind, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     default:
@@ -239,12 +244,15 @@ void Program::Link() {
 
     int status;
     CheckedCall(glGetProgramiv, m_bind, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-        int length;
-        CheckedCall(glGetProgramiv, m_bind, GL_INFO_LOG_LENGTH, &length);
+    int length;
+    CheckedCall(glGetProgramiv, m_bind, GL_INFO_LOG_LENGTH, &length);
+    if (length > 0) {
         string log(length - 1, 0);
         CheckedCall(glGetProgramInfoLog, m_bind, length - 1, &length, &log[0]);
-        throw logic_error(log);
+        PHI_LOG(DEBUG, "Program link log:\n%s\n", log.c_str());
+    }
+    if (status == GL_FALSE) {
+        throw logic_error("Cannot link program");
     }
     m_constants = DiscoverProgramConstants(m_bind);
     m_attributes = DiscoverProgramAttributes(m_bind);
