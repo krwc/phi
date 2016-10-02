@@ -27,7 +27,7 @@ static inline void LogMethod(LogLevel level,
                              const int line,
                              const char *format,
                              ...) {
-    static const char *levels[] = { "TRACE", "INFO", "DEBUG", "WARNING",
+    static const char *levels[] = { "TRACE", "INFO", "DEBUG", "WARN",
                                     "ERROR" };
     va_list args;
     va_start(args, format);
