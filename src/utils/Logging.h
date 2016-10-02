@@ -38,8 +38,8 @@ static inline void LogMethod(LogLevel level,
     va_end(args);
 }
 
-#define PHI_LOG(level, format, ...) \
-    LogMethod((level), __FILE__, __LINE__, (format), __VA_ARGS__)
+#define PHI_LOG(level, ...) \
+    LogMethod((level), __FILE__, __LINE__, __VA_ARGS__)
 
 } // namespace
 
