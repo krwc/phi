@@ -6,14 +6,22 @@
 namespace phi {
 using namespace std;
 
+void FrameBuffer::Destroy() {
+    if (m_bind) {
+        CheckedCall(glDeleteFramebuffers, 1, &m_bind);
+        PHI_LOG(TRACE, "Deleted FrameBuffer (ID=%u)", m_bind);
+    }
+}
+
 FrameBuffer &FrameBuffer::operator=(FrameBuffer &&other) {
     if (this != &other) {
-        this->~FrameBuffer();
+        Destroy();
         m_bind = other.m_bind;
         m_width = other.m_width;
         m_height = other.m_height;
         m_color_attachments = move(other.m_color_attachments);
         m_depth_attachment = move(other.m_depth_attachment);
+        other.m_bind = GL_NONE;
     }
     return *this;
 }
@@ -33,10 +41,7 @@ FrameBuffer::FrameBuffer(int width, int height)
 }
 
 FrameBuffer::~FrameBuffer() {
-    if (m_bind) {
-        CheckedCall(glDeleteFramebuffers, 1, &m_bind);
-        PHI_LOG(TRACE, "Deleted FrameBuffer (ID=%u)", m_bind);
-    }
+    Destroy();
 }
 
 void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {

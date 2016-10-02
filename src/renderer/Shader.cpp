@@ -5,14 +5,20 @@
 namespace phi {
 using namespace std;
 
+void Shader::Destroy() {
+    if (m_bind) {
+        PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_bind);
+        CheckedCall(glDeleteShader, m_bind);
+    }
+}
+
 Shader &Shader::operator=(Shader &&other) {
     if (&other != this) {
-        this->~Shader();
+        Destroy();
         m_bind = other.m_bind;
         m_type = other.m_type;
         m_source = other.m_source;
-        // This will prevent us from accidentally calling glDeleteShader
-        other.m_bind = 0;
+        other.m_bind = GL_NONE;
     }
     return *this;
 }
@@ -29,10 +35,7 @@ Shader::Shader(ShaderType type, const char *source) noexcept
 }
 
 Shader::~Shader() noexcept {
-    if (m_bind) {
-        PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_bind);
-        CheckedCall(glDeleteShader, m_bind);
-    }
+    Destroy();
 }
 
 void Shader::Compile() {
@@ -52,9 +55,16 @@ void Shader::Compile() {
     }
 }
 
+void Program::Destroy() {
+    if (m_bind) {
+        PHI_LOG(TRACE, "Program: deleted (ID=%u)", m_bind);
+        CheckedCall(glDeleteProgram, m_bind);
+    }
+}
+
 Program &Program::operator=(Program &&other) {
     if (&other != this) {
-        this->~Program();
+        Destroy();
         m_bind = other.m_bind;
         m_constants = move(other.m_constants);
         m_attributes = move(other.m_attributes);
@@ -74,10 +84,7 @@ Program::Program()
 }
 
 Program::~Program() {
-    if (m_bind) {
-        PHI_LOG(TRACE, "Program: deleted (ID=%u)", m_bind);
-        CheckedCall(glDeleteProgram, m_bind);
-    }
+    Destroy();
 }
 
 const Program::ParamInfo *Program::FindConstant(const string &name) const try {

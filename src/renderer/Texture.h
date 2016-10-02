@@ -31,6 +31,9 @@ struct TextureDesc {
 };
 
 class Texture {
+private:
+    void Destroy();
+
 protected:
     GLuint m_bind;
     TextureType m_type;
@@ -40,6 +43,11 @@ protected:
     int m_height;
 
 public:
+    Texture &operator=(const Texture &) = delete;
+    Texture(const Texture &) = delete;
+
+    Texture &operator=(Texture &&);
+    Texture(Texture &&);
     Texture(const TextureDesc &desc);
 
     virtual ~Texture();
@@ -73,6 +81,8 @@ public:
 
 class Texture2D : public Texture {
 public:
+    Texture2D &operator=(Texture2D &&) = default;
+    Texture2D(Texture2D &&) = default;
     Texture2D(int width, int height, TextureFormat format);
     virtual ~Texture2D();
 

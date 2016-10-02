@@ -19,6 +19,8 @@ enum class ShaderType {
 };
 
 class Shader {
+    void Destroy();
+
     GLuint m_bind;
     ShaderType m_type;
     const char *m_source;
@@ -43,6 +45,8 @@ public:
 };
 
 class Program {
+    void Destroy();
+
 public:
     struct ParamInfo {
         GLenum type;

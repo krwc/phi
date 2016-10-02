@@ -10,6 +10,8 @@
 namespace phi {
 
 class FrameBuffer {
+    void Destroy();
+
     GLuint m_bind;
     int m_width;
     int m_height;
