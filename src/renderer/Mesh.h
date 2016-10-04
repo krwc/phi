@@ -22,19 +22,15 @@ public:
     virtual ~Mesh() {}
     virtual const phi::VertexLayout *GetVertexLayout() const = 0;
     virtual const phi::Material *GetMaterial() const = 0;
-};
-
-struct BufferedMesh : virtual public Mesh {
     virtual const phi::Buffer *GetVertexBuffer() {
         return nullptr;
     }
-
     virtual const phi::Buffer *GetIndexBuffer() {
         return nullptr;
     }
 };
 
-class SimpleMesh : virtual public BufferedMesh {
+class SimpleMesh : virtual public Mesh {
 public:
     struct Vertex {
         glm::vec4 position;
