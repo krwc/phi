@@ -4,7 +4,7 @@
 #include "Material.h"
 #include "VertexLayout.h"
 
-#include "libs/glm/glm.hpp"
+#include "math/Math.hpp"
 
 #include <memory>
 #include <vector>

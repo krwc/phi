@@ -2,7 +2,7 @@
 #define PHI_RENDERER_MATERIAL_H
 #include "Texture.h"
 
-#include "libs/glm/glm.hpp"
+#include "math/Math.hpp"
 
 namespace phi {
 
