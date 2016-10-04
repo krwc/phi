@@ -32,7 +32,7 @@ static void InitWindow(AppData &data, const string &title = "Phi Renderer") {
     }
     glfwMakeContextCurrent(data.window);
     glfwSwapInterval(1);
-    PHI_LOG(TRACE, "Initialized OpenGL 4.5 window (`%s`)", title.c_str());
+    PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 }
 
 } // namespace phi

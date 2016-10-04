@@ -8,15 +8,15 @@
 
 namespace phi {
 
-enum class ElementType {
+enum class Type {
     Float = GL_FLOAT
 };
 
 struct VertexLayoutEntry {
-    std::string attribute;
+    std::string name;
     int offset;
     int stride;
-    ElementType type;
+    Type type;
 };
 
 class VertexLayout {
