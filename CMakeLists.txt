@@ -4,6 +4,7 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -march=native -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(FindPkgConfig)
 pkg_search_module(GLFW3 REQUIRED glfw3)
