@@ -9,7 +9,7 @@ using namespace std;
 void Texture::Destroy() {
     if (m_bind) {
         PHI_LOG(TRACE, "Deleting texture (ID=%u)", m_bind);
-        CheckedCall(glDeleteTextures, 1, &m_bind);
+        CheckedCall(phi::glDeleteTextures, 1, &m_bind);
     }
 }
 
@@ -113,12 +113,12 @@ size_t TexturePixelSize(TextureFormat format) {
 Texture2D::Texture2D(int width, int height, TextureFormat format)
         : Texture({ TextureType::Texture2D, format, 1, width, height }) {
     GLint current = GL_NONE;
-    CheckedCall(glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, m_bind);
-    CheckedCall(glTexImage2D, GL_TEXTURE_2D, 0, (GLenum) format, width, height,
+    CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glTexImage2D, GL_TEXTURE_2D, 0, (GLenum) format, width, height,
                 0, TextureInternalFormat(format), TexturePixelType(format),
                 nullptr);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: created texture (ID=%u) %dx%d", m_bind, width, height);
 }
 
@@ -132,22 +132,22 @@ void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {
     size_t size = m_width * m_height * TexturePixelType(m_format);
     assert(size >= w * h * TexturePixelType(m_format));
     GLint current = GL_NONE;
-    CheckedCall(glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
     PHI_LOG(TRACE, "Texture2D: writing %u bytes",
             w * h * TexturePixelSize(m_format));
-    CheckedCall(glTexSubImage2D, GL_TEXTURE_2D, level, x, y, w, h,
+    CheckedCall(phi::glTexSubImage2D, GL_TEXTURE_2D, level, x, y, w, h,
                 TextureInternalFormat(m_format), TexturePixelType(m_format),
                 data);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
 }
 
 void Texture2D::GenerateMipmaps() {
     GLint current = GL_NONE;
-    CheckedCall(glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, m_bind);
-    CheckedCall(glGenerateMipmap, GL_TEXTURE_2D);
-    CheckedCall(glBindTexture, GL_TEXTURE_2D, current);
+    CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glGenerateMipmap, GL_TEXTURE_2D);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: generated mipmaps");
 }
 

@@ -7,6 +7,7 @@
 
 #include "renderer/Buffer.h"
 #include "renderer/Texture.h"
+#include "renderer/Prototypes.h"
 
 using namespace std;
 
@@ -32,6 +33,47 @@ static void InitWindow(AppData &data, const string &title = "Phi Renderer") {
     }
     glfwMakeContextCurrent(data.window);
     glfwSwapInterval(1);
+#define PHI_LOAD_PROC_HELPER(name) PHI_LOAD_PROC(name, glfwGetProcAddress)
+    PHI_LOAD_PROC_HELPER(glAttachShader);
+    PHI_LOAD_PROC_HELPER(glBindTexture);
+    PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
+    PHI_LOAD_PROC_HELPER(glCompileShader);
+    PHI_LOAD_PROC_HELPER(glCreateBuffers);
+    PHI_LOAD_PROC_HELPER(glCreateFramebuffers);
+    PHI_LOAD_PROC_HELPER(glCreateProgram);
+    PHI_LOAD_PROC_HELPER(glCreateShader);
+    PHI_LOAD_PROC_HELPER(glDeleteBuffers);
+    PHI_LOAD_PROC_HELPER(glDeleteFramebuffers);
+    PHI_LOAD_PROC_HELPER(glDeleteProgram);
+    PHI_LOAD_PROC_HELPER(glDeleteShader);
+    PHI_LOAD_PROC_HELPER(glDeleteTextures);
+    PHI_LOAD_PROC_HELPER(glDetachShader);
+    PHI_LOAD_PROC_HELPER(glGenerateMipmap);
+    PHI_LOAD_PROC_HELPER(glGenTextures);
+    PHI_LOAD_PROC_HELPER(glGetActiveAttrib);
+    PHI_LOAD_PROC_HELPER(glGetActiveUniform);
+    PHI_LOAD_PROC_HELPER(glGetAttribLocation);
+    PHI_LOAD_PROC_HELPER(glGetIntegerv);
+    PHI_LOAD_PROC_HELPER(glGetProgramInfoLog);
+    PHI_LOAD_PROC_HELPER(glGetProgramiv);
+    PHI_LOAD_PROC_HELPER(glGetShaderInfoLog);
+    PHI_LOAD_PROC_HELPER(glGetShaderiv);
+    PHI_LOAD_PROC_HELPER(glGetUniformLocation);
+    PHI_LOAD_PROC_HELPER(glLinkProgram);
+    PHI_LOAD_PROC_HELPER(glNamedBufferData);
+    PHI_LOAD_PROC_HELPER(glNamedBufferSubData);
+    PHI_LOAD_PROC_HELPER(glNamedFramebufferTexture);
+    PHI_LOAD_PROC_HELPER(glProgramUniform1fv);
+    PHI_LOAD_PROC_HELPER(glProgramUniform1i);
+    PHI_LOAD_PROC_HELPER(glProgramUniform2fv);
+    PHI_LOAD_PROC_HELPER(glProgramUniform3fv);
+    PHI_LOAD_PROC_HELPER(glProgramUniform4fv);
+    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix3fv);
+    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix4fv);
+    PHI_LOAD_PROC_HELPER(glShaderSource);
+    PHI_LOAD_PROC_HELPER(glTexImage2D);
+    PHI_LOAD_PROC_HELPER(glTexSubImage2D);
+#undef PHI_LOAD_PROC_HELPER
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 }
 

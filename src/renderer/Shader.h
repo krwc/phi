@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "Prototypes.h"
 #include "Resource.h"
 
 #include "utils/Logging.h"
