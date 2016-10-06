@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(phi)
+set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CXX_FLAGS "-std=c++14 -march=native -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)

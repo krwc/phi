@@ -34,9 +34,9 @@ void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
 
 const Buffer *SimpleMesh::GetVertexBuffer() {
     if (m_dirty) {
-        m_vbo = move(make_unique<Buffer>(BufferType::Vertex,
-                                         BufferUsage::Static, m_vertices.data(),
-                                         m_vertices.size() * sizeof(Vertex)));
+        m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferUsage::Static,
+                                    m_vertices.data(),
+                                    m_vertices.size() * sizeof(Vertex));
         m_dirty = false;
     }
     return m_vbo.get();
