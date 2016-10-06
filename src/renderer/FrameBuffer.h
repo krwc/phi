@@ -1,10 +1,8 @@
 #ifndef PHI_RENDERER_FRAME_BUFFER_H
 #define PHI_RENDERER_FRAME_BUFFER_H
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <map>
 
+#include "Prototypes.h"
 #include "Resource.h"
 #include "Texture.h"
 

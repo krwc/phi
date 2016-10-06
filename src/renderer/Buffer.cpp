@@ -8,7 +8,7 @@ using namespace std;
 
 void Buffer::Destroy() {
     if (m_bind) {
-        CheckedCall(glDeleteBuffers, 1, &m_bind);
+        CheckedCall(phi::glDeleteBuffers, 1, &m_bind);
         PHI_LOG(TRACE, "Buffer: deleted (ID=%u)", m_bind);
     }
 }
@@ -33,8 +33,8 @@ Buffer::Buffer(BufferType type,
                const void *data,
                size_t size)
         : m_type(type), m_bind(GL_NONE), m_size(size) {
-    CheckedCall(glCreateBuffers, 1, &m_bind);
-    CheckedCall(glNamedBufferData, m_bind, size, data, (GLenum) usage);
+    CheckedCall(phi::glCreateBuffers, 1, &m_bind);
+    CheckedCall(phi::glNamedBufferData, m_bind, size, data, (GLenum) usage);
     PHI_LOG(TRACE, "Buffer: created (ID=%u) of size %u", m_bind, size);
 }
 
@@ -46,7 +46,7 @@ void Buffer::UpdateData(const void *data, size_t size, size_t offset) {
     if (offset + size > m_size) {
         throw invalid_argument("Data size exceeds buffer capacity");
     }
-    CheckedCall(glNamedBufferSubData, m_bind, offset, size, data);
+    CheckedCall(phi::glNamedBufferSubData, m_bind, offset, size, data);
 }
 
 } // namespace phi

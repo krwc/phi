@@ -8,7 +8,7 @@ using namespace std;
 void Shader::Destroy() {
     if (m_bind) {
         PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_bind);
-        CheckedCall(glDeleteShader, m_bind);
+        CheckedCall(phi::glDeleteShader, m_bind);
     }
 }
 
@@ -28,7 +28,7 @@ Shader::Shader(Shader &&other) : m_bind(GL_NONE) {
 }
 
 Shader::Shader(ShaderType type, const char *source) noexcept
-        : m_bind(CheckedCall(glCreateShader, (GLenum) type)),
+        : m_bind(CheckedCall(phi::glCreateShader, (GLenum) type)),
           m_type(type),
           m_source(source) {
     PHI_LOG(TRACE, "Shader: created shader (ID=%u)", m_bind);
@@ -40,16 +40,16 @@ Shader::~Shader() noexcept {
 
 void Shader::Compile() {
     GLint length = (GLint) strlen(m_source);
-    CheckedCall(glShaderSource, m_bind, 1, (const GLchar **) (&m_source),
+    CheckedCall(phi::glShaderSource, m_bind, 1, (const GLchar **) (&m_source),
                 &length);
     int status, log_length;
-    CheckedCall(glCompileShader, m_bind);
-    CheckedCall(glGetShaderiv, m_bind, GL_COMPILE_STATUS, &status);
-    CheckedCall(glGetShaderiv, m_bind, GL_INFO_LOG_LENGTH, &log_length);
+    CheckedCall(phi::glCompileShader, m_bind);
+    CheckedCall(phi::glGetShaderiv, m_bind, GL_COMPILE_STATUS, &status);
+    CheckedCall(phi::glGetShaderiv, m_bind, GL_INFO_LOG_LENGTH, &log_length);
     string compilation_log;
     if (status == GL_FALSE) {
         compilation_log.resize(log_length - 1, '\0');
-        CheckedCall(glGetShaderInfoLog, m_bind, log_length - 1, &log_length,
+        CheckedCall(phi::glGetShaderInfoLog, m_bind, log_length - 1, &log_length,
                     &compilation_log[0]);
         throw invalid_argument(compilation_log);
     }
@@ -58,7 +58,7 @@ void Shader::Compile() {
 void Program::Destroy() {
     if (m_bind) {
         PHI_LOG(TRACE, "Program: deleted (ID=%u)", m_bind);
-        CheckedCall(glDeleteProgram, m_bind);
+        CheckedCall(phi::glDeleteProgram, m_bind);
     }
 }
 
@@ -79,7 +79,7 @@ Program::Program(Program &&other) : m_bind(GL_NONE) {
 }
 
 Program::Program()
-        : m_bind(CheckedCall(glCreateProgram)), m_constants(), m_attributes() {
+        : m_bind(CheckedCall(phi::glCreateProgram)), m_constants(), m_attributes() {
     PHI_LOG(TRACE, "Program: created (ID=%u)", m_bind);
 }
 
@@ -105,31 +105,31 @@ void Program::SetConstant(GLint location, GLenum type, const void *data) {
     case GL_BOOL:
     case GL_SAMPLER_2D:
     case GL_SAMPLER_2D_ARRAY:
-        CheckedCall(glProgramUniform1i, m_bind, location,
+        CheckedCall(phi::glProgramUniform1i, m_bind, location,
                     *((const GLint *) data));
         break;
     case GL_FLOAT:
-        CheckedCall(glProgramUniform1fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform1fv, m_bind, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC2:
-        CheckedCall(glProgramUniform2fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform2fv, m_bind, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC3:
-        CheckedCall(glProgramUniform3fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform3fv, m_bind, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC4:
-        CheckedCall(glProgramUniform4fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform4fv, m_bind, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT3:
-        CheckedCall(glProgramUniformMatrix3fv, m_bind, location, 1, GL_FALSE,
+        CheckedCall(phi::glProgramUniformMatrix3fv, m_bind, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT4:
-        CheckedCall(glProgramUniformMatrix4fv, m_bind, location, 1, GL_FALSE,
+        CheckedCall(phi::glProgramUniformMatrix4fv, m_bind, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     default:
@@ -155,8 +155,8 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
     map<string, Program::ParamInfo> result{};
     GLint num_uniforms = 0;
     GLint max_name_length = 0;
-    CheckedCall(glGetProgramiv, bind, GL_ACTIVE_UNIFORMS, &num_uniforms);
-    CheckedCall(glGetProgramiv, bind, GL_ACTIVE_UNIFORM_MAX_LENGTH,
+    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_UNIFORMS, &num_uniforms);
+    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_UNIFORM_MAX_LENGTH,
                  &max_name_length);
 
     for (int id = 0; id < num_uniforms; ++id) {
@@ -164,13 +164,13 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
         GLint length;
         GLenum type;
         GLint size;
-        CheckedCall(glGetActiveUniform, bind, id, max_name_length, &length,
+        CheckedCall(phi::glGetActiveUniform, bind, id, max_name_length, &length,
                      &size, &type, &buffer[0]);
         string name(buffer.begin(), buffer.begin() + length);
 
         result[name].type = type;
         result[name].location =
-                CheckedCall(glGetUniformLocation, bind, name.c_str());
+                CheckedCall(phi::glGetUniformLocation, bind, name.c_str());
         PHI_LOG(TRACE, "Shader: found constant (ID=%d) '%s'",
                 result[name].location, name.c_str());
         // Ugly, hacky workaround for a bug in intel drivers (I presume),
@@ -181,7 +181,7 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
             for (int i = 1; i < UINT16_MAX; ++i) {
                 string name = arr_name + "[" + to_string(i) + "]";
                 GLint location =
-                        CheckedCall(glGetUniformLocation, bind, name.c_str());
+                        CheckedCall(phi::glGetUniformLocation, bind, name.c_str());
                 if (location >= 0) {
                     result[name].type = type;
                     result[name].location = location;
@@ -218,22 +218,22 @@ map<string, Program::ParamInfo> DiscoverProgramAttributes(GLuint bind) {
     map<string, Program::ParamInfo> result;
     GLint num_attribs = 0;
     GLint max_name_length = 0;
-    CheckedCall(glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTES, &num_attribs);
-    CheckedCall(glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
+    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTES, &num_attribs);
+    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
                  &max_name_length);
     for (int id = 0; id < num_attribs; ++id) {
         vector<char> buffer(max_name_length);
         GLint length;
         GLint size;
         GLenum type;
-        CheckedCall(glGetActiveAttrib, bind, id, max_name_length, &length,
+        CheckedCall(phi::glGetActiveAttrib, bind, id, max_name_length, &length,
                     &size, &type, &buffer[0]);
         string name(buffer.begin(), buffer.begin() + length);
         PHI_LOG(TRACE, "Shader: found attribute '%s' [type = %s]", name.c_str(),
                 TypeString(type));
         result[name].type = type;
         result[name].location =
-                CheckedCall(glGetAttribLocation, bind, name.c_str());
+                CheckedCall(phi::glGetAttribLocation, bind, name.c_str());
     }
     return result;
 }
@@ -242,20 +242,20 @@ map<string, Program::ParamInfo> DiscoverProgramAttributes(GLuint bind) {
 
 void Program::Link() {
     for (const auto &shader : m_shaders) {
-        CheckedCall(glAttachShader, m_bind, shader.GetId());
+        CheckedCall(phi::glAttachShader, m_bind, shader.GetId());
     }
-    CheckedCall(glLinkProgram, m_bind);
+    CheckedCall(phi::glLinkProgram, m_bind);
     for (const auto &shader : m_shaders) {
-        CheckedCall(glDetachShader, m_bind, shader.GetId());
+        CheckedCall(phi::glDetachShader, m_bind, shader.GetId());
     }
 
     int status;
-    CheckedCall(glGetProgramiv, m_bind, GL_LINK_STATUS, &status);
+    CheckedCall(phi::glGetProgramiv, m_bind, GL_LINK_STATUS, &status);
     int length;
-    CheckedCall(glGetProgramiv, m_bind, GL_INFO_LOG_LENGTH, &length);
+    CheckedCall(phi::glGetProgramiv, m_bind, GL_INFO_LOG_LENGTH, &length);
     if (length > 0) {
         string log(length - 1, 0);
-        CheckedCall(glGetProgramInfoLog, m_bind, length - 1, &length, &log[0]);
+        CheckedCall(phi::glGetProgramInfoLog, m_bind, length - 1, &length, &log[0]);
         PHI_LOG(DEBUG, "Program link log:\n%s\n", log.c_str());
     }
     if (status == GL_FALSE) {

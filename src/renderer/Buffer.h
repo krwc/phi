@@ -1,8 +1,6 @@
 #ifndef PHI_RENDERER_BUFFER_H
 #define PHI_RENDERER_BUFFER_H
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
+#include "Prototypes.h"
 #include "Resource.h"
 
 namespace phi {
