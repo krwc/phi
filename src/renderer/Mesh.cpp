@@ -14,8 +14,8 @@ const VertexLayout SimpleMeshLayout = {
 
 } // namespace
 
-SimpleMesh::SimpleMesh(const Material &material)
-        : m_dirty(true), m_material(material), m_vertices() {}
+SimpleMesh::SimpleMesh(unique_ptr<const Material> &&material)
+        : m_dirty(true), m_material(move(material)), m_vertices() {}
 
 SimpleMesh::~SimpleMesh() {}
 
@@ -24,7 +24,7 @@ const VertexLayout *SimpleMesh::GetVertexLayout() const {
 }
 
 const Material *SimpleMesh::GetMaterial() const {
-    return &m_material;
+    return m_material.get();
 }
 
 void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
