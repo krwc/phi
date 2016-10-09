@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(phi)
 set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_CXX_FLAGS "-std=c++14 -march=native -Wall -Wextra -Wpedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -Wall -Wextra -Wpedantic -O2")
+set(CMAKE_CXX_FLAGS_DEBUG   "-std=c++14 -Wall -Wextra -Wpedantic -ggdb -O0")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 include(FindPkgConfig)
 pkg_search_module(GLFW3 REQUIRED glfw3)
