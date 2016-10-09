@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_VERTEX_LAYOUT_H
-#define PHI_RENDERER_VERTEX_LAYOUT_H
+#ifndef PHI_RENDERER_LAYOUT_H
+#define PHI_RENDERER_LAYOUT_H
 #include <GL/gl.h>
 
 #include <initializer_list>
@@ -24,7 +24,7 @@ enum class Type {
  * Now, let's assume we have a Buffer object filled with vertex data:
  * @code:
  *  struct Vertex { vec4 position; vec4 color };
- * in this case we'd have to setup two VertexLayoutEntry instances, in order to
+ * in this case we'd have to setup two LayoutEntry instances, in order to
  * bind data properly:
  * @code:
  *  {
@@ -32,20 +32,20 @@ enum class Type {
  *      { "color"   , offsetof(Vertex, color)   , sizeof(Vertex), Type::Float }
  *  }
  */
-struct VertexLayoutEntry {
+struct LayoutEntry {
     std::string name;
     int offset;
     int stride;
     Type type;
 };
 
-class VertexLayout {
-    std::vector<VertexLayoutEntry> m_layout;
+class Layout {
+    std::vector<LayoutEntry> m_layout;
 
 public:
-    VertexLayout(std::initializer_list<VertexLayoutEntry> layout);
+    Layout(std::initializer_list<LayoutEntry> layout);
 
-    const std::vector<VertexLayoutEntry> &GetEntries() const {
+    const std::vector<LayoutEntry> &GetEntries() const {
         return m_layout;
     }
 };

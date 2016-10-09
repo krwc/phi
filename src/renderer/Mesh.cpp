@@ -6,7 +6,7 @@ using namespace std;
 
 namespace {
 
-const VertexLayout SimpleMeshLayout = {
+const Layout SimpleMeshLayout = {
     { "position", offsetof(SimpleMesh::Vertex, position), sizeof(SimpleMesh::Vertex), Type::Float },
     { "normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float },
     { "uv"      , offsetof(SimpleMesh::Vertex, uv)      , sizeof(SimpleMesh::Vertex), Type::Float }
@@ -19,7 +19,7 @@ SimpleMesh::SimpleMesh(unique_ptr<const Material> &&material)
 
 SimpleMesh::~SimpleMesh() {}
 
-const VertexLayout *SimpleMesh::GetVertexLayout() const {
+const Layout *SimpleMesh::GetLayout() const {
     return &SimpleMeshLayout;
 }
 
