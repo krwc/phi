@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_RENDER_COMMAND_H
-#define PHI_RENDERER_RENDER_COMMAND_H
+#ifndef PHI_RENDERER_COMMAND_H
+#define PHI_RENDERER_COMMAND_H
 #include "Prototypes.h"
 
 namespace phi {
@@ -14,7 +14,7 @@ enum class PrimitiveType : unsigned {
     Invalid
 };
 
-struct RenderCommand {
+struct Command {
     PrimitiveType primitive;
     phi::Material *material;
     phi::Layout *layout;
@@ -26,7 +26,7 @@ struct RenderCommand {
     int offset;
 
     /** Creates an invalid render command that needs to be filled by the user */
-    RenderCommand();
+    Command();
 };
 
 } // namespace phi
