@@ -2,7 +2,7 @@
 #define PHI_RENDERER_MESH_H
 #include "Buffer.h"
 #include "Material.h"
-#include "VertexLayout.h"
+#include "Layout.h"
 
 #include "math/Math.h"
 
@@ -20,7 +20,7 @@ public:
 
     Mesh() {}
     virtual ~Mesh() {}
-    virtual const phi::VertexLayout *GetVertexLayout() const = 0;
+    virtual const phi::Layout *GetLayout() const = 0;
     virtual const phi::Material *GetMaterial() const = 0;
     virtual const phi::Buffer *GetVertexBuffer() {
         return nullptr;
@@ -40,8 +40,8 @@ public:
 
     SimpleMesh(std::unique_ptr<const phi::Material> &&material);
     virtual ~SimpleMesh();
-    virtual const phi::VertexLayout *GetVertexLayout() const;
     virtual const phi::Material *GetMaterial() const;
+    virtual const phi::Layout *GetLayout() const;
     virtual const phi::Buffer *GetVertexBuffer();
     void AppendVertex(const SimpleMesh::Vertex &);
 
