@@ -9,6 +9,7 @@ namespace phi {
 class BasicMaterial : public phi::Material {
     glm::vec4 m_specular;
     glm::vec4 m_diffuse;
+    std::shared_ptr<Program> m_program;
 
 public:
     BasicMaterial();
@@ -19,6 +20,10 @@ public:
 
     virtual phi::MaterialId GetId() const {
         return phi::MaterialId::Basic;
+    }
+
+    virtual std::string GetName() const {
+        return "mat_basic";
     }
 };
 
