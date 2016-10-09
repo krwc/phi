@@ -1,8 +1,8 @@
-#include "RenderCommand.h"
+#include "Command.h"
 
 namespace phi {
 
-RenderCommand::RenderCommand()
+Command::Command()
         : primitive(PrimitiveType::Invalid),
           material(nullptr),
           layout(nullptr),
