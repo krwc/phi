@@ -1,22 +1,29 @@
 #ifndef PHI_RENDERER_MATERIAL_H
 #define PHI_RENDERER_MATERIAL_H
-#include "Texture.h"
-
-#include "math/Math.hpp"
 
 namespace phi {
+class Renderer;
+
+enum class MaterialId {
+    Basic
+};
 
 struct Material {
-    phi::Texture2D *texture_diffuse;
-    phi::Texture2D *texture_normal;
-    glm::vec4 color_diffuse;
-    glm::vec4 color_specular;
+    virtual ~Material() {}
+    /**
+     * This method will be called by Renderer when it would decide to use this
+     * material for rendering.
+     *
+     * It should be used to set all required Renderer parameters in order to
+     * properly render an object with this material.
+     */
+    virtual void PrepareForRendering(Renderer &) const = 0;
 
-    Material()
-            : texture_diffuse(nullptr),
-              texture_normal(nullptr),
-              color_diffuse(1, 1, 1, 1),
-              color_specular(0, 0, 0, 1) {}
+    /**
+     * Returns identifier of this material. This information is then used by
+     * the Renderer to be able to properly sort rendering commands by materials.
+     */
+    virtual MaterialId GetId() const = 0;
 };
 
 } // namespace phi

@@ -4,7 +4,7 @@
 #include "Material.h"
 #include "VertexLayout.h"
 
-#include "math/Math.hpp"
+#include "math/Math.h"
 
 #include <memory>
 #include <vector>
@@ -38,7 +38,7 @@ public:
         glm::vec2 uv;
     };
 
-    SimpleMesh(const phi::Material &material = phi::Material());
+    SimpleMesh(std::unique_ptr<const phi::Material> &&material);
     virtual ~SimpleMesh();
     virtual const phi::VertexLayout *GetVertexLayout() const;
     virtual const phi::Material *GetMaterial() const;
@@ -47,7 +47,7 @@ public:
 
 private:
     bool m_dirty;
-    phi::Material m_material;
+    std::unique_ptr<const phi::Material> m_material;
     std::unique_ptr<phi::Buffer> m_vbo;
     std::vector<Vertex> m_vertices;
 };
