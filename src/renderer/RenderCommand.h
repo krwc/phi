@@ -1,5 +1,6 @@
 #ifndef PHI_RENDERER_RENDER_COMMAND_H
 #define PHI_RENDERER_RENDER_COMMAND_H
+#include "Prototypes.h"
 
 namespace phi {
 class Material;
@@ -19,7 +20,7 @@ struct RenderCommand {
     phi::Layout *layout;
     phi::Buffer *vbo;
     phi::Buffer *ibo;
-    /** Number of primitives to draw. */
+    /** Number of primitives to draw */
     int count;
     /** Byte offset in buffer where geometry starts */
     int offset;
