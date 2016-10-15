@@ -5,6 +5,7 @@
 #include <string>
 
 #include "utils/Logging.h"
+#include "utils/MeshImporter.h"
 
 #include "device/Prototypes.h"
 
@@ -90,6 +91,7 @@ int main() {
     unique_ptr<phi::Camera> camera = make_unique<phi::FreeLookCamera>();
 
     scene->SetCamera(camera.get());
+    auto box = phi::MeshImporter::FromFile("assets/model/box.obj");
 
     bool running = true;
     while (running) {

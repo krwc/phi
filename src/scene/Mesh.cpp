@@ -8,8 +8,7 @@ namespace {
 
 const Layout SimpleMeshLayout = {
     { "position", offsetof(SimpleMesh::Vertex, position), sizeof(SimpleMesh::Vertex), Type::Float },
-    { "normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float },
-    { "uv"      , offsetof(SimpleMesh::Vertex, uv)      , sizeof(SimpleMesh::Vertex), Type::Float }
+    { "normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float }
 };
 
 } // namespace
