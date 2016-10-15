@@ -1,6 +1,6 @@
 #include "BasicMaterial.h"
 
-#include "renderer/Shader.h"
+#include "device/Shader.h"
 
 namespace phi {
 using namespace glm;

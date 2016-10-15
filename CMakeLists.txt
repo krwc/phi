@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-std=c++14 -Wall -Wextra -Wpedantic -O2")
 set(CMAKE_CXX_FLAGS_DEBUG   "-std=c++14 -Wall -Wextra -Wpedantic -ggdb -O0")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 

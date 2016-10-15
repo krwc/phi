@@ -1,7 +1,7 @@
 #ifndef PHI_RENDERER_MATERIAL_H
 #define PHI_RENDERER_MATERIAL_H
 
-#include "ProgramCache.h"
+#include "utils/ProgramCache.h"
 
 namespace phi {
 class Renderer;

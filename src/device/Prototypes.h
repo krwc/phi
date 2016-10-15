@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_PROTOTYPES_H
-#define PHI_RENDERER_PROTOTYPES_H
+#ifndef PHI_DEVICE_PROTOTYPES_H
+#define PHI_DEVICE_PROTOTYPES_H
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glcorearb.h>
