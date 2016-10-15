@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "FreeLookCamera.h"
 
 namespace phi {
 using namespace glm;
