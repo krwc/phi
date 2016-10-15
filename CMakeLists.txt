@@ -10,12 +10,14 @@ set(CMAKE_BUILD_TYPE Debug)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 include(FindPkgConfig)
+pkg_search_module(ASSIMP REQUIRED assimp)
 pkg_search_module(GLFW3 REQUIRED glfw3)
 pkg_search_module(GL REQUIRED gl)
 
 file(GLOB_RECURSE SRC_CPP src/*.cpp)
 file(GLOB_RECURSE SRC_HPP src/*.h)
+file(COPY assets DESTINATION .)
 
 include_directories(src)
 add_executable(phi ${SRC_CPP})
-target_link_libraries(phi ${GLFW3_LIBRARIES} ${GL_LIBRARIES})
+target_link_libraries(phi ${GLFW3_LIBRARIES} ${GL_LIBRARIES} ${ASSIMP_LIBRARIES})

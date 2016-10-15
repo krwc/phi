@@ -35,7 +35,6 @@ public:
     struct Vertex {
         glm::vec4 position;
         glm::vec3 normal;
-        glm::vec2 uv;
     };
 
     SimpleMesh(std::unique_ptr<const phi::Material> &&material);
