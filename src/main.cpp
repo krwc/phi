@@ -1,13 +1,15 @@
 #include <GLFW/glfw3.h>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
 #include "utils/Logging.h"
 
-#include "renderer/Buffer.h"
-#include "renderer/Texture.h"
 #include "renderer/Prototypes.h"
+
+#include "scene/FreeLookCamera.h"
+#include "scene/ListScene.h"
 
 using namespace std;
 
@@ -84,6 +86,10 @@ int main() {
     app.width = 1024;
     app.height = 768;
     phi::InitWindow(app);
+    unique_ptr<phi::Scene> scene = make_unique<phi::ListScene>();
+    unique_ptr<phi::Camera> camera = make_unique<phi::FreeLookCamera>();
+
+    scene->SetCamera(camera.get());
 
     bool running = true;
     while (running) {
