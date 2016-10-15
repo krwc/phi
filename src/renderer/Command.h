@@ -1,6 +1,6 @@
 #ifndef PHI_RENDERER_COMMAND_H
 #define PHI_RENDERER_COMMAND_H
-#include "Prototypes.h"
+#include "device/Prototypes.h"
 
 namespace phi {
 class Material;

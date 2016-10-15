@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_TEXTURE_H
-#define PHI_RENDERER_TEXTURE_H
+#ifndef PHI_DEVICE_TEXTURE_H
+#define PHI_DEVICE_TEXTURE_H
 #include "Prototypes.h"
 #include "Resource.h"
 

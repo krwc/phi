@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_PROGRAM_CACHE_H
-#define PHI_RENDERER_PROGRAM_CACHE_H
+#ifndef PHI_UTILS_PROGRAM_CACHE_H
+#define PHI_UTILS_PROGRAM_CACHE_H
 #include <memory>
 #include <string>
 #include <map>

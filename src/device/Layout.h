@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_LAYOUT_H
-#define PHI_RENDERER_LAYOUT_H
+#ifndef PHI_DEVICE_LAYOUT_H
+#define PHI_DEVICE_LAYOUT_H
 #include <GL/gl.h>
 
 #include <initializer_list>

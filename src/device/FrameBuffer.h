@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_FRAME_BUFFER_H
-#define PHI_RENDERER_FRAME_BUFFER_H
+#ifndef PHI_DEVICE_FRAME_BUFFER_H
+#define PHI_DEVICE_FRAME_BUFFER_H
 #include <map>
 
 #include "Prototypes.h"

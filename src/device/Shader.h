@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_SHADER_H
-#define PHI_RENDERER_SHADER_H
+#ifndef PHI_DEVICE_SHADER_H
+#define PHI_DEVICE_SHADER_H
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 

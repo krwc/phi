@@ -6,7 +6,7 @@
 
 #include "utils/Logging.h"
 
-#include "renderer/Prototypes.h"
+#include "device/Prototypes.h"
 
 #include "scene/FreeLookCamera.h"
 #include "scene/ListScene.h"

@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_BUFFER_H
-#define PHI_RENDERER_BUFFER_H
+#ifndef PHI_DEVICE_BUFFER_H
+#define PHI_DEVICE_BUFFER_H
 #include "Prototypes.h"
 #include "Resource.h"
 

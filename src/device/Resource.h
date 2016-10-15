@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_RESOURCE_H
-#define PHI_RENDERER_RESOURCE_H
+#ifndef PHI_DEVICE_RESOURCE_H
+#define PHI_DEVICE_RESOURCE_H
 #include <GL/gl.h>
 
 namespace phi {

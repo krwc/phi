@@ -1,8 +1,8 @@
-#ifndef PHI_RENDERER_MESH_H
-#define PHI_RENDERER_MESH_H
-#include "Buffer.h"
-#include "Material.h"
-#include "Layout.h"
+#ifndef PHI_SCENE_MESH_H
+#define PHI_SCENE_MESH_H
+#include "device/Buffer.h"
+#include "device/Layout.h"
+#include "renderer/Material.h"
 
 #include "math/Math.h"
 
