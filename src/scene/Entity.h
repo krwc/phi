@@ -1,6 +1,9 @@
 #ifndef PHI_SCENE_ENTITY_H
 #define PHI_SCENE_ENTITY_H
 
+#include "math/Math.h"
+#include "math/Box.h"
+
 namespace phi {
 
 class Entity {
