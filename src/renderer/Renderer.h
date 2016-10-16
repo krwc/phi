@@ -2,7 +2,6 @@
 #define PHI_RENDERER_RENDERER_H
 
 namespace phi {
-class Material;
 class Scene;
 
 class Renderer {

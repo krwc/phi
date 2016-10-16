@@ -54,10 +54,6 @@ void BasicMaterial::SetDiffuse(const vec4 &diffuse) {
 
 void BasicMaterial::PrepareForRendering() {
     m_program->SetConstant("diffuse", m_diffuse);
-    // TODO: set diffuse, specular, bind shader program, it'd go somewhat like:
-    // rend.BindProgram(m_program.get());
-    // m_program->SetConstant("specular", m_specular);
-    // m_program->SetConstant("diffuse", m_diffuse);
 }
 
 } // namespace phi
