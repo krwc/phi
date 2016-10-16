@@ -6,12 +6,14 @@
 
 #include "math/Math.h"
 
+#include "Entity.h"
+
 #include <memory>
 #include <vector>
 
 namespace phi {
 
-class Mesh {
+class Mesh : public Entity {
 public:
     Mesh(const Mesh &) = delete;
     Mesh &operator=(const Mesh &) = delete;
@@ -21,11 +23,11 @@ public:
     Mesh() {}
     virtual ~Mesh() {}
     virtual const phi::Layout *GetLayout() const = 0;
-    virtual const phi::Material *GetMaterial() const = 0;
-    virtual const phi::Buffer *GetVertexBuffer() {
+    virtual phi::Material *GetMaterial() const = 0;
+    virtual phi::Buffer *GetVertexBuffer() {
         return nullptr;
     }
-    virtual const phi::Buffer *GetIndexBuffer() {
+    virtual phi::Buffer *GetIndexBuffer() {
         return nullptr;
     }
 };
@@ -37,16 +39,16 @@ public:
         glm::vec3 normal;
     };
 
-    SimpleMesh(std::unique_ptr<const phi::Material> &&material);
+    SimpleMesh(std::unique_ptr<phi::Material> &&material);
     virtual ~SimpleMesh();
-    virtual const phi::Material *GetMaterial() const;
     virtual const phi::Layout *GetLayout() const;
-    virtual const phi::Buffer *GetVertexBuffer();
+    virtual phi::Material *GetMaterial() const;
+    virtual phi::Buffer *GetVertexBuffer();
     void AppendVertex(const SimpleMesh::Vertex &);
-
+    virtual void Render(phi::CommandQueue *);
 private:
     bool m_dirty;
-    std::unique_ptr<const phi::Material> m_material;
+    std::unique_ptr<phi::Material> m_material;
     std::unique_ptr<phi::Buffer> m_vbo;
     std::vector<Vertex> m_vertices;
 };

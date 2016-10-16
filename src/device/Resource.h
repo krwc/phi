@@ -1,6 +1,6 @@
 #ifndef PHI_DEVICE_RESOURCE_H
 #define PHI_DEVICE_RESOURCE_H
-#include <GL/gl.h>
+#include "Prototypes.h"
 
 namespace phi {
 

@@ -41,8 +41,8 @@ unique_ptr<Mesh> MeshImporter::FromFile(const string &file) {
                 v.position[k] = mesh->mVertices[face.mIndices[j]][k];
                 v.normal[k] = mesh->mNormals[face.mIndices[j]][k];
             }
+            result->AppendVertex(v);
         }
-        result->AppendVertex(v);
     }
     PHI_LOG(INFO, "Loaded mesh '%s'", file.c_str());
     return move(result);

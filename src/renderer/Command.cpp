@@ -4,8 +4,8 @@ namespace phi {
 
 Command::Command()
         : primitive(PrimitiveType::Invalid),
-          material(nullptr),
           layout(nullptr),
+          material(nullptr),
           vbo(nullptr),
           ibo(nullptr),
           count(-1),

@@ -1,8 +1,5 @@
 #ifndef RENDERER_UTILS_H
 #define RENDERER_UTILS_H
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <cassert>
 #include <fstream>
 #include <iterator>
@@ -11,6 +8,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "Prototypes.h"
 #include "utils/Logging.h"
 
 namespace phi {

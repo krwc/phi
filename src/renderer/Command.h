@@ -2,6 +2,8 @@
 #define PHI_RENDERER_COMMAND_H
 #include "device/Prototypes.h"
 
+#include "math/Math.h"
+
 namespace phi {
 class Material;
 class Layout;
@@ -16,8 +18,10 @@ enum class PrimitiveType : unsigned {
 
 struct Command {
     PrimitiveType primitive;
+    /** Model transform. */
+    const glm::mat4 *model;
+    const phi::Layout *layout;
     phi::Material *material;
-    phi::Layout *layout;
     phi::Buffer *vbo;
     phi::Buffer *ibo;
     /** Number of primitives to draw */
