@@ -29,9 +29,11 @@ class ForwardRenderer : public Renderer {
     void BindVbo(phi::Buffer *);
     void BindIbo(phi::Buffer *);
     void Draw(phi::PrimitiveType, int start, int count);
+
 public:
     ForwardRenderer(int width, int height);
     virtual void Render(phi::Scene *);
+    virtual void Resize(int width, int height);
 };
 
 } // namespace phi

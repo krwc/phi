@@ -8,6 +8,7 @@ class Renderer {
 public:
     virtual ~Renderer() {}
     virtual void Render(phi::Scene *) = 0;
+    virtual void Resize(int width, int height) = 0;
 };
 
 } // namespace phi

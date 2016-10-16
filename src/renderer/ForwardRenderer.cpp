@@ -18,8 +18,7 @@ using namespace glm;
 
 ForwardRenderer::ForwardRenderer(int width, int height)
         : m_proj(), m_vao(GL_NONE) {
-    m_proj = perspectiveFov(radians(70.0f), float(width), float(height), 0.1f,
-                            10000.0f);
+    Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -147,6 +146,12 @@ void ForwardRenderer::Render(phi::Scene *scene) {
         Draw(command.primitive, command.offset, command.count);
     }
     m_last = ForwardRenderer::State{};
+}
+
+void ForwardRenderer::Resize(int width, int height) {
+    m_proj = perspectiveFov(radians(70.0f), float(width), float(height), 0.1f,
+                            10000.0f);
+    glViewport(0, 0, width, height);
 }
 
 } // namespace phi
