@@ -16,7 +16,11 @@ public:
 
     void SetSpecular(const glm::vec4 &specular);
     void SetDiffuse(const glm::vec4 &diffuse);
-    virtual void PrepareForRendering(phi::Renderer &) const;
+    virtual void PrepareForRendering();
+
+    virtual phi::Program *GetProgram() {
+        return m_program.get();
+    }
 
     virtual phi::MaterialId GetId() const {
         return phi::MaterialId::Basic;

@@ -1,8 +1,5 @@
 #ifndef PHI_DEVICE_SHADER_H
 #define PHI_DEVICE_SHADER_H
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -83,6 +80,9 @@ public:
         return m_bind;
     }
 
+    const ParamInfo *FindConstant(const std::string &name) const;
+    const ParamInfo *FindAttribute(const std::string &name) const;
+
 private:
     GLuint m_bind;
 
@@ -90,10 +90,7 @@ private:
     std::map<std::string, struct ParamInfo> m_attributes;
     std::vector<Shader> m_shaders;
 
-    const ParamInfo *FindConstant(const std::string &name) const;
-    const ParamInfo *FindAttribute(const std::string &name) const;
     void SetConstant(GLint location, GLenum type, const void *value);
-
 };
 
 } // namespace phi

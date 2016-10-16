@@ -1,8 +1,7 @@
 #ifndef PHI_DEVICE_PROTOTYPES_H
 #define PHI_DEVICE_PROTOTYPES_H
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
 #include <GL/glcorearb.h>
+#include <GL/gl.h>
 
 #include <cassert>
 
@@ -11,6 +10,15 @@ namespace phi {
 extern PFNGLATTACHSHADERPROC glAttachShader;
 extern PFNGLBINDTEXTUREEXTPROC glBindTexture;
 extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
+extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
+extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+extern PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
+extern PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
+extern PFNGLBINDBUFFERPROC glBindBuffer;
+extern PFNGLDRAWARRAYSEXTPROC glDrawArrays;
+extern PFNGLDRAWELEMENTSPROC glDrawElements;
+extern PFNGLUSEPROGRAMPROC glUseProgram;
 extern PFNGLCOMPILESHADERPROC glCompileShader;
 extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;

@@ -1,10 +1,10 @@
 #ifndef PHI_DEVICE_LAYOUT_H
 #define PHI_DEVICE_LAYOUT_H
-#include <GL/gl.h>
-
 #include <initializer_list>
 #include <string>
 #include <vector>
+
+#include "Prototypes.h"
 
 namespace phi {
 

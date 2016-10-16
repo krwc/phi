@@ -8,20 +8,22 @@ namespace phi {
 class Renderer;
 
 class CommandQueue {
-    std::vector<Command> m_commands;
+    std::vector<phi::Command> m_commands;
 
 public:
     CommandQueue();
     virtual ~CommandQueue() {}
 
     /** Inserts new Command to the queue. */
-    virtual void Insert(Command &command);
+    virtual void Insert(phi::Command &command);
 
     /** Clears the queue. */
     virtual void Flush();
 
-    /** Executes all rendering commands from the queue. */
-    virtual void Execute(Renderer &) const;
+    // TODO: After implementing custom iterator interface this must be changed.
+    virtual const std::vector<phi::Command> &GetCommands() const {
+        return m_commands;
+    }
 };
 
 } // namespace phi

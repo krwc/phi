@@ -1,19 +1,22 @@
-#include <GLFW/glfw3.h>
-
 #include <memory>
 #include <stdexcept>
 #include <string>
 
+// This MUST be included before GLFW headers.
+#include "device/Prototypes.h"
+
+#include <GLFW/glfw3.h>
+
 #include "utils/Logging.h"
 #include "utils/MeshImporter.h"
-
-#include "device/Prototypes.h"
 
 #include "scene/FreeLookCamera.h"
 #include "scene/ListScene.h"
 
-using namespace std;
+#include "renderer/ForwardRenderer.h"
 
+using namespace std;
+using namespace glm;
 namespace phi {
 
 struct AppData {
@@ -40,6 +43,15 @@ static void InitWindow(AppData &data, const string &title = "Phi Renderer") {
     PHI_LOAD_PROC_HELPER(glAttachShader);
     PHI_LOAD_PROC_HELPER(glBindTexture);
     PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
+    PHI_LOAD_PROC_HELPER(glCreateVertexArrays);
+    PHI_LOAD_PROC_HELPER(glBindVertexArray);
+    PHI_LOAD_PROC_HELPER(glEnableVertexAttribArray);
+    PHI_LOAD_PROC_HELPER(glDisableVertexAttribArray);
+    PHI_LOAD_PROC_HELPER(glVertexAttribPointer);
+    PHI_LOAD_PROC_HELPER(glBindBuffer);
+    PHI_LOAD_PROC_HELPER(glDrawArrays);
+    PHI_LOAD_PROC_HELPER(glDrawElements);
+    PHI_LOAD_PROC_HELPER(glUseProgram);
     PHI_LOAD_PROC_HELPER(glCompileShader);
     PHI_LOAD_PROC_HELPER(glCreateBuffers);
     PHI_LOAD_PROC_HELPER(glCreateFramebuffers);
@@ -87,19 +99,61 @@ int main() {
     app.width = 1024;
     app.height = 768;
     phi::InitWindow(app);
+    unique_ptr<phi::Renderer> r =
+            make_unique<phi::ForwardRenderer>(app.width, app.height);
     unique_ptr<phi::Scene> scene = make_unique<phi::ListScene>();
-    unique_ptr<phi::Camera> camera = make_unique<phi::FreeLookCamera>();
-
-    scene->SetCamera(camera.get());
+    unique_ptr<phi::FreeLookCamera> camera = make_unique<phi::FreeLookCamera>();
     auto box = phi::MeshImporter::FromFile("assets/model/box.obj");
+    camera->Move({0,0,15});
+    scene->SetCamera(camera.get());
+    scene->AddEntity(box.get());
 
+    double last_x = 0, last_y = 0;
+    bool grab_mouse = false;
     bool running = true;
+    vec3 position = {0,0,0};
+    double time = 0;
     while (running) {
         if (glfwWindowShouldClose(app.window)) {
             running = false;
         }
+        if (glfwGetKey(app.window, GLFW_KEY_W) == GLFW_PRESS) {
+            camera->Move({0,0,-0.1});
+        }
+        if (glfwGetKey(app.window, GLFW_KEY_S) == GLFW_PRESS) {
+            camera->Move({0,0,0.1});
+        }
+        if (glfwGetKey(app.window, GLFW_KEY_A) == GLFW_PRESS) {
+            camera->Move({-0.1,0,0});
+        }
+        if (glfwGetKey(app.window, GLFW_KEY_D) == GLFW_PRESS) {
+            camera->Move({0.1,0,0});
+        }
+        if (glfwGetKey(app.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            grab_mouse = false;
+            glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        if (glfwGetMouseButton(app.window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            grab_mouse = true;
+            glfwGetCursorPos(app.window, &last_x, &last_y);
+            glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+        if (grab_mouse) {
+            double mx, my;
+            glfwGetCursorPos(app.window, &mx, &my);
+            double dx = last_x - mx;
+            double dy = last_y - my;
+            last_x = mx;
+            last_y = my;
+            camera->RotateX(-dy * 0.2);
+            camera->RotateY(-dx * 0.2);
+        }
+        box->SetRotation({4*time, 3*time, 0});
+        r->Render(scene.get());
         glfwSwapBuffers(app.window);
         glfwPollEvents();
+        time += 0.1;
     }
     glfwDestroyWindow(app.window);
     return 0;
