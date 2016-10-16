@@ -19,25 +19,43 @@ using namespace std;
 using namespace glm;
 namespace phi {
 
-struct AppData {
+struct Application {
     int width;
     int height;
+    bool grab_mouse;
     GLFWwindow *window;
+    double last_x;
+    double last_y;
+    double time;
+    unique_ptr<phi::Renderer> renderer;
+    unique_ptr<phi::FreeLookCamera> camera;
+    unique_ptr<phi::Scene> scene;
+
+    Application(int w, int h, const string &title);
+    void HandleInput();
+    void HandleResize();
+    void Render();
+    void Swap();
 };
 
-static void InitWindow(AppData &data, const string &title = "Phi Renderer") {
+Application::Application(int w, int h, const string &title = "Phi Renderer")
+        : width(w),
+          height(h),
+          grab_mouse(false),
+          last_x(0),
+          last_y(0),
+          time(0) {
     if (!glfwInit()) {
         throw runtime_error("Cannot initialize GLFW");
     }
-    // Request OpenGL 4.5
+    // Request OpenGL 4.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    data.window = glfwCreateWindow(data.width, data.height, title.c_str(),
-                                   nullptr, nullptr);
-    if (!data.window) {
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    window = glfwCreateWindow(w, h, title.c_str(), nullptr, nullptr);
+    if (!window) {
         throw runtime_error("Cannot create GLFW window");
     }
-    glfwMakeContextCurrent(data.window);
+    glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 #define PHI_LOAD_PROC_HELPER(name) PHI_LOAD_PROC(name, glfwGetProcAddress)
     PHI_LOAD_PROC_HELPER(glAttachShader);
@@ -90,70 +108,87 @@ static void InitWindow(AppData &data, const string &title = "Phi Renderer") {
     PHI_LOAD_PROC_HELPER(glTexSubImage2D);
 #undef PHI_LOAD_PROC_HELPER
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
+
+    renderer = make_unique<phi::ForwardRenderer>(width, height);
+    camera = make_unique<phi::FreeLookCamera>();
+    scene = make_unique<phi::ListScene>();
+    scene->SetCamera(camera.get());
+}
+
+void Application::HandleInput() {
+    HandleResize();
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera->Move({ 0, 0, -0.1 });
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera->Move({ 0, 0, 0.1 });
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera->Move({ -0.1, 0, 0 });
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera->Move({ 0.1, 0, 0 });
+    }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        grab_mouse = false;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        grab_mouse = true;
+        glfwGetCursorPos(window, &last_x, &last_y);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
+    if (grab_mouse) {
+        double mx, my;
+        glfwGetCursorPos(window, &mx, &my);
+        double dx = last_x - mx;
+        double dy = last_y - my;
+        last_x = mx;
+        last_y = my;
+        camera->RotateX(-dy * 0.2);
+        camera->RotateY(-dx * 0.2);
+    }
+}
+
+void Application::Render() {
+    HandleInput();
+    renderer->Render(scene.get());
+}
+
+void Application::Swap() {
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+    time += 0.1;
+}
+
+void Application::HandleResize() {
+    int w, h;
+    glfwGetFramebufferSize(window, &w, &h);
+    if (w != width || h != height) {
+        renderer->Resize(w, h);
+        width = w;
+        height = h;
+    }
 }
 
 } // namespace phi
 
 int main() {
-    phi::AppData app {};
-    app.width = 1024;
-    app.height = 768;
-    phi::InitWindow(app);
-    unique_ptr<phi::Renderer> r =
-            make_unique<phi::ForwardRenderer>(app.width, app.height);
-    unique_ptr<phi::Scene> scene = make_unique<phi::ListScene>();
-    unique_ptr<phi::FreeLookCamera> camera = make_unique<phi::FreeLookCamera>();
+    phi::Application app(1024, 768);
     auto box = phi::MeshImporter::FromFile("assets/model/box.obj");
-    camera->Move({0,0,15});
-    scene->SetCamera(camera.get());
-    scene->AddEntity(box.get());
+    app.scene->AddEntity(box.get());
+    app.camera->Move({0,0,15});
 
-    double last_x = 0, last_y = 0;
-    bool grab_mouse = false;
     bool running = true;
-    vec3 position = {0,0,0};
-    double time = 0;
     while (running) {
         if (glfwWindowShouldClose(app.window)) {
             running = false;
         }
-        if (glfwGetKey(app.window, GLFW_KEY_W) == GLFW_PRESS) {
-            camera->Move({0,0,-0.1});
-        }
-        if (glfwGetKey(app.window, GLFW_KEY_S) == GLFW_PRESS) {
-            camera->Move({0,0,0.1});
-        }
-        if (glfwGetKey(app.window, GLFW_KEY_A) == GLFW_PRESS) {
-            camera->Move({-0.1,0,0});
-        }
-        if (glfwGetKey(app.window, GLFW_KEY_D) == GLFW_PRESS) {
-            camera->Move({0.1,0,0});
-        }
-        if (glfwGetKey(app.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            grab_mouse = false;
-            glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
-        if (glfwGetMouseButton(app.window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-            grab_mouse = true;
-            glfwGetCursorPos(app.window, &last_x, &last_y);
-            glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
-
-        if (grab_mouse) {
-            double mx, my;
-            glfwGetCursorPos(app.window, &mx, &my);
-            double dx = last_x - mx;
-            double dy = last_y - my;
-            last_x = mx;
-            last_y = my;
-            camera->RotateX(-dy * 0.2);
-            camera->RotateY(-dx * 0.2);
-        }
-        box->SetRotation({4*time, 3*time, 0});
-        r->Render(scene.get());
-        glfwSwapBuffers(app.window);
-        glfwPollEvents();
-        time += 0.1;
+        box->SetRotation({4*app.time, 3*app.time, 0});
+        app.Render();
+        app.Swap();
     }
     glfwDestroyWindow(app.window);
     return 0;
