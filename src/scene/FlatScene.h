@@ -1,5 +1,5 @@
-#ifndef PHI_SCENE_LIST_SCENE_H
-#define PHI_SCENE_LIST_SCENE_H
+#ifndef PHI_SCENE_FLAT_SCENE_H
+#define PHI_SCENE_FLAT_SCENE_H
 #include "Scene.h"
 
 #include <vector>
@@ -9,7 +9,7 @@ namespace phi {
 /**
  * Very basic implementation of the Scene that keeps everything in the lists.
  */
-class ListScene : public Scene {
+class FlatScene : public Scene {
     std::vector<phi::Entity *> m_entities;
     std::vector<phi::Light *> m_lights;
     const phi::Camera *m_camera;

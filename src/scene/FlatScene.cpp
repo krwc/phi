@@ -1,23 +1,23 @@
-#include "ListScene.h"
+#include "FlatScene.h"
 #include "Entity.h"
 
 #include "renderer/CommandQueue.h"
 
 namespace phi {
 
-void ListScene::SetCamera(Camera *camera) {
+void FlatScene::SetCamera(Camera *camera) {
     m_camera = camera;
 }
 
-void ListScene::AddEntity(Entity *entity) {
+void FlatScene::AddEntity(Entity *entity) {
     m_entities.push_back(entity);
 }
 
-void ListScene::AddLight(Light *light) {
+void FlatScene::AddLight(Light *light) {
     m_lights.push_back(light);
 }
 
-void ListScene::Render(CommandQueue *q) {
+void FlatScene::Render(CommandQueue *q) {
     for (auto &entity : m_entities) {
         entity->Render(q);
     }

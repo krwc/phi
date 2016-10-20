@@ -11,7 +11,7 @@
 #include "utils/MeshImporter.h"
 
 #include "scene/FreeLookCamera.h"
-#include "scene/ListScene.h"
+#include "scene/FlatScene.h"
 
 #include "renderer/ForwardRenderer.h"
 #include "renderer/materials/BasicMaterial.h"
@@ -112,7 +112,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
     renderer = make_unique<phi::ForwardRenderer>(width, height);
     camera = make_unique<phi::FreeLookCamera>();
-    scene = make_unique<phi::ListScene>();
+    scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
 
