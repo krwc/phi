@@ -14,7 +14,7 @@ using namespace std;
 unique_ptr<Mesh> MeshImporter::FromFile(const string &file) {
     Assimp::Importer importer;
     auto scene = importer.ReadFile(file, aiProcess_Triangulate
-                                                 | aiProcess_GenNormals);
+                                                 | aiProcess_GenSmoothNormals);
     if (!scene) {
         PHI_LOG(ERROR, "Cannot import mesh '%s' [ %s ]", file.c_str(),
                 importer.GetErrorString());
