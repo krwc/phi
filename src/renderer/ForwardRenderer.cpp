@@ -31,11 +31,17 @@ ForwardRenderer::ForwardRenderer(int width, int height)
 void ForwardRenderer::BindGlobals(Program *program,
                                   const glm::mat4 &view,
                                   const glm::mat4 &model) {
-    if (!!program->FindConstant("g_ModelViewProjMatrix")) {
-        program->SetConstant("g_ModelViewProjMatrix", m_proj * view * model);
+    if (!!program->FindConstant("g_ProjViewModelMatrix")) {
+        program->SetConstant("g_ProjViewModelMatrix", m_proj * view * model);
+    }
+    if (!!program->FindConstant("g_ViewModelMatrix")) {
+        program->SetConstant("g_ViewModelMatrix", view * model);
     }
     if (!!program->FindConstant("g_NormalMatrix")) {
-        program->SetConstant("g_NormalMatrix", inverse(transpose(mat3(model))));
+        program->SetConstant("g_NormalMatrix", mat3(transpose(inverse(model))));
+    }
+    if (!!program->FindConstant("g_ModelMatrix")) {
+        program->SetConstant("g_ModelMatrix", model);
     }
 }
 
