@@ -29,8 +29,7 @@ unique_ptr<Mesh> MeshImporter::FromFile(const string &file) {
     auto mesh = scene->mMeshes[0];
     assert(mesh->HasPositions());
     assert(mesh->HasNormals());
-    auto material = make_unique<BasicMaterial>();
-    auto result = make_unique<SimpleMesh>(move(material));
+    auto result = make_unique<SimpleMesh>();
 
     for (unsigned i = 0; i < mesh->mNumFaces; ++i) {
         auto face = mesh->mFaces[i];
