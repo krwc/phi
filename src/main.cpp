@@ -14,6 +14,7 @@
 #include "scene/ListScene.h"
 
 #include "renderer/ForwardRenderer.h"
+#include "renderer/materials/BasicMaterial.h"
 
 using namespace std;
 using namespace glm;
@@ -117,18 +118,22 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
 void Application::HandleInput() {
     HandleResize();
+    float accel = 1.0f;
 
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        accel = 4.0f;
+    }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera->Move({ 0, 0, -0.1 });
+        camera->Move(accel * vec3{ 0, 0, -0.1 });
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera->Move({ 0, 0, 0.1 });
+        camera->Move(accel * vec3{ 0, 0, 0.1 });
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera->Move({ -0.1, 0, 0 });
+        camera->Move(accel * vec3{ -0.1, 0, 0 });
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera->Move({ 0.1, 0, 0 });
+        camera->Move(accel * vec3{ 0.1, 0, 0 });
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         grab_mouse = false;
@@ -178,8 +183,40 @@ void Application::HandleResize() {
 int main() {
     phi::Application app(1024, 768);
     auto box = phi::MeshImporter::FromFile("assets/model/box.obj");
+    auto plane_h = phi::MeshImporter::FromFile("assets/model/plane.obj");
+    auto plane_v = phi::MeshImporter::FromFile("assets/model/plane.obj");
+    auto torus = phi::MeshImporter::FromFile("assets/model/torus.obj");
+    box->SetScale({2,2,2});
+    plane_h->SetPosition({0,-5,0});
+    plane_h->SetScale({6,1,6});
+
+    plane_v->SetRotation({90,0,0});
+    plane_v->SetScale({6, 2, 3});
+    plane_v->SetPosition({0,10,-30});
+
+    torus->SetScale({4, 4, 4});
+
+    auto red_material = make_unique<phi::BasicMaterial>();
+    red_material->SetDiffuse({1, 0, 0, 1});
+    auto pink_material = make_unique<phi::BasicMaterial>();
+    pink_material->SetDiffuse({0.6, 0.2, 0.4, 1});
+    auto blue_material = make_unique<phi::BasicMaterial>();
+    blue_material->SetDiffuse({0.2, 0.2, 0.3, 1});
+    auto violet_material = make_unique<phi::BasicMaterial>();
+    violet_material->SetDiffuse({0.4, 0., 0.6, 1});
+
+    box->SetMaterial(red_material.get());
+    plane_h->SetMaterial(pink_material.get());
+    plane_v->SetMaterial(blue_material.get());
+    torus->SetMaterial(violet_material.get());
+
+    app.scene->AddEntity(plane_h.get());
+    app.scene->AddEntity(plane_v.get());
     app.scene->AddEntity(box.get());
+    app.scene->AddEntity(torus.get());
     app.camera->Move({0,0,15});
+    const float R = 20.0f;
+    const float T = 0.1f;
 
     bool running = true;
     while (running) {
@@ -187,6 +224,7 @@ int main() {
             running = false;
         }
         box->SetRotation({4*app.time, 3*app.time, 0});
+        box->SetPosition({R*sin(T*app.time), 8, R*cos(T*app.time)});
         app.Render();
         app.Swap();
     }

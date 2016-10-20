@@ -30,6 +30,7 @@ public:
     virtual phi::Buffer *GetIndexBuffer() {
         return nullptr;
     }
+    virtual void SetMaterial(phi::Material *) = 0;
 };
 
 class SimpleMesh : virtual public Mesh {
@@ -39,16 +40,18 @@ public:
         glm::vec3 normal;
     };
 
-    SimpleMesh(std::unique_ptr<phi::Material> &&material);
+    SimpleMesh();
     virtual ~SimpleMesh();
     virtual const phi::Layout *GetLayout() const;
     virtual phi::Material *GetMaterial() const;
     virtual phi::Buffer *GetVertexBuffer();
+    virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
     virtual void Render(phi::CommandQueue *);
+
 private:
     bool m_dirty;
-    std::unique_ptr<phi::Material> m_material;
+    phi::Material *m_material;
     std::unique_ptr<phi::Buffer> m_vbo;
     std::vector<Vertex> m_vertices;
 };

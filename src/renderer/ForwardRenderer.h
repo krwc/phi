@@ -16,7 +16,6 @@ class ForwardRenderer : public Renderer {
 
     struct State {
         std::vector<int> arrays;
-        const phi::Layout *layout;
         phi::Program *program;
         phi::Buffer *vbo;
         phi::Buffer *ibo;

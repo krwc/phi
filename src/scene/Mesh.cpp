@@ -16,8 +16,8 @@ const Layout SimpleMeshLayout = {
 
 } // namespace
 
-SimpleMesh::SimpleMesh(unique_ptr<Material> &&material)
-        : m_dirty(true), m_material(move(material)), m_vertices() {}
+SimpleMesh::SimpleMesh()
+        : m_dirty(true), m_material(nullptr), m_vertices() {}
 
 SimpleMesh::~SimpleMesh() {}
 
@@ -26,7 +26,7 @@ const Layout *SimpleMesh::GetLayout() const {
 }
 
 Material *SimpleMesh::GetMaterial() const {
-    return m_material.get();
+    return m_material;
 }
 
 void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
@@ -42,6 +42,10 @@ Buffer *SimpleMesh::GetVertexBuffer() {
         m_dirty = false;
     }
     return m_vbo.get();
+}
+
+void SimpleMesh::SetMaterial(Material *material) {
+    m_material = material;
 }
 
 void SimpleMesh::Render(CommandQueue *queue) {

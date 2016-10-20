@@ -10,13 +10,20 @@ static const char *vertex_shader = R"(
 #version 430
 layout(location=0) in vec4 in_position;
 layout(location=1) in vec3 in_normal;
-uniform mat4 g_MVP;
+uniform mat4 g_ProjViewModelMatrix;
+uniform mat4 g_ViewModelMatrix;
+uniform mat4 g_ModelMatrix;
+uniform mat3 g_NormalMatrix;
 
 out vec3 N;
+out vec3 P;
+out vec3 DirLightPos;
 
 void main() {
-    gl_Position = g_MVP * in_position;
-    N = in_normal;
+    vec4 Transformed = g_ProjViewModelMatrix * in_position;
+    gl_Position = Transformed;
+    N = normalize(g_NormalMatrix * in_normal);
+    P = (g_ModelMatrix * in_position).xyz;
 }
 )";
 
@@ -25,9 +32,22 @@ static const char *fragment_shader = R"(
 uniform vec3 diffuse;
 out vec4 FragColor;
 in vec3 N;
+in vec3 P;
+
+const vec3 DirLightPos = vec3(0, 30, 100);
+const vec3 PointLightPos = vec3(0, 4, 8);
 
 void main() {
-    FragColor = vec4(min(diffuse, N), 1.0f);
+    float DirLightI = max(0.0, dot(N, normalize(DirLightPos)));
+    vec3 L = (PointLightPos - P);
+    float PointLightI = max(0.0, dot(N, normalize(L)));
+    float d = length(L);
+    float Attenuation = 1/(1.0f + 0.1*d + 0.03*d*d);
+    if (d > 1/0.03) {
+        PointLightI = 0;
+    }
+
+    FragColor = vec4(clamp(DirLightI + PointLightI * Attenuation, 0, 1) * diffuse, 1.0f);
 }
 )";
 

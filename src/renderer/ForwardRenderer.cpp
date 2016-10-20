@@ -31,8 +31,17 @@ ForwardRenderer::ForwardRenderer(int width, int height)
 void ForwardRenderer::BindGlobals(Program *program,
                                   const glm::mat4 &view,
                                   const glm::mat4 &model) {
-    if (!!program->FindConstant("g_MVP")) {
-        program->SetConstant("g_MVP", m_proj * view * model);
+    if (!!program->FindConstant("g_ProjViewModelMatrix")) {
+        program->SetConstant("g_ProjViewModelMatrix", m_proj * view * model);
+    }
+    if (!!program->FindConstant("g_ViewModelMatrix")) {
+        program->SetConstant("g_ViewModelMatrix", view * model);
+    }
+    if (!!program->FindConstant("g_NormalMatrix")) {
+        program->SetConstant("g_NormalMatrix", mat3(transpose(inverse(model))));
+    }
+    if (!!program->FindConstant("g_ModelMatrix")) {
+        program->SetConstant("g_ModelMatrix", model);
     }
 }
 
@@ -67,9 +76,6 @@ void ForwardRenderer::BindProgram(Program *program) {
 
 void ForwardRenderer::BindLayout(Program *program,
                                  const Layout *layout) {
-    if (m_last.layout == layout) {
-        return;
-    }
     CheckedCall(phi::glBindVertexArray, m_vao);
     /* Clear enabled attributes state, to prepare for rendering data of
      * different layout */
@@ -93,7 +99,6 @@ void ForwardRenderer::BindLayout(Program *program,
                     NumAttributeComponents(info->type), (GLenum) entry.type,
                     GL_FALSE, entry.stride, (void *) (intptr_t) entry.offset);
     }
-    m_last.layout = layout;
 }
 
 void ForwardRenderer::BindVbo(Buffer *buffer) {
