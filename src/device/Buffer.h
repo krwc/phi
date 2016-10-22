@@ -7,10 +7,10 @@ namespace phi {
 
 enum class BufferType {
     Vertex = GL_ARRAY_BUFFER,
-    Index = GL_ELEMENT_ARRAY_BUFFER
+    Index = GL_ELEMENT_ARRAY_BUFFER,
 };
 
-enum class BufferUsage {
+enum class BufferHint {
     Static = GL_STATIC_DRAW,
     Dynamic = GL_DYNAMIC_DRAW
 };
@@ -28,7 +28,7 @@ public:
 
     Buffer &operator=(Buffer &&);
     Buffer(Buffer &&);
-    Buffer(BufferType type, BufferUsage usage, const void *data, size_t size);
+    Buffer(BufferType type, BufferHint usage, const void *data, size_t size);
     virtual ~Buffer();
     void UpdateData(const void *data, size_t size, size_t offset = 0);
 
