@@ -11,13 +11,15 @@ namespace phi {
  */
 class FlatScene : public Scene {
     std::vector<phi::Entity *> m_entities;
-    std::vector<phi::Light *> m_lights;
+    std::vector<phi::PointLight *> m_point_lights;
+    std::vector<phi::DirectionalLight *> m_directional_lights;
     const phi::Camera *m_camera;
 
 public:
     virtual void SetCamera(phi::Camera *);
     virtual void AddEntity(phi::Entity *);
-    virtual void AddLight(phi::Light *);
+    virtual void AddLight(phi::DirectionalLight *);
+    virtual void AddLight(phi::PointLight *);
     virtual void Render(phi::CommandQueue *);
     virtual const phi::Camera *GetCamera() const {
         return m_camera;

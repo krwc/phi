@@ -17,7 +17,6 @@ uniform mat3 g_NormalMatrix;
 
 out vec3 N;
 out vec3 P;
-out vec3 DirLightPos;
 
 void main() {
     vec4 Transformed = g_ProjViewModelMatrix * in_position;
@@ -34,20 +33,62 @@ out vec4 FragColor;
 in vec3 N;
 in vec3 P;
 
+struct DirectionalLight {
+    vec3 Position;
+    vec3 Color;
+};
+
+struct PointLight {
+    vec3 Position;
+    vec3 Color;
+    float ConstantAttenuation;
+    float LinearAttenuation;
+    float QuadraticAttenuation;
+};
+
+struct Light {
+    int NumDirectionalLights;
+    DirectionalLight Directional[8];
+    int NumPointLights;
+    PointLight Point[8];
+};
+
+uniform Light g_Light;
+
 const vec3 DirLightPos = vec3(0, 30, 100);
 const vec3 PointLightPos = vec3(0, 4, 8);
 
-void main() {
-    float DirLightI = max(0.0, dot(N, normalize(DirLightPos)));
-    vec3 L = (PointLightPos - P);
-    float PointLightI = max(0.0, dot(N, normalize(L)));
-    float d = length(L);
-    float Attenuation = 1/(1.0f + 0.1*d + 0.03*d*d);
-    if (d > 1/0.03) {
-        PointLightI = 0;
+vec3 ComputeDirLightIntensity(vec3 Normal) {
+    vec3 Intensity = vec3(0,0,0);
+    for (int i = 0; i < g_Light.NumDirectionalLights; ++i) {
+        float I = max(0.0, dot(Normal, normalize(g_Light.Directional[i].Position)));
+        Intensity += I * g_Light.Directional[i].Color;
     }
+    return Intensity;
+}
 
-    FragColor = vec4(clamp(DirLightI + PointLightI * Attenuation, 0, 1) * diffuse, 1.0f);
+vec3 ComputePointLightIntensity(vec3 Normal, vec3 Point) {
+    vec3 Intensity = vec3(0,0,0);
+    for (int i = 0; i < g_Light.NumPointLights; ++i) {
+        vec3 L = g_Light.Point[i].Position - Point;
+        float D = length(L);
+        float I = max(0.0, dot(N, L / D));
+        float A = 1 / (g_Light.Point[i].ConstantAttenuation
+                        + g_Light.Point[i].LinearAttenuation*D
+                        + g_Light.Point[i].QuadraticAttenuation*D*D);
+        if (D > 1/g_Light.Point[i].QuadraticAttenuation) {
+            I = 0;
+        }
+        Intensity += I * A * g_Light.Point[i].Color;
+    }
+    return Intensity;
+}
+
+void main() {
+    vec3 DirLightI = ComputeDirLightIntensity(N);
+    vec3 PointLightI = ComputePointLightIntensity(N, P);
+
+    FragColor = vec4(clamp((DirLightI + PointLightI) * diffuse, 0, 1), 1.0f);
 }
 )";
 

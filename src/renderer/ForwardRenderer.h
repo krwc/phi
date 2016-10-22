@@ -23,6 +23,10 @@ class ForwardRenderer : public Renderer {
 
     void
     BindGlobals(phi::Program *, const glm::mat4 &view, const glm::mat4 &model);
+    void BindLights(phi::Program *,
+                    const std::vector<phi::DirectionalLight *> &);
+    void BindLights(phi::Program *,
+                    const std::vector<phi::PointLight *> &);
     void BindProgram(phi::Program *);
     void BindLayout(phi::Program *, const phi::Layout *);
     void BindVbo(phi::Buffer *);
