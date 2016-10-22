@@ -9,6 +9,7 @@
 
 #include "scene/Camera.h"
 #include "scene/Scene.h"
+#include "scene/Light.h"
 
 #include <stdexcept>
 
@@ -26,23 +27,6 @@ ForwardRenderer::ForwardRenderer(int width, int height)
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-}
-
-void ForwardRenderer::BindGlobals(Program *program,
-                                  const glm::mat4 &view,
-                                  const glm::mat4 &model) {
-    if (!!program->FindConstant("g_ProjViewModelMatrix")) {
-        program->SetConstant("g_ProjViewModelMatrix", m_proj * view * model);
-    }
-    if (!!program->FindConstant("g_ViewModelMatrix")) {
-        program->SetConstant("g_ViewModelMatrix", view * model);
-    }
-    if (!!program->FindConstant("g_NormalMatrix")) {
-        program->SetConstant("g_NormalMatrix", mat3(transpose(inverse(model))));
-    }
-    if (!!program->FindConstant("g_ModelMatrix")) {
-        program->SetConstant("g_ModelMatrix", model);
-    }
 }
 
 namespace {
@@ -64,6 +48,53 @@ int NumAttributeComponents(GLenum type) {
     }
 }
 
+string ArrayMember(const string &name, int index) {
+    return name + "[" + std::to_string(index) + "]";
+}
+
+}
+
+void ForwardRenderer::BindGlobals(Program *program,
+                                  const glm::mat4 &view,
+                                  const glm::mat4 &model) {
+    if (!!program->FindConstant("g_ProjViewModelMatrix")) {
+        program->SetConstant("g_ProjViewModelMatrix", m_proj * view * model);
+    }
+    if (!!program->FindConstant("g_ViewModelMatrix")) {
+        program->SetConstant("g_ViewModelMatrix", view * model);
+    }
+    if (!!program->FindConstant("g_NormalMatrix")) {
+        program->SetConstant("g_NormalMatrix", mat3(transpose(inverse(model))));
+    }
+    if (!!program->FindConstant("g_ModelMatrix")) {
+        program->SetConstant("g_ModelMatrix", model);
+    }
+}
+
+void ForwardRenderer::BindLights(Program *program,
+                                 const vector<DirectionalLight *> &lights) {
+    program->SetConstant("g_Light.NumDirectionalLights", (int) lights.size());
+    for (size_t i = 0; i < lights.size(); ++i) {
+        auto item = ArrayMember("g_Light.Directional", i);
+        program->SetConstant(item + ".Position", lights[i]->GetPosition());
+        program->SetConstant(item + ".Color", lights[i]->GetColor());
+    }
+}
+
+void ForwardRenderer::BindLights(Program *program,
+                                 const vector<PointLight *> &lights) {
+    program->SetConstant("g_Light.NumPointLights", (int) lights.size());
+    for (size_t i = 0; i < lights.size(); ++i) {
+        auto item = ArrayMember("g_Light.Point", i);
+        program->SetConstant(item + ".Position", lights[i]->GetPosition());
+        program->SetConstant(item + ".Color", lights[i]->GetColor());
+        program->SetConstant(item + ".ConstantAttenuation",
+                             lights[i]->GetConstantAttenuationFactor());
+        program->SetConstant(item + ".LinearAttenuation",
+                             lights[i]->GetLinearAttenuationFactor());
+        program->SetConstant(item + ".QuadraticAttenuation",
+                             lights[i]->GetQuadraticAttenuationFactor());
+    }
 }
 
 void ForwardRenderer::BindProgram(Program *program) {
@@ -144,6 +175,8 @@ void ForwardRenderer::Render(phi::Scene *scene) {
         auto program = command.material->GetProgram();
         BindProgram(program);
         BindGlobals(program, view, *command.model);
+        BindLights(program, command.directional_lights);
+        BindLights(program, command.point_lights);
         command.material->PrepareForRendering();
         BindVbo(command.vbo);
         BindLayout(program, command.layout);

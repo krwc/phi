@@ -36,7 +36,7 @@ void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
 
 Buffer *SimpleMesh::GetVertexBuffer() {
     if (m_dirty) {
-        m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferUsage::Static,
+        m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferHint::Static,
                                     m_vertices.data(),
                                     m_vertices.size() * sizeof(Vertex));
         m_dirty = false;
@@ -48,16 +48,14 @@ void SimpleMesh::SetMaterial(Material *material) {
     m_material = material;
 }
 
-void SimpleMesh::Render(CommandQueue *queue) {
-    Command command{};
-    command.primitive = PrimitiveType::Triangles;
-    command.model = &GetTransform();
-    command.material = GetMaterial();
-    command.layout = &SimpleMeshLayout;
-    command.vbo = GetVertexBuffer();
-    command.count = int(m_vertices.size());
-    command.offset = 0;
-    queue->Insert(command);
+void SimpleMesh::Render(Command *command) {
+    command->primitive = PrimitiveType::Triangles;
+    command->model = &GetTransform();
+    command->material = GetMaterial();
+    command->layout = &SimpleMeshLayout;
+    command->vbo = GetVertexBuffer();
+    command->count = int(m_vertices.size());
+    command->offset = 0;
 }
 
 } // namespace phi

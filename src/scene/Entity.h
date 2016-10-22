@@ -6,16 +6,17 @@
 #include "math/Transformable.h"
 
 namespace phi {
-class CommandQueue;
+struct Command;
 
 class Entity : public Transformable {
 public:
     virtual ~Entity() {}
 
     /**
-     * Pushes render commands to the queue needed to properly render entity.
+     * Fills in render command describing what needs to be done to render
+     * entity.
      */
-    virtual void Render(phi::CommandQueue *) = 0;
+    virtual void Render(phi::Command *) = 0;
 };
 
 } // namespace phi

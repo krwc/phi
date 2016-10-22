@@ -10,8 +10,9 @@
 #include "utils/Logging.h"
 #include "utils/MeshImporter.h"
 
+#include "scene/FlatScene.h"
 #include "scene/FreeLookCamera.h"
-#include "scene/ListScene.h"
+#include "scene/Light.h"
 
 #include "renderer/ForwardRenderer.h"
 #include "renderer/materials/BasicMaterial.h"
@@ -112,7 +113,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
     renderer = make_unique<phi::ForwardRenderer>(width, height);
     camera = make_unique<phi::FreeLookCamera>();
-    scene = make_unique<phi::ListScene>();
+    scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
 
@@ -215,6 +216,28 @@ int main() {
     app.scene->AddEntity(box.get());
     app.scene->AddEntity(torus.get());
     app.camera->Move({0,0,15});
+
+    auto sun = make_unique<phi::DirectionalLight>();
+    sun->SetPosition({0,30,100});
+    sun->SetColor({1,1,1});
+
+    auto red_bulb = make_unique<phi::PointLight>();
+    red_bulb->SetPosition({0,4,8});
+    red_bulb->SetColor({1,0,0});
+    red_bulb->SetLinearAttenuationFactor(0.01);
+    red_bulb->SetQuadraticAttenuationFactor(0.001);
+
+    auto green_bulb = make_unique<phi::PointLight>();
+    green_bulb->SetPosition(torus->GetPosition());
+    green_bulb->SetColor({0,1,0});
+    green_bulb->SetConstantAttenuationFactor(0.4);
+    green_bulb->SetLinearAttenuationFactor(0.05);
+    green_bulb->SetQuadraticAttenuationFactor(0.001);
+
+    app.scene->AddLight(sun.get());
+    app.scene->AddLight(red_bulb.get());
+    app.scene->AddLight(green_bulb.get());
+
     const float R = 20.0f;
     const float T = 0.1f;
 
@@ -225,6 +248,7 @@ int main() {
         }
         box->SetRotation({4*app.time, 3*app.time, 0});
         box->SetPosition({R*sin(T*app.time), 8, R*cos(T*app.time)});
+        red_bulb->SetPosition(box->GetPosition());
         app.Render();
         app.Swap();
     }

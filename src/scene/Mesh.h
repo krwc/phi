@@ -47,7 +47,7 @@ public:
     virtual phi::Buffer *GetVertexBuffer();
     virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
-    virtual void Render(phi::CommandQueue *);
+    virtual void Render(phi::Command *);
 
 private:
     bool m_dirty;

@@ -1,5 +1,7 @@
 #ifndef PHI_RENDERER_COMMAND_H
 #define PHI_RENDERER_COMMAND_H
+#include <vector>
+
 #include "device/Prototypes.h"
 
 #include "math/Math.h"
@@ -8,6 +10,8 @@ namespace phi {
 class Material;
 class Layout;
 class Buffer;
+class PointLight;
+class DirectionalLight;
 
 enum class PrimitiveType : unsigned {
     Triangles = GL_TRIANGLES,
@@ -17,6 +21,10 @@ enum class PrimitiveType : unsigned {
 };
 
 struct Command {
+    /** Lights enabled during rendering */
+    std::vector<phi::PointLight *> point_lights;
+    std::vector<phi::DirectionalLight *> directional_lights;
+    /** Geometry primitive used for rendering */
     PrimitiveType primitive;
     /** Model transform. */
     const glm::mat4 *model;
