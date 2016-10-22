@@ -218,12 +218,12 @@ int main() {
     app.camera->Move({0,0,15});
 
     auto sun = make_unique<phi::DirectionalLight>();
-    sun->SetPosition({0, 30, 100});
+    sun->SetPosition({0,30,100});
     sun->SetColor({1,1,1});
 
     auto red_bulb = make_unique<phi::PointLight>();
-    red_bulb->SetPosition({0, 4, 8});
-    red_bulb->SetColor({1, 0, 0});
+    red_bulb->SetPosition({0,4,8});
+    red_bulb->SetColor({1,0,0});
     red_bulb->SetLinearAttenuationFactor(0.01);
     red_bulb->SetQuadraticAttenuationFactor(0.001);
 

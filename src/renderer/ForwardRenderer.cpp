@@ -48,8 +48,8 @@ int NumAttributeComponents(GLenum type) {
     }
 }
 
-string ArrayMember(const char *name, int index) {
-    return string(name) + "[" + std::to_string(index) + "]";
+string ArrayMember(const string &name, int index) {
+    return name + "[" + std::to_string(index) + "]";
 }
 
 }
