@@ -21,13 +21,13 @@ void FlatScene::AddLight(PointLight *light) {
     m_point_lights.push_back(light);
 }
 
-void FlatScene::Render(CommandQueue *q) {
+void FlatScene::Render(CommandQueue *queue) {
     for (auto &entity : m_entities) {
         Command command{};
         command.directional_lights = m_directional_lights;
         command.point_lights = m_point_lights;
         entity->Render(&command);
-        q->Insert(command);
+        queue->Insert(command);
     }
 }
 

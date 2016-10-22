@@ -55,9 +55,6 @@ struct Light {
 
 uniform Light g_Light;
 
-const vec3 DirLightPos = vec3(0, 30, 100);
-const vec3 PointLightPos = vec3(0, 4, 8);
-
 vec3 ComputeDirLightIntensity(vec3 Normal) {
     vec3 Intensity = vec3(0,0,0);
     for (int i = 0; i < g_Light.NumDirectionalLights; ++i) {
