@@ -1,10 +1,14 @@
 #ifndef PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
 #define PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
+#include <memory>
+
 #include "math/Math.h"
 
+#include "renderer/DataBinding.h"
 #include "renderer/Material.h"
 
 namespace phi {
+class Renderer;
 
 class BasicMaterial : public phi::Material {
     glm::vec4 m_specular;
@@ -16,11 +20,10 @@ public:
 
     void SetSpecular(const glm::vec4 &specular);
     void SetDiffuse(const glm::vec4 &diffuse);
-    virtual void PrepareForRendering();
 
-    virtual phi::Program *GetProgram() {
-        return m_program.get();
-    }
+    virtual void
+    OnPrepareTextureBindings(std::vector<phi::TextureBinding> &) const;
+    virtual void OnPrepareProgramBinding(phi::ProgramBinding &binding) const;
 
     virtual phi::MaterialId GetId() const {
         return phi::MaterialId::Basic;

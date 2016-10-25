@@ -1,11 +1,12 @@
-#include "Command.h"
+#include "DrawCall.h"
 
 namespace phi {
 
-Command::Command()
+DrawCall::DrawCall()
         : primitive(PrimitiveType::Invalid),
+          texture_bindings(),
+          program_binding(),
           layout(nullptr),
-          material(nullptr),
           vbo(nullptr),
           ibo(nullptr),
           count(-1),

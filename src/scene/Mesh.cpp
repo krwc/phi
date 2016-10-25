@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-#include "renderer/CommandQueue.h"
+#include "renderer/DrawCallQueue.h"
 
 #include <utility>
 
@@ -29,11 +29,6 @@ Material *SimpleMesh::GetMaterial() const {
     return m_material;
 }
 
-void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
-    m_vertices.push_back(vertex);
-    m_dirty = true;
-}
-
 Buffer *SimpleMesh::GetVertexBuffer() {
     if (m_dirty) {
         m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferHint::Static,
@@ -44,14 +39,25 @@ Buffer *SimpleMesh::GetVertexBuffer() {
     return m_vbo.get();
 }
 
+Box SimpleMesh::GetBox() const {
+    return GetTransform() * m_box;
+}
+
+void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
+    m_vertices.push_back(vertex);
+    m_box.Cover(vertex.position);
+    m_dirty = true;
+}
+
 void SimpleMesh::SetMaterial(Material *material) {
     m_material = material;
 }
 
-void SimpleMesh::Render(Command *command) {
+void SimpleMesh::Render(DrawCall *command) {
     command->primitive = PrimitiveType::Triangles;
     command->model = &GetTransform();
-    command->material = GetMaterial();
+    m_material->OnPrepareTextureBindings(command->texture_bindings);
+    m_material->OnPrepareProgramBinding(command->program_binding);
     command->layout = &SimpleMeshLayout;
     command->vbo = GetVertexBuffer();
     command->count = int(m_vertices.size());

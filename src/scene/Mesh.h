@@ -4,6 +4,7 @@
 #include "device/Layout.h"
 #include "renderer/Material.h"
 
+#include "math/Box.h"
 #include "math/Math.h"
 
 #include "Entity.h"
@@ -45,12 +46,15 @@ public:
     virtual const phi::Layout *GetLayout() const;
     virtual phi::Material *GetMaterial() const;
     virtual phi::Buffer *GetVertexBuffer();
+    virtual phi::Box GetBox() const;
+
     virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
-    virtual void Render(phi::Command *);
+    virtual void Render(phi::DrawCall *);
 
 private:
     bool m_dirty;
+    phi::Box m_box;
     phi::Material *m_material;
     std::unique_ptr<phi::Buffer> m_vbo;
     std::vector<Vertex> m_vertices;

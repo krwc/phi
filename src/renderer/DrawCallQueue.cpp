@@ -1,12 +1,12 @@
-#include "CommandQueue.h"
+#include "DrawCallQueue.h"
 
 #include <cassert>
 
 namespace phi {
 
-CommandQueue::CommandQueue() : m_commands() {}
+DrawCallQueue::DrawCallQueue() : m_commands() {}
 
-void CommandQueue::Insert(Command &command) {
+void DrawCallQueue::Insert(DrawCall &command) {
     assert(command.primitive != PrimitiveType::Invalid);
     assert(command.count > 0);
     assert(command.offset >= 0);
@@ -14,7 +14,7 @@ void CommandQueue::Insert(Command &command) {
     m_commands.push_back(command);
 }
 
-void CommandQueue::Flush() {
+void DrawCallQueue::Flush() {
     m_commands.clear();
 }
 

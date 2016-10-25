@@ -38,7 +38,7 @@ Texture::Texture(const TextureDesc &desc)
           m_depth(desc.depth),
           m_width(desc.width),
           m_height(desc.height) {
-    CheckedCall(glGenTextures, 1, &m_bind);
+    CheckedCall(phi::glCreateTextures, (GLenum) desc.type, 1, &m_bind);
 }
 
 Texture::~Texture() {
@@ -60,6 +60,7 @@ GLenum TextureInternalFormat(TextureFormat format) {
         return GL_RGB;
     case TextureFormat::RGBA_8888:
         return GL_RGBA;
+    case TextureFormat::DEPTH_16:
     case TextureFormat::DEPTH_24:
     case TextureFormat::DEPTH_32:
         return GL_DEPTH_COMPONENT;
@@ -79,6 +80,7 @@ GLenum TexturePixelType(TextureFormat format) {
     case TextureFormat::RG_16F:
     case TextureFormat::RG_32F:
         return GL_FLOAT;
+    case TextureFormat::DEPTH_16:
     case TextureFormat::DEPTH_24:
     case TextureFormat::DEPTH_32:
         return GL_FLOAT;
@@ -92,6 +94,7 @@ size_t TexturePixelSize(TextureFormat format) {
     case TextureFormat::R_8:
         return 1;
     case TextureFormat::R_16F:
+    case TextureFormat::DEPTH_16:
         return 2;
     case TextureFormat::RGB_888:
     case TextureFormat::DEPTH_24:
@@ -118,6 +121,11 @@ Texture2D::Texture2D(int width, int height, TextureFormat format)
     CheckedCall(phi::glTexImage2D, GL_TEXTURE_2D, 0, (GLenum) format, width, height,
                 0, TextureInternalFormat(format), TexturePixelType(format),
                 nullptr);
+#warning "TODO: implement Sampler object";
+    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: created texture (ID=%u) %dx%d", m_bind, width, height);
 }

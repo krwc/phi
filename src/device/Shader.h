@@ -63,13 +63,16 @@ public:
 
     template <typename T>
     void SetConstant(const std::string &name, const T &value) {
+        SetConstant(name.c_str(), (const void *) &value);
+    }
+
+    void SetConstant(const char *name, const void *value) {
         if (!m_bind) {
             throw std::logic_error("Shader not linked yet");
         } else if (auto &&info = FindConstant(name)) {
-            SetConstant(info->location, info->type, (const void *) &value);
+            SetConstant(info->location, info->type, value);
         } else {
-            PHI_LOG(WARNING, "Shader: cannot set constant %s: not found",
-                    name.c_str());
+            PHI_LOG(WARNING, "Shader: cannot set constant %s: not found", name);
         }
     }
 

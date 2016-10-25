@@ -4,6 +4,7 @@
 
 // This MUST be included before GLFW headers.
 #include "device/Prototypes.h"
+#include "device/Texture.h"
 
 #include <GLFW/glfw3.h>
 
@@ -15,6 +16,7 @@
 #include "scene/Light.h"
 
 #include "renderer/ForwardRenderer.h"
+#include "renderer/DebugDrawer.h"
 #include "renderer/materials/BasicMaterial.h"
 
 using namespace std;
@@ -30,6 +32,7 @@ struct Application {
     double last_y;
     double time;
     unique_ptr<phi::Renderer> renderer;
+    unique_ptr<phi::DebugDrawer> debug;
     unique_ptr<phi::FreeLookCamera> camera;
     unique_ptr<phi::Scene> scene;
 
@@ -84,7 +87,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
     PHI_LOAD_PROC_HELPER(glDeleteTextures);
     PHI_LOAD_PROC_HELPER(glDetachShader);
     PHI_LOAD_PROC_HELPER(glGenerateMipmap);
-    PHI_LOAD_PROC_HELPER(glGenTextures);
+    PHI_LOAD_PROC_HELPER(glCreateTextures);
     PHI_LOAD_PROC_HELPER(glGetActiveAttrib);
     PHI_LOAD_PROC_HELPER(glGetActiveUniform);
     PHI_LOAD_PROC_HELPER(glGetAttribLocation);
@@ -113,6 +116,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
     renderer = make_unique<phi::ForwardRenderer>(width, height);
     camera = make_unique<phi::FreeLookCamera>();
+    debug = make_unique<phi::DebugDrawer>(*camera.get(), *renderer.get());
     scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
@@ -160,7 +164,7 @@ void Application::HandleInput() {
 
 void Application::Render() {
     HandleInput();
-    renderer->Render(scene.get());
+    renderer->Render(*scene.get());
 }
 
 void Application::Swap() {
@@ -215,10 +219,10 @@ int main() {
     app.scene->AddEntity(plane_v.get());
     app.scene->AddEntity(box.get());
     app.scene->AddEntity(torus.get());
-    app.camera->Move({0,0,15});
+    app.camera->Move({0,16,60});
 
     auto sun = make_unique<phi::DirectionalLight>();
-    sun->SetPosition({0,30,100});
+    sun->SetPosition({0,3,10});
     sun->SetColor({1,1,1});
 
     auto red_bulb = make_unique<phi::PointLight>();
@@ -227,20 +231,29 @@ int main() {
     red_bulb->SetLinearAttenuationFactor(0.01);
     red_bulb->SetQuadraticAttenuationFactor(0.001);
 
-    auto green_bulb = make_unique<phi::PointLight>();
-    green_bulb->SetPosition(torus->GetPosition());
-    green_bulb->SetColor({0,1,0});
-    green_bulb->SetConstantAttenuationFactor(0.4);
-    green_bulb->SetLinearAttenuationFactor(0.05);
-    green_bulb->SetQuadraticAttenuationFactor(0.001);
+    auto violet_bulb = make_unique<phi::PointLight>();
+    violet_bulb->SetPosition(torus->GetPosition());
+    violet_bulb->SetColor({0.4, 0., 0.6});
+    violet_bulb->SetConstantAttenuationFactor(0.4);
+    violet_bulb->SetLinearAttenuationFactor(0.05);
+    violet_bulb->SetQuadraticAttenuationFactor(0.001);
 
     app.scene->AddLight(sun.get());
     app.scene->AddLight(red_bulb.get());
-    app.scene->AddLight(green_bulb.get());
+    app.scene->AddLight(violet_bulb.get());
 
     const float R = 20.0f;
     const float T = 0.1f;
 
+    phi::Texture2D texture(200, 200, phi::TextureFormat::RGBA_8888);
+    std::vector<uint8_t> data(4*200*200);
+    for (uint32_t i = 0; i < data.size(); i += 4) {
+        data[i + 0] = rand() % 255;
+        data[i + 1] = rand() % 255;
+        data[i + 2] = rand() % 255;
+        data[i + 3] = 255;
+    }
+    texture.Write(0, 0, 0, 200, 200, data.data());
     bool running = true;
     while (running) {
         if (glfwWindowShouldClose(app.window)) {
@@ -250,7 +263,14 @@ int main() {
         box->SetPosition({R*sin(T*app.time), 8, R*cos(T*app.time)});
         red_bulb->SetPosition(box->GetPosition());
         app.Render();
+        app.debug->DrawBox(box->GetBox());
+        app.debug->DrawBox(torus->GetBox());
+        app.debug->DrawBox(app.scene->GetBox());
+        app.renderer->SetViewport(0, 0, 200, 200);
+        app.debug->DrawTexture(&texture, 0, 0, 0, 0);
+        app.renderer->SetViewport(0, 0, app.width, app.height);
         app.Swap();
+
     }
     glfwDestroyWindow(app.window);
     return 0;

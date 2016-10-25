@@ -15,8 +15,8 @@ class FrameBuffer : virtual public Resource {
     int m_width;
     int m_height;
 
-    std::map<int, Texture2D *> m_color_attachments;
-    Texture2D *m_depth_attachment;
+    std::map<int, phi::Texture2D *> m_color_attachments;
+    phi::Texture2D *m_depth_attachment;
 
 public:
     FrameBuffer &operator=(const FrameBuffer &) = delete;
@@ -30,20 +30,20 @@ public:
     /**
      * Sets @p color_texture as a color attachment of id @p index.
      */
-    virtual void SetColorAttachment(int index, Texture2D *color_texture);
+    virtual void SetColorAttachment(int index, phi::Texture2D *color_texture);
 
     /**
      * Sets @p depth_texture as a depth attachment of id @p index.
      */
-    virtual void SetDepthAttachment(Texture2D *depth_texture);
+    virtual void SetDepthAttachment(phi::Texture2D *depth_texture);
 
     virtual bool IsReady() const;
 
-    virtual const std::map<int, Texture2D *> &GetColorAttachments() const {
+    virtual const std::map<int, phi::Texture2D *> &GetColorAttachments() const {
         return m_color_attachments;
     }
 
-    virtual const Texture2D *GetDepthAttachment() const {
+    virtual const phi::Texture2D *GetDepthAttachment() const {
         return m_depth_attachment;
     }
 

@@ -1,5 +1,8 @@
 #ifndef PHI_RENDERER_MATERIAL_H
 #define PHI_RENDERER_MATERIAL_H
+#include <vector>
+
+#include "DataBinding.h"
 
 #include "utils/ProgramCache.h"
 
@@ -18,18 +21,17 @@ public:
     virtual ~Material() {}
 
     /**
-     * This method will be called by Renderer when it would decide to use this
-     * material for rendering.
-     *
-     * It should be used to set all required Renderer parameters in order to
-     * properly render an object with this material.
+     * This method is called by the Renderer to obtain information about textures
+     * that need to be bound in order to properly render this material.
      */
-    virtual void PrepareForRendering() = 0;
+    virtual void
+    OnPrepareTextureBindings(std::vector<phi::TextureBinding> &) const = 0;
 
     /**
-     * Returns underlying program being used by this material.
+     * This method is called by the Renderer to obtain information about program
+     * that is used by the material.
      */
-    virtual phi::Program *GetProgram() = 0;
+    virtual void OnPrepareProgramBinding(phi::ProgramBinding &) const = 0;
 
     /**
      * Returns identifier of this material. This information is then used by
