@@ -116,7 +116,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
     renderer = make_unique<phi::ForwardRenderer>(width, height);
     camera = make_unique<phi::FreeLookCamera>();
-    debug = make_unique<phi::DebugDrawer>(camera.get(), renderer.get());
+    debug = make_unique<phi::DebugDrawer>(*camera.get(), *renderer.get());
     scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
@@ -246,12 +246,12 @@ int main() {
     const float T = 0.1f;
 
     phi::Texture2D texture(200, 200, phi::TextureFormat::RGBA_8888);
-    std::vector<glm::ivec4> data(200*200);
-    for (uint32_t i = 0; i < data.size(); ++i) {
-        for (uint32_t j = 0; j < 3; ++j) {
-            data[i][j] = rand() % 255;
-        }
-        data[i][3] = 255;
+    std::vector<uint8_t> data(4*200*200);
+    for (uint32_t i = 0; i < data.size(); i += 4) {
+        data[i + 0] = rand() % 255;
+        data[i + 1] = rand() % 255;
+        data[i + 2] = rand() % 255;
+        data[i + 3] = 255;
     }
     texture.Write(0, 0, 0, 200, 200, data.data());
     bool running = true;

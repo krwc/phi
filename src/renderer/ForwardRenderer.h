@@ -20,14 +20,6 @@ class Light;
 class ForwardRenderer : public Renderer {
     friend class DebugDrawer;
 
-    struct ShadowMap {
-        phi::FrameBuffer fbo;
-        phi::Texture2D depth;
-        phi::Program program;
-        ShadowMap(int width, int height);
-    };
-
-    std::unique_ptr<ShadowMap> m_shadow_map;
     std::vector<phi::Light *> m_shadow_casters;
     glm::mat4 m_proj;
     GLuint m_vao;

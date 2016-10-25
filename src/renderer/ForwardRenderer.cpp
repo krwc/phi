@@ -11,47 +11,14 @@
 #include "scene/Scene.h"
 #include "scene/Light.h"
 
-#include "materials/DebugMaterial.h"
-
 #include <stdexcept>
 
 namespace phi {
 using namespace std;
 using namespace glm;
 
-namespace {
-const char *depth_vertex_shader = R"(
-#version 430
-layout(location=0) in vec4 in_position;
-uniform mat4 OrthoMatrix;
-
-void main() {
-    gl_Position = OrthoMatrix * in_position;
-}
-)";
-
-const char *depth_fragment_shader = R"(
-#version 430
-void main() {
-    gl_FragDepth = gl_FragCoord.z;
-}
-)";
-
-} // namespace
-
-ForwardRenderer::ShadowMap::ShadowMap(int width, int height)
-        : fbo(width, height),
-          depth(width, height, TextureFormat::DEPTH_16),
-          program() {
-    fbo.SetDepthAttachment(&depth);
-    assert(fbo.IsReady());
-    program.SetSource(ShaderType::Vertex, depth_vertex_shader);
-    program.SetSource(ShaderType::Fragment, depth_fragment_shader);
-    program.Link();
-}
-
 ForwardRenderer::ForwardRenderer(int width, int height)
-        : m_shadow_map(), m_proj(), m_vao(GL_NONE), m_last() {
+        : m_proj(), m_vao(GL_NONE), m_last() {
     Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
@@ -60,8 +27,6 @@ ForwardRenderer::ForwardRenderer(int width, int height)
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    const int shadow_resolution = 2048;
-    m_shadow_map = make_unique<ShadowMap>(shadow_resolution, shadow_resolution);
 }
 
 namespace {
@@ -215,11 +180,9 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     DrawCallQueue Q;
     scene.Render(&Q);
     auto camera = scene.GetCamera();
-    auto view = camera->GetViewMatrix();
     for (const DrawCall &command : Q.GetDrawCalls()) {
         Render(*camera, command);
     }
-    RenderShadows();
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
 }
@@ -244,19 +207,6 @@ void ForwardRenderer::Render(const phi::Camera &camera,
     BindLayout(command.layout);
     BindIbo(command.ibo);
     Draw(command.primitive, command.offset, command.count);
-}
-
-void ForwardRenderer::RenderShadows() {
- //   CheckedCall(glBindFramebuffer, GL_FRAMEBUFFER, m_shadow_map.fbo.GetId());
-//    BindProgram(&m_shadow_map->program);
-    for (const Light *light : m_shadow_casters) {
-        vec3 dir = -normalize(light->GetPosition());
-#warning "TODO: compute enclosing matrix automatically"
-//        mat4 ortho = ortho(-40, 40, -40, 40, -40, 40);
-//        m_shadow_map->program.SetConstant("OrthoMatrix",
-
-    }
-  //  CheckedCall(glBindFramebuffer, GL_FRAMEBUFFER, GL_NONE);
 }
 
 void ForwardRenderer::Resize(int width, int height) {
