@@ -47,7 +47,8 @@ FrameBuffer::~FrameBuffer() {
 void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {
     assert(color_texture);
     TextureFormat format = color_texture->GetFormat();
-    assert(format != TextureFormat::DEPTH_24
+    assert(format != TextureFormat::DEPTH_16
+           && format != TextureFormat::DEPTH_24
            && format != TextureFormat::DEPTH_32);
     CheckedCall(phi::glNamedFramebufferTexture, m_bind, GL_COLOR_ATTACHMENT0 + index,
                 color_texture->GetId(), 0);
@@ -57,7 +58,8 @@ void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {
 void FrameBuffer::SetDepthAttachment(Texture2D *depth_texture) {
     assert(depth_texture);
     TextureFormat format = depth_texture->GetFormat();
-    assert(format == TextureFormat::DEPTH_24
+    assert(format == TextureFormat::DEPTH_16
+           || format == TextureFormat::DEPTH_24
            || format == TextureFormat::DEPTH_32);
     CheckedCall(phi::glNamedFramebufferTexture, m_bind, GL_DEPTH_ATTACHMENT,
                 depth_texture->GetId(), 0);

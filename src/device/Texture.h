@@ -13,13 +13,14 @@ enum class TextureFormat {
     RG_32F = GL_RG32F,
     RGB_888 = GL_RGB8,
     RGBA_8888 = GL_RGBA8,
+    DEPTH_16 = GL_DEPTH_COMPONENT16,
     DEPTH_24 = GL_DEPTH_COMPONENT24,
     DEPTH_32 = GL_DEPTH_COMPONENT32
 };
 
 enum class TextureType {
-    Texture2D,
-    TextureArray,
+    Texture2D = GL_TEXTURE_2D,
+    TextureArray = GL_TEXTURE_2D_ARRAY,
 };
 
 struct TextureDesc {
