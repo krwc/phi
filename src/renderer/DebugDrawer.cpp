@@ -27,10 +27,11 @@ const char *quad_vertex_shader = R"(
 const char *quad_fragment_shader = R"(
     #version 430
     uniform sampler2D img;
+    out vec4 FragColor;
     in vec2 UV;
 
     void main() {
-        gl_FragColor = texture(img, UV);
+        FragColor = texture(img, UV);
     }
 )";
 
