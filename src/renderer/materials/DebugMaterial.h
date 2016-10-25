@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
-#define PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
+#ifndef PHI_RENDERER_MATERIALS_DEBUG_MATERIAL_H
+#define PHI_RENDERER_MATERIALS_DEBUG_MATERIAL_H
 #include <memory>
 
 #include "math/Math.h"
@@ -8,29 +8,25 @@
 #include "renderer/Material.h"
 
 namespace phi {
-class Renderer;
 
-class BasicMaterial : public phi::Material {
-    glm::vec4 m_specular;
-    glm::vec4 m_diffuse;
+class DebugMaterial : public phi::Material {
+    glm::vec4 m_color;
     std::shared_ptr<Program> m_program;
 
 public:
-    BasicMaterial();
+    DebugMaterial();
 
-    void SetSpecular(const glm::vec4 &specular);
-    void SetDiffuse(const glm::vec4 &diffuse);
-
+    void SetColor(const glm::vec4 &color);
     virtual void
     OnPrepareTextureBindings(std::vector<phi::TextureBinding> &) const;
     virtual void OnPrepareProgramBinding(phi::ProgramBinding &binding) const;
 
     virtual phi::MaterialId GetId() const {
-        return phi::MaterialId::Basic;
+        return phi::MaterialId::Debug;
     }
 
     virtual std::string GetName() const {
-        return "mat_basic";
+        return "mat_debug";
     }
 };
 

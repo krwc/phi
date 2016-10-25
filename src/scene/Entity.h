@@ -6,7 +6,7 @@
 #include "math/Transformable.h"
 
 namespace phi {
-struct Command;
+struct DrawCall;
 
 class Entity : public Transformable {
 public:
@@ -16,7 +16,12 @@ public:
      * Fills in render command describing what needs to be done to render
      * entity.
      */
-    virtual void Render(phi::Command *) = 0;
+    virtual void Render(phi::DrawCall *) = 0;
+
+    /**
+     * Returns current world-space bounding box.
+     */
+    virtual phi::Box GetBox() const = 0;
 };
 
 } // namespace phi
