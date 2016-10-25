@@ -40,7 +40,6 @@ class ForwardRenderer : public Renderer {
     void BindIbo(const phi::Buffer *buffer);
     void Draw(phi::PrimitiveType, int start, int count);
 
-    void RenderShadows();
 public:
     ForwardRenderer(int width, int height);
     virtual void Render(phi::Scene &);

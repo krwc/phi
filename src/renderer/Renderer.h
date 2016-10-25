@@ -5,11 +5,7 @@
 
 namespace phi {
 class Scene;
-class Box;
 class Camera;
-class Layout;
-class Program;
-class Buffer;
 struct DrawCall;
 
 class Renderer {
