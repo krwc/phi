@@ -15,12 +15,12 @@ class Buffer;
 class PointLight;
 class DirectionalLight;
 
-enum class PrimitiveType : unsigned {
+enum class PrimitiveType {
     Triangles = GL_TRIANGLES,
     Points = GL_POINTS,
     Lines = GL_LINES,
     LineStrip = GL_LINE_STRIP,
-    Invalid = 0xffffffff
+    Invalid = GL_NONE
 };
 
 struct DrawCall {
