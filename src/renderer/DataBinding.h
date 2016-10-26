@@ -24,13 +24,6 @@ struct ProgramConstant {
     const void *value;
 };
 
-struct ProgramBinding {
-    /** Program object to be bound */
-    phi::Program *program;
-    /** Constant specification. */
-    std::vector<phi::ProgramConstant> constants;
-};
-
 } // namespace phi
 
 #endif

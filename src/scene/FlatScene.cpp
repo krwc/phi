@@ -5,33 +5,33 @@
 
 namespace phi {
 
-void FlatScene::SetCamera(Camera *camera) {
+void FlatScene::SetCamera(phi::Camera *camera) {
     m_camera = camera;
 }
 
-void FlatScene::AddEntity(Entity *entity) {
+void FlatScene::AddEntity(phi::Entity *entity) {
     m_entities.push_back(entity);
 }
 
-void FlatScene::AddLight(DirectionalLight *light) {
-    m_directional_lights.push_back(light);
+void FlatScene::AddLight(phi::DirLight *light) {
+    m_dir_lights.push_back(light);
 }
 
-void FlatScene::AddLight(PointLight *light) {
+void FlatScene::AddLight(phi::PointLight *light) {
     m_point_lights.push_back(light);
 }
 
-void FlatScene::Render(DrawCallQueue *queue) {
+void FlatScene::Render(phi::DrawCallQueue *queue) {
     for (auto &entity : m_entities) {
-        DrawCall command{};
-        command.directional_lights = m_directional_lights;
-        command.point_lights = m_point_lights;
-        entity->Render(&command);
-        queue->Insert(command);
+        phi::DrawCall draw{};
+        entity->Render(draw);
+        draw.point_lights = m_point_lights;
+        draw.dir_lights = m_dir_lights;
+        queue->Insert(draw);
     }
 }
 
-const Box &FlatScene::GetBox() const {
+const phi::Box &FlatScene::GetBox() const {
     m_box = {};
     for (const auto &entity : m_entities) {
         m_box.Cover(entity->GetBox());

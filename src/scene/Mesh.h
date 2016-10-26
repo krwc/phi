@@ -50,7 +50,7 @@ public:
 
     virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
-    virtual void Render(phi::DrawCall *);
+    virtual void Render(phi::DrawCall &);
 
 private:
     bool m_dirty;

@@ -16,7 +16,7 @@ public:
      * Fills in render command describing what needs to be done to render
      * entity.
      */
-    virtual void Render(phi::DrawCall *) = 0;
+    virtual void Render(phi::DrawCall &) = 0;
 
     /**
      * Returns current world-space bounding box.

@@ -21,26 +21,30 @@ public:
     virtual ~Material() {}
 
     /**
-     * This method is called by the Renderer to obtain information about textures
-     * that need to be bound in order to properly render this material.
+     * Fills passed vector with textures used by this material.
      */
     virtual void
-    OnPrepareTextureBindings(std::vector<phi::TextureBinding> &) const = 0;
+    FillTextureBindings(std::vector<phi::TextureBinding> &) const = 0;
 
     /**
-     * This method is called by the Renderer to obtain information about program
-     * that is used by the material.
+     * Fills passed vector with constant names and pointers to the data where
+     * their values are stored.
      */
-    virtual void OnPrepareProgramBinding(phi::ProgramBinding &) const = 0;
+    virtual void
+    FillProgramConstants(std::vector<phi::ProgramConstant> &) const = 0;
 
     /**
-     * Returns identifier of this material. This information is then used by
-     * the Renderer to be able to properly sort rendering commands by materials.
+     * @returns Pointer to the program being utilized by this material.
+     */
+    virtual phi::Program *GetProgram() = 0;
+
+    /**
+     * @returns Identifier of this material.
      */
     virtual phi::MaterialId GetId() const = 0;
 
     /**
-     * Returns human-readable material name.
+     * @returns Human-readable material name.
      */
     virtual std::string GetName() const = 0;
 };

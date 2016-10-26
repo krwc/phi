@@ -49,10 +49,6 @@ int NumAttributeComponents(GLenum type) {
     }
 }
 
-string ArrayMember(const string &name, int index) {
-    return name + "[" + std::to_string(index) + "]";
-}
-
 }
 
 void ForwardRenderer::BindGlobals(const glm::mat4 &view,
@@ -73,39 +69,62 @@ void ForwardRenderer::BindGlobals(const glm::mat4 &view,
     }
 }
 
-void ForwardRenderer::BindLights(const vector<DirectionalLight *> &lights) {
-    if (!m_last.program->FindConstant("g_Light.NumDirectionalLights")) {
-        return;
-    }
+namespace {
 
-    m_last.program->SetConstant("g_Light.NumDirectionalLights", (int) lights.size());
-    for (size_t i = 0; i < lights.size(); ++i) {
-        auto item = ArrayMember("g_Light.Directional", i);
-        m_last.program->SetConstant(item + ".Position", lights[i]->GetPosition());
-        m_last.program->SetConstant(item + ".Color", lights[i]->GetColor());
-        if (lights[i]->IsCastingShadows()) {
-            m_shadow_casters.push_back(lights[i]);
-        }
-    }
+const std::string POINT_LIGHT_PARAM_ATT_CONSTANT = ".ConstantAttenuation";
+const std::string POINT_LIGHT_PARAM_ATT_LINEAR = ".LinearAttenuation";
+const std::string POINT_LIGHT_PARAM_ATT_QUADRATIC = ".QuadraticAttenuation";
+
+const std::string LIGHT_PARAM_POSITION = ".Position";
+const std::string LIGHT_PARAM_COLOR = ".Color";
+
+std::string ArrayMember(const std::string &name, uint32_t index) {
+    return name + "[" + std::to_string(index) + "]";
 }
 
-void ForwardRenderer::BindLights(const vector<PointLight *> &lights) {
-    if (!m_last.program->FindConstant("g_Light.NumPointLights")) {
-        return;
+}
+
+void ForwardRenderer::BindLights(const std::vector<phi::DirLight *> &dir_lights,
+                                 const std::vector<phi::PointLight *> &point_lights) {
+    bool supports_directional_lights =
+            !!m_last.program->FindConstant("g_Light.NumDirectionalLights");
+    bool supports_point_lights =
+            !!m_last.program->FindConstant("g_Light.NumPointLights");
+    phi::Program *program = m_last.program;
+
+    if (supports_directional_lights) {
+        program->SetConstant("g_Light.NumDirectionalLights",
+                             int(dir_lights.size()));
+
+        for (uint32_t i = 0; i < dir_lights.size(); ++i) {
+            auto &&item = ArrayMember("g_Light.Directional", i);
+            program->SetConstant(item + LIGHT_PARAM_POSITION,
+                                 dir_lights[i]->GetPosition());
+            program->SetConstant(item + LIGHT_PARAM_COLOR,
+                                 dir_lights[i]->GetColor());
+            if (dir_lights[i]->IsCastingShadows()) {
+                m_shadow_casters.push_back(dir_lights[i]);
+            }
+        }
     }
 
-    m_last.program->SetConstant("g_Light.NumPointLights", (int) lights.size());
-    for (size_t i = 0; i < lights.size(); ++i) {
-        auto item = ArrayMember("g_Light.Point", i);
-        m_last.program->SetConstant(item + ".Position",
-                                    lights[i]->GetPosition());
-        m_last.program->SetConstant(item + ".Color", lights[i]->GetColor());
-        m_last.program->SetConstant(item + ".ConstantAttenuation",
-                                    lights[i]->GetConstantAttenuationFactor());
-        m_last.program->SetConstant(item + ".LinearAttenuation",
-                                    lights[i]->GetLinearAttenuationFactor());
-        m_last.program->SetConstant(item + ".QuadraticAttenuation",
-                                    lights[i]->GetQuadraticAttenuationFactor());
+    if (supports_point_lights) {
+        program->SetConstant("g_Light.NumPointLights",
+                             int(point_lights.size()));
+
+        for (uint32_t i = 0; i < point_lights.size(); ++i) {
+            auto &&item = ArrayMember("g_Light.Point", i);
+            program->SetConstant(item + LIGHT_PARAM_POSITION,
+                                 point_lights[i]->GetPosition());
+            program->SetConstant(item + LIGHT_PARAM_COLOR,
+                                 point_lights[i]->GetColor());
+            program->SetConstant(item + POINT_LIGHT_PARAM_ATT_CONSTANT,
+                                 point_lights[i]->GetConstantAttenuation());
+            program->SetConstant(item + POINT_LIGHT_PARAM_ATT_LINEAR,
+                                 point_lights[i]->GetLinearAttenuation());
+            program->SetConstant(item + POINT_LIGHT_PARAM_ATT_QUADRATIC,
+                                 point_lights[i]->GetQuadraticAttenuation());
+        }
     }
 }
 
@@ -164,7 +183,7 @@ void ForwardRenderer::BindIbo(const phi::Buffer *buffer) {
     }
 }
 
-void ForwardRenderer::Draw(PrimitiveType type, int start, int count) {
+void ForwardRenderer::Draw(Primitive type, int start, int count) {
     if (!m_last.ibo) {
         CheckedCall(phi::glDrawArrays, (GLenum) type, start, count);
     } else {
@@ -174,31 +193,16 @@ void ForwardRenderer::Draw(PrimitiveType type, int start, int count) {
     }
 }
 
-void ForwardRenderer::Render(phi::Scene &scene) {
-    glClearColor(0.3, 0.3, 0.3, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    DrawCallQueue Q;
-    scene.Render(&Q);
-    auto camera = scene.GetCamera();
-    for (const DrawCall &command : Q.GetDrawCalls()) {
-        Render(*camera, command);
-    }
-    m_last = ForwardRenderer::State{};
-    m_shadow_casters.clear();
-}
-
-void ForwardRenderer::Render(const phi::Camera &camera,
-                             const phi::DrawCall &command) {
-    BindProgram(command.program_binding.program);
-    BindGlobals(camera.GetViewMatrix(), *command.model);
-    BindLights(command.directional_lights);
-    BindLights(command.point_lights);
-    for (const auto &constant : command.program_binding.constants) {
+void ForwardRenderer::Execute(const glm::mat4 &view,
+                              const phi::DrawCall &draw) {
+    BindProgram(draw.program);
+    BindGlobals(view, draw.transform);
+    BindLights(draw.dir_lights, draw.point_lights);
+    for (const auto &constant : draw.program_constants) {
         m_last.program->SetConstant(constant.name, constant.value);
     }
     uint32_t texture_unit = 0;
-    for (const auto &texture : command.texture_bindings) {
+    for (const auto &texture : draw.texture_bindings) {
         assert(texture.sampler);
         assert(texture.texture);
         CheckedCall(glActiveTexture, GL_TEXTURE0 + texture_unit);
@@ -206,10 +210,30 @@ void ForwardRenderer::Render(const phi::Camera &camera,
         CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, texture.texture->GetId());
         m_last.program->SetConstant(texture.name, texture_unit++);
     }
-    BindVbo(command.vbo);
-    BindLayout(command.layout);
-    BindIbo(command.ibo);
-    Draw(command.primitive, command.offset, command.count);
+    BindVbo(draw.vbo);
+    BindLayout(draw.layout);
+    BindIbo(draw.ibo);
+    Draw(draw.primitive, draw.offset, draw.count);
+}
+
+void ForwardRenderer::Render(phi::Scene &scene) {
+    glClearColor(0.3, 0.3, 0.3, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    DrawCallQueue Q;
+    scene.Render(&Q);
+    auto camera = scene.GetCamera();
+    auto view = camera->GetViewMatrix();
+    for (const DrawCall &command : Q.GetDrawCalls()) {
+        Execute(view, command);
+    }
+    m_last = ForwardRenderer::State{};
+    m_shadow_casters.clear();
+}
+
+void ForwardRenderer::Execute(const phi::DrawCall &command) {
+    glm::mat4 dummy(1.0f);
+    Execute(dummy, command);
 }
 
 void ForwardRenderer::Resize(int width, int height) {

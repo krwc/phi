@@ -3,12 +3,14 @@
 namespace phi {
 
 DrawCall::DrawCall()
-        : primitive(PrimitiveType::Invalid),
-          texture_bindings(),
-          program_binding(),
+        : primitive(phi::Primitive::Invalid),
+          transform(),
+          program(nullptr),
           layout(nullptr),
           vbo(nullptr),
           ibo(nullptr),
+          program_constants(),
+          texture_bindings(),
           count(-1),
           offset(-1) {}
 
