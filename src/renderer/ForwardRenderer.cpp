@@ -5,6 +5,7 @@
 #include "device/Buffer.h"
 #include "device/Layout.h"
 #include "device/Prototypes.h"
+#include "device/Sampler.h"
 #include "device/Utils.h"
 
 #include "scene/Camera.h"
@@ -198,8 +199,10 @@ void ForwardRenderer::Render(const phi::Camera &camera,
     }
     uint32_t texture_unit = 0;
     for (const auto &texture : command.texture_bindings) {
-        // TODO: this doesn't work, because samplers are lacking
+        assert(texture.sampler);
+        assert(texture.texture);
         CheckedCall(glActiveTexture, GL_TEXTURE0 + texture_unit);
+        CheckedCall(phi::glBindSampler, texture_unit, texture.sampler->GetId());
         CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, texture.texture->GetId());
         m_last.program->SetConstant(texture.name, texture_unit++);
     }

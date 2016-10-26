@@ -77,6 +77,10 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
     PHI_LOAD_PROC_HELPER(glUseProgram);
     PHI_LOAD_PROC_HELPER(glCompileShader);
     PHI_LOAD_PROC_HELPER(glCreateBuffers);
+    PHI_LOAD_PROC_HELPER(glCreateSamplers);
+    PHI_LOAD_PROC_HELPER(glDeleteSamplers);
+    PHI_LOAD_PROC_HELPER(glBindSampler);
+    PHI_LOAD_PROC_HELPER(glSamplerParameteri);
     PHI_LOAD_PROC_HELPER(glCreateFramebuffers);
     PHI_LOAD_PROC_HELPER(glCreateProgram);
     PHI_LOAD_PROC_HELPER(glCreateShader);

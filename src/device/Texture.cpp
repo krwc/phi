@@ -121,11 +121,6 @@ Texture2D::Texture2D(int width, int height, TextureFormat format)
     CheckedCall(phi::glTexImage2D, GL_TEXTURE_2D, 0, (GLenum) format, width, height,
                 0, TextureInternalFormat(format), TexturePixelType(format),
                 nullptr);
-#warning "TODO: implement Sampler object";
-    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    CheckedCall(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: created texture (ID=%u) %dx%d", m_bind, width, height);
 }
