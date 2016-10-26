@@ -108,16 +108,17 @@ void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
     };
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
     glm::vec4 color4 = glm::vec4(color, 1.0f);
-    DrawCall draw{};
-    draw.primitive = PrimitiveType::Lines;
-    draw.model = &m_dummy;
-    draw.program_binding.program = &m_debug_program;
-    draw.program_binding.constants = { { "Color", &color4 } };
+    phi::DrawCall draw{};
+    draw.primitive = phi::Primitive::Lines;
+    draw.transform = m_view.GetViewMatrix();
+    draw.program = &m_debug_program;
     draw.layout = &debug_layout;
     draw.vbo = &m_vbo;
+    draw.program_constants = { { "Color", &color4 } };
+    draw.texture_bindings = {};
     draw.count = data.size();
     draw.offset = 0;
-    m_renderer.Render(m_view, draw);
+    m_renderer.Execute(draw);
 }
 
 void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int h) {
@@ -127,17 +128,17 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     (void) h;
     m_vbo.UpdateData(quad, sizeof(quad));
     DrawCall draw{};
-    draw.primitive = PrimitiveType::Triangles;
-    draw.model = &m_dummy;
+    draw.primitive = Primitive::Triangles;
+    draw.transform = m_view.GetViewMatrix();
+    draw.program = &m_quad_program;
+    draw.layout = &quad_layout;
+    draw.vbo = &m_vbo;
     draw.texture_bindings = {
         { "img", texture, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp) }
     };
-    draw.program_binding.program = &m_quad_program;
-    draw.layout = &quad_layout;
-    draw.vbo = &m_vbo;
     draw.count = 6;
     draw.offset = 0;
-    m_renderer.Render(m_view, draw);
+    m_renderer.Execute(draw);
 }
 
 } // namespace phi

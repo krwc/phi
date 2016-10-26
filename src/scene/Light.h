@@ -23,7 +23,7 @@ public:
     virtual bool IsCastingShadows() const;
 };
 
-class DirectionalLight : public Light {};
+class DirLight : public Light {};
 
 class PointLight : public Light {
     float m_attenuation_constant;
@@ -33,22 +33,22 @@ class PointLight : public Light {
 public:
     PointLight();
 
-    void SetConstantAttenuationFactor(float value) {
+    void SetConstantAttenuation(float value) {
         m_attenuation_constant = value;
     }
-    void SetLinearAttenuationFactor(float value) {
+    void SetLinearAttenuation(float value) {
         m_attenuation_linear = value;
     }
-    void SetQuadraticAttenuationFactor(float value) {
+    void SetQuadraticAttenuation(float value) {
         m_attenuation_quadratic = value;
     }
-    float GetConstantAttenuationFactor() const {
+    float GetConstantAttenuation() const {
         return m_attenuation_constant;
     }
-    float GetLinearAttenuationFactor() const {
+    float GetLinearAttenuation() const {
         return m_attenuation_linear;
     }
-    float GetQuadraticAttenuationFactor() const {
+    float GetQuadraticAttenuation() const {
         return m_attenuation_quadratic;
     }
 };

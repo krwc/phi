@@ -49,19 +49,20 @@ void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
     m_dirty = true;
 }
 
-void SimpleMesh::SetMaterial(Material *material) {
+void SimpleMesh::SetMaterial(phi::Material *material) {
     m_material = material;
 }
 
-void SimpleMesh::Render(DrawCall *command) {
-    command->primitive = PrimitiveType::Triangles;
-    command->model = &GetTransform();
-    m_material->OnPrepareTextureBindings(command->texture_bindings);
-    m_material->OnPrepareProgramBinding(command->program_binding);
-    command->layout = &SimpleMeshLayout;
-    command->vbo = GetVertexBuffer();
-    command->count = int(m_vertices.size());
-    command->offset = 0;
+void SimpleMesh::Render(phi::DrawCall &draw) {
+    draw.primitive = Primitive::Triangles;
+    draw.transform = GetTransform();
+    draw.program = m_material->GetProgram();
+    draw.layout = &SimpleMeshLayout;
+    draw.vbo = GetVertexBuffer();
+    draw.count = int(m_vertices.size());
+    draw.offset = 0;
+    m_material->FillTextureBindings(draw.texture_bindings);
+    m_material->FillProgramConstants(draw.program_constants);
 }
 
 } // namespace phi

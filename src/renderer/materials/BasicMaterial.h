@@ -21,9 +21,12 @@ public:
     void SetSpecular(const glm::vec4 &specular);
     void SetDiffuse(const glm::vec4 &diffuse);
 
-    virtual void
-    OnPrepareTextureBindings(std::vector<phi::TextureBinding> &) const;
-    virtual void OnPrepareProgramBinding(phi::ProgramBinding &binding) const;
+    virtual void FillTextureBindings(std::vector<phi::TextureBinding> &) const;
+    virtual void FillProgramConstants(std::vector<phi::ProgramConstant> &) const;
+
+    virtual phi::Program *GetProgram() {
+        return m_program.get();
+    }
 
     virtual phi::MaterialId GetId() const {
         return phi::MaterialId::Basic;

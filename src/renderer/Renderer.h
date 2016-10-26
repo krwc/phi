@@ -23,10 +23,9 @@ public:
      * rendering (without packing data into the scene). The idea is just to execute
      * draw call encapsulated in @p call.
      *
-     * @param camera    Camera whose view will be used for rendering.
      * @param call      Draw call to execute.
      */
-    virtual void Render(const phi::Camera &camera, const phi::DrawCall &call) = 0;
+    virtual void Execute(const phi::DrawCall &call) = 0;
 
     /**
      * This method should be called whenever view changes, to be able to properly

@@ -225,22 +225,22 @@ int main() {
     app.scene->AddEntity(torus.get());
     app.camera->Move({0,16,60});
 
-    auto sun = make_unique<phi::DirectionalLight>();
+    auto sun = make_unique<phi::DirLight>();
     sun->SetPosition({0,3,10});
     sun->SetColor({1,1,1});
 
     auto red_bulb = make_unique<phi::PointLight>();
     red_bulb->SetPosition({0,4,8});
     red_bulb->SetColor({1,0,0});
-    red_bulb->SetLinearAttenuationFactor(0.01);
-    red_bulb->SetQuadraticAttenuationFactor(0.001);
+    red_bulb->SetLinearAttenuation(0.01);
+    red_bulb->SetQuadraticAttenuation(0.001);
 
     auto violet_bulb = make_unique<phi::PointLight>();
     violet_bulb->SetPosition(torus->GetPosition());
     violet_bulb->SetColor({0.4, 0., 0.6});
-    violet_bulb->SetConstantAttenuationFactor(0.4);
-    violet_bulb->SetLinearAttenuationFactor(0.05);
-    violet_bulb->SetQuadraticAttenuationFactor(0.001);
+    violet_bulb->SetConstantAttenuation(0.4);
+    violet_bulb->SetLinearAttenuation(0.05);
+    violet_bulb->SetQuadraticAttenuation(0.001);
 
     app.scene->AddLight(sun.get());
     app.scene->AddLight(red_bulb.get());

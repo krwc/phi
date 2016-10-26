@@ -116,14 +116,13 @@ void BasicMaterial::SetDiffuse(const vec4 &diffuse) {
     m_diffuse = diffuse;
 }
 
-void BasicMaterial::OnPrepareTextureBindings(
-        std::vector<phi::TextureBinding> &) const {
+void BasicMaterial::FillTextureBindings(std::vector<phi::TextureBinding> &) const {
     return;
 }
 
-void BasicMaterial::OnPrepareProgramBinding(phi::ProgramBinding &binding) const {
-    binding.program = m_program.get();
-    binding.constants = { { "diffuse", glm::value_ptr(m_diffuse) } };
+void BasicMaterial::FillProgramConstants(
+        std::vector<phi::ProgramConstant> &constants) const {
+    constants = { { "diffuse", glm::value_ptr(m_diffuse) } };
 }
 
 } // namespace phi

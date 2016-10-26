@@ -13,9 +13,9 @@ class Material;
 class Layout;
 class Buffer;
 class PointLight;
-class DirectionalLight;
+class DirLight;
 
-enum class PrimitiveType {
+enum class Primitive {
     Triangles = GL_TRIANGLES,
     Points = GL_POINTS,
     Lines = GL_LINES,
@@ -24,21 +24,22 @@ enum class PrimitiveType {
 };
 
 struct DrawCall {
-    std::vector<phi::PointLight *> point_lights;
-    std::vector<phi::DirectionalLight *> directional_lights;
-    PrimitiveType primitive;
-    const glm::mat4 *model;
-    std::vector<phi::TextureBinding> texture_bindings;
-    phi::ProgramBinding program_binding;
+    phi::Primitive primitive;
+    glm::mat4 transform;
+    phi::Program *program;
     const phi::Layout *layout;
     const phi::Buffer *vbo;
     const phi::Buffer *ibo;
-    /** Number of primitives to draw */
+    std::vector<phi::ProgramConstant> program_constants;
+    std::vector<phi::TextureBinding> texture_bindings;
+    std::vector<phi::PointLight *> point_lights;
+    std::vector<phi::DirLight *> dir_lights;
+    /* Number of primitives to draw. */
     int count;
-    /** Byte offset in buffer where geometry starts */
+    /* Byte offset in buffer where geometry starts. */
     int offset;
 
-    /** Creates an invalid render command that needs to be filled by the user */
+    /** Creates an invalid draw call that needs to be filled by the user. */
     DrawCall();
 };
 
