@@ -4,6 +4,8 @@
 
 #include "math/Box.h"
 
+#include "device/Sampler.h"
+
 #include "scene/Camera.h"
 
 #include <vector>
@@ -127,7 +129,9 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     DrawCall draw{};
     draw.primitive = PrimitiveType::Triangles;
     draw.model = &m_dummy;
-    draw.texture_bindings = { { "img", texture } };
+    draw.texture_bindings = {
+        { "img", texture, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp) }
+    };
     draw.program_binding.program = &m_quad_program;
     draw.layout = &quad_layout;
     draw.vbo = &m_vbo;

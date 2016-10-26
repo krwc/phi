@@ -6,12 +6,15 @@
 namespace phi {
 class Texture;
 class Program;
+class Sampler;
 
 struct TextureBinding {
     /** Sampler name used in the shader to access this texture */
     const char *name;
     /** Texture object to be bound */
     const phi::Texture *texture;
+    /** Sampler object used to sample texture */
+    const phi::Sampler *sampler;
 };
 
 struct ProgramConstant {
