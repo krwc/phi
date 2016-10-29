@@ -20,7 +20,7 @@ class Light;
 class ForwardRenderer : public Renderer {
     friend class DebugDrawer;
 
-    std::vector<phi::DirLight *> m_shadow_casters;
+    std::vector<const phi::DirLight *> m_shadow_casters;
     glm::mat4 m_proj;
     int m_width;
     int m_height;

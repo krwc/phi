@@ -103,9 +103,6 @@ void ForwardRenderer::BindLights(const std::vector<phi::DirLight *> &dir_lights,
                                  dir_lights[i]->GetPosition());
             program->SetConstant(item + LIGHT_PARAM_COLOR,
                                  dir_lights[i]->GetColor());
-            if (dir_lights[i]->IsCastingShadows()) {
-                m_shadow_casters.push_back(dir_lights[i]);
-            }
         }
     }
 
@@ -223,10 +220,17 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     glClear(GL_DEPTH_BUFFER_BIT);
     DrawCallQueue Q;
     scene.Render(&Q);
+    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
+        for (const phi::DirLight *light : drawcall.dir_lights) {
+            if (light->IsCastingShadows()) {
+                m_shadow_casters.push_back(light);
+            }
+        }
+    }
     auto camera = scene.GetCamera();
     auto view = camera->GetViewMatrix();
-    for (const DrawCall &command : Q.GetDrawCalls()) {
-        Execute(view, command);
+    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
+        Execute(view, drawcall);
     }
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
