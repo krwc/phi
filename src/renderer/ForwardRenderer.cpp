@@ -257,4 +257,8 @@ void ForwardRenderer::SetScissor(int x, int y, int w, int h) {
     glScissor(x, y, w, h);
 }
 
+void ForwardRenderer::SetFrameBuffer(phi::FrameBuffer &target) {
+    CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, target.GetId());
+}
+
 } // namespace phi

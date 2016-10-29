@@ -12,7 +12,7 @@ enum class WrapMode {
 };
 
 class Sampler : public Resource {
-    GLuint m_bind;
+    GLuint m_id;
 
     Sampler(GLenum min_filter,
             GLenum mag_filter,
@@ -22,7 +22,7 @@ class Sampler : public Resource {
 
 public:
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 
     static const phi::Sampler *Nearest2D(phi::WrapMode mode);

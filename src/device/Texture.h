@@ -36,7 +36,7 @@ private:
     void Destroy();
 
 protected:
-    GLuint m_bind;
+    GLuint m_id;
     TextureType m_type;
     TextureFormat m_format;
     int m_depth;
@@ -74,7 +74,7 @@ public:
     }
 
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 
     virtual void GenerateMipmaps() = 0;

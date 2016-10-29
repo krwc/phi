@@ -50,6 +50,7 @@ public:
     virtual void Resize(int width, int height);
     virtual void SetViewport(int x, int y, int w, int h);
     virtual void SetScissor(int x, int y, int w, int h);
+    virtual void SetFrameBuffer(phi::FrameBuffer &target);
 };
 
 } // namespace phi

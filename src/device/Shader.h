@@ -21,7 +21,7 @@ enum class ShaderType {
 class Shader : virtual public Resource {
     void Destroy();
 
-    GLuint m_bind;
+    GLuint m_id;
     ShaderType m_type;
     const char *m_source;
 
@@ -40,7 +40,7 @@ public:
     }
 
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 };
 
@@ -67,7 +67,7 @@ public:
     }
 
     void SetConstant(const char *name, const void *value) {
-        if (!m_bind) {
+        if (!m_id) {
             throw std::logic_error("Shader not linked yet");
         } else if (auto &&info = FindConstant(name)) {
             SetConstant(info->location, info->type, value);
@@ -80,14 +80,14 @@ public:
     virtual void Link();
 
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 
     const ParamInfo *FindConstant(const std::string &name) const;
     const ParamInfo *FindAttribute(const std::string &name) const;
 
 private:
-    GLuint m_bind;
+    GLuint m_id;
 
     std::map<std::string, struct ParamInfo> m_constants;
     std::map<std::string, struct ParamInfo> m_attributes;

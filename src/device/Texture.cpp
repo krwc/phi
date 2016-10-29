@@ -7,38 +7,38 @@ namespace phi {
 using namespace std;
 
 void Texture::Destroy() {
-    if (m_bind) {
-        PHI_LOG(TRACE, "Deleting texture (ID=%u)", m_bind);
-        CheckedCall(phi::glDeleteTextures, 1, &m_bind);
+    if (m_id) {
+        PHI_LOG(TRACE, "Deleting texture (ID=%u)", m_id);
+        CheckedCall(phi::glDeleteTextures, 1, &m_id);
     }
 }
 
 Texture &Texture::operator=(Texture &&other) {
     if (&other != this) {
         Destroy();
-        m_bind = other.m_bind;
+        m_id = other.m_id;
         m_type = other.m_type;
         m_format = other.m_format;
         m_depth = other.m_depth;
         m_width = other.m_width;
         m_height = other.m_height;
-        other.m_bind = GL_NONE;
+        other.m_id = GL_NONE;
     }
     return *this;
 }
 
-Texture::Texture(Texture &&other) : m_bind(GL_NONE) {
+Texture::Texture(Texture &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
 Texture::Texture(const TextureDesc &desc)
-        : m_bind(GL_NONE),
+        : m_id(GL_NONE),
           m_type(desc.type),
           m_format(desc.format),
           m_depth(desc.depth),
           m_width(desc.width),
           m_height(desc.height) {
-    CheckedCall(phi::glCreateTextures, (GLenum) desc.type, 1, &m_bind);
+    CheckedCall(phi::glCreateTextures, (GLenum) desc.type, 1, &m_id);
 }
 
 Texture::~Texture() {
@@ -117,17 +117,17 @@ Texture2D::Texture2D(int width, int height, TextureFormat format)
         : Texture({ TextureType::Texture2D, format, 1, width, height }) {
     GLint current = GL_NONE;
     CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_id);
     CheckedCall(phi::glTexImage2D, GL_TEXTURE_2D, 0, (GLenum) format, width, height,
                 0, TextureInternalFormat(format), TexturePixelType(format),
                 nullptr);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
-    PHI_LOG(TRACE, "Texture2D: created texture (ID=%u) %dx%d", m_bind, width, height);
+    PHI_LOG(TRACE, "Texture2D: created texture (ID=%u) %dx%d", m_id, width, height);
 }
 
 Texture2D::~Texture2D() {
-    if (m_bind) {
-        PHI_LOG(TRACE, "Texture2D: deleted texture (ID=%u)", m_bind);
+    if (m_id) {
+        PHI_LOG(TRACE, "Texture2D: deleted texture (ID=%u)", m_id);
     }
 }
 
@@ -136,7 +136,7 @@ void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {
     assert(size >= w * h * TexturePixelType(m_format));
     GLint current = GL_NONE;
     CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_id);
     PHI_LOG(TRACE, "Texture2D: writing %u bytes",
             w * h * TexturePixelSize(m_format));
     CheckedCall(phi::glTexSubImage2D, GL_TEXTURE_2D, level, x, y, w, h,
@@ -148,7 +148,7 @@ void Texture2D::Write(int level, int x, int y, int w, int h, const void *data) {
 void Texture2D::GenerateMipmaps() {
     GLint current = GL_NONE;
     CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
-    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_bind);
+    CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_id);
     CheckedCall(phi::glGenerateMipmap, GL_TEXTURE_2D);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: generated mipmaps");
