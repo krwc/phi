@@ -27,6 +27,8 @@ class FrameBuffer {
     int m_height;
     std::vector<GLenum> m_buffers;
 
+    bool IsTextureSizeValid(const phi::Texture *texture);
+
 public:
     FrameBuffer &operator=(const FrameBuffer &) = delete;
     FrameBuffer(const FrameBuffer&) = delete;

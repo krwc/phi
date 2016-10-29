@@ -47,8 +47,15 @@ FrameBuffer::~FrameBuffer() {
     Destroy();
 }
 
+bool FrameBuffer::IsTextureSizeValid(const phi::Texture *texture) {
+    return texture->GetWidth() == m_width
+            && texture->GetHeight() == m_height
+            && texture->GetDepth() == 1;
+}
+
 void FrameBuffer::SetColorAttachment(const phi::ColorAttachment &attachment) {
     assert(attachment.color);
+    assert(IsTextureSizeValid(attachment.color));
     phi::TextureFormat format = attachment.color->GetFormat();
     assert(format != phi::TextureFormat::DEPTH_16
            && format != phi::TextureFormat::DEPTH_24
@@ -69,6 +76,7 @@ void FrameBuffer::SetColorAttachment(const phi::ColorAttachment &attachment) {
 
 void FrameBuffer::SetDepthAttachment(const phi::DepthAttachment &attachment) {
     assert(attachment.depth);
+    assert(IsTextureSizeValid(attachment.depth));
     phi::TextureFormat format = attachment.depth->GetFormat();
     assert(format == phi::TextureFormat::DEPTH_16
            || format == phi::TextureFormat::DEPTH_24
