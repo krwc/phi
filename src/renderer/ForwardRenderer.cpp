@@ -19,10 +19,11 @@ using namespace std;
 using namespace glm;
 
 ForwardRenderer::ForwardRenderer(int width, int height)
-        : m_proj(), m_vao(GL_NONE), m_last() {
+        : m_proj(), m_width(width), m_height(height), m_vao(GL_NONE), m_last() {
     Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_SCISSOR_TEST);
     glDepthFunc(GL_LESS);
     glDepthRange(0.0f, 1.0f);
     glFrontFace(GL_CCW);
@@ -102,9 +103,6 @@ void ForwardRenderer::BindLights(const std::vector<phi::DirLight *> &dir_lights,
                                  dir_lights[i]->GetPosition());
             program->SetConstant(item + LIGHT_PARAM_COLOR,
                                  dir_lights[i]->GetColor());
-            if (dir_lights[i]->IsCastingShadows()) {
-                m_shadow_casters.push_back(dir_lights[i]);
-            }
         }
     }
 
@@ -222,10 +220,17 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     glClear(GL_DEPTH_BUFFER_BIT);
     DrawCallQueue Q;
     scene.Render(&Q);
+    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
+        for (const phi::DirLight *light : drawcall.dir_lights) {
+            if (light->IsCastingShadows()) {
+                m_shadow_casters.push_back(light);
+            }
+        }
+    }
     auto camera = scene.GetCamera();
     auto view = camera->GetViewMatrix();
-    for (const DrawCall &command : Q.GetDrawCalls()) {
-        Execute(view, command);
+    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
+        Execute(view, drawcall);
     }
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
@@ -240,10 +245,16 @@ void ForwardRenderer::Resize(int width, int height) {
     m_proj = perspectiveFov(radians(70.0f), float(width), float(height), 0.1f,
                             10000.0f);
     SetViewport(0, 0, width, height);
+    m_width = width;
+    m_height = height;
 }
 
 void ForwardRenderer::SetViewport(int x, int y, int w, int h) {
     glViewport(x, y, w, h);
+}
+
+void ForwardRenderer::SetScissor(int x, int y, int w, int h) {
+    glScissor(x, y, w, h);
 }
 
 } // namespace phi

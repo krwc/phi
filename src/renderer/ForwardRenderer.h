@@ -20,8 +20,10 @@ class Light;
 class ForwardRenderer : public Renderer {
     friend class DebugDrawer;
 
-    std::vector<phi::DirLight *> m_shadow_casters;
+    std::vector<const phi::DirLight *> m_shadow_casters;
     glm::mat4 m_proj;
+    int m_width;
+    int m_height;
     GLuint m_vao;
 
     struct State {
@@ -47,6 +49,7 @@ public:
     virtual void Execute(const phi::DrawCall &);
     virtual void Resize(int width, int height);
     virtual void SetViewport(int x, int y, int w, int h);
+    virtual void SetScissor(int x, int y, int w, int h);
 };
 
 } // namespace phi

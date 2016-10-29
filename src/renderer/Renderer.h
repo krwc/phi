@@ -40,6 +40,11 @@ public:
      * Sets current viewport. It works equivalently to @ref glViewport.
      */
     virtual void SetViewport(int x, int y, int w, int h) = 0;
+
+    /**
+     * Sets current scissor box. It works equivalently to @ref glScissor
+     */
+    virtual void SetScissor(int x, int y, int w, int h) = 0;
 };
 
 } // namespace phi
