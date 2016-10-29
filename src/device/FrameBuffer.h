@@ -22,7 +22,7 @@ struct DepthAttachment {
 class FrameBuffer {
     void Destroy();
 
-    GLuint m_bind;
+    GLuint m_id;
     int m_width;
     int m_height;
     std::vector<GLenum> m_buffers;
@@ -41,7 +41,7 @@ public:
     virtual bool IsReady() const;
 
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 };
 

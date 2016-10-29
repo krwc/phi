@@ -6,32 +6,32 @@ namespace phi {
 using namespace std;
 
 void Shader::Destroy() {
-    if (m_bind) {
-        PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_bind);
-        CheckedCall(phi::glDeleteShader, m_bind);
+    if (m_id) {
+        PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_id);
+        CheckedCall(phi::glDeleteShader, m_id);
     }
 }
 
 Shader &Shader::operator=(Shader &&other) {
     if (&other != this) {
         Destroy();
-        m_bind = other.m_bind;
+        m_id = other.m_id;
         m_type = other.m_type;
         m_source = other.m_source;
-        other.m_bind = GL_NONE;
+        other.m_id = GL_NONE;
     }
     return *this;
 }
 
-Shader::Shader(Shader &&other) : m_bind(GL_NONE) {
+Shader::Shader(Shader &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
 Shader::Shader(ShaderType type, const char *source) noexcept
-        : m_bind(CheckedCall(phi::glCreateShader, (GLenum) type)),
+        : m_id(CheckedCall(phi::glCreateShader, (GLenum) type)),
           m_type(type),
           m_source(source) {
-    PHI_LOG(TRACE, "Shader: created shader (ID=%u)", m_bind);
+    PHI_LOG(TRACE, "Shader: created shader (ID=%u)", m_id);
 }
 
 Shader::~Shader() noexcept {
@@ -40,47 +40,47 @@ Shader::~Shader() noexcept {
 
 void Shader::Compile() {
     GLint length = (GLint) strlen(m_source);
-    CheckedCall(phi::glShaderSource, m_bind, 1, (const GLchar **) (&m_source),
+    CheckedCall(phi::glShaderSource, m_id, 1, (const GLchar **) (&m_source),
                 &length);
     int status, log_length;
-    CheckedCall(phi::glCompileShader, m_bind);
-    CheckedCall(phi::glGetShaderiv, m_bind, GL_COMPILE_STATUS, &status);
-    CheckedCall(phi::glGetShaderiv, m_bind, GL_INFO_LOG_LENGTH, &log_length);
+    CheckedCall(phi::glCompileShader, m_id);
+    CheckedCall(phi::glGetShaderiv, m_id, GL_COMPILE_STATUS, &status);
+    CheckedCall(phi::glGetShaderiv, m_id, GL_INFO_LOG_LENGTH, &log_length);
     string compilation_log;
     if (status == GL_FALSE) {
         compilation_log.resize(log_length - 1, '\0');
-        CheckedCall(phi::glGetShaderInfoLog, m_bind, log_length - 1, &log_length,
+        CheckedCall(phi::glGetShaderInfoLog, m_id, log_length - 1, &log_length,
                     &compilation_log[0]);
         throw invalid_argument(compilation_log);
     }
 }
 
 void Program::Destroy() {
-    if (m_bind) {
-        PHI_LOG(TRACE, "Program: deleted (ID=%u)", m_bind);
-        CheckedCall(phi::glDeleteProgram, m_bind);
+    if (m_id) {
+        PHI_LOG(TRACE, "Program: deleted (ID=%u)", m_id);
+        CheckedCall(phi::glDeleteProgram, m_id);
     }
 }
 
 Program &Program::operator=(Program &&other) {
     if (&other != this) {
         Destroy();
-        m_bind = other.m_bind;
+        m_id = other.m_id;
         m_constants = move(other.m_constants);
         m_attributes = move(other.m_attributes);
         m_shaders = move(other.m_shaders);
-        other.m_bind = 0;
+        other.m_id = 0;
     }
     return *this;
 }
 
-Program::Program(Program &&other) : m_bind(GL_NONE) {
+Program::Program(Program &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
 Program::Program()
-        : m_bind(CheckedCall(phi::glCreateProgram)), m_constants(), m_attributes() {
-    PHI_LOG(TRACE, "Program: created (ID=%u)", m_bind);
+        : m_id(CheckedCall(phi::glCreateProgram)), m_constants(), m_attributes() {
+    PHI_LOG(TRACE, "Program: created (ID=%u)", m_id);
 }
 
 Program::~Program() {
@@ -105,31 +105,31 @@ void Program::SetConstant(GLint location, GLenum type, const void *data) {
     case GL_BOOL:
     case GL_SAMPLER_2D:
     case GL_SAMPLER_2D_ARRAY:
-        CheckedCall(phi::glProgramUniform1i, m_bind, location,
+        CheckedCall(phi::glProgramUniform1i, m_id, location,
                     *((const GLint *) data));
         break;
     case GL_FLOAT:
-        CheckedCall(phi::glProgramUniform1fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform1fv, m_id, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC2:
-        CheckedCall(phi::glProgramUniform2fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform2fv, m_id, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC3:
-        CheckedCall(phi::glProgramUniform3fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform3fv, m_id, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_VEC4:
-        CheckedCall(phi::glProgramUniform4fv, m_bind, location, 1,
+        CheckedCall(phi::glProgramUniform4fv, m_id, location, 1,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT3:
-        CheckedCall(phi::glProgramUniformMatrix3fv, m_bind, location, 1, GL_FALSE,
+        CheckedCall(phi::glProgramUniformMatrix3fv, m_id, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     case GL_FLOAT_MAT4:
-        CheckedCall(phi::glProgramUniformMatrix4fv, m_bind, location, 1, GL_FALSE,
+        CheckedCall(phi::glProgramUniformMatrix4fv, m_id, location, 1, GL_FALSE,
                     (const GLfloat *) data);
         break;
     default:
@@ -242,28 +242,28 @@ map<string, Program::ParamInfo> DiscoverProgramAttributes(GLuint bind) {
 
 void Program::Link() {
     for (const auto &shader : m_shaders) {
-        CheckedCall(phi::glAttachShader, m_bind, shader.GetId());
+        CheckedCall(phi::glAttachShader, m_id, shader.GetId());
     }
-    CheckedCall(phi::glLinkProgram, m_bind);
+    CheckedCall(phi::glLinkProgram, m_id);
     for (const auto &shader : m_shaders) {
-        CheckedCall(phi::glDetachShader, m_bind, shader.GetId());
+        CheckedCall(phi::glDetachShader, m_id, shader.GetId());
     }
 
     int status;
-    CheckedCall(phi::glGetProgramiv, m_bind, GL_LINK_STATUS, &status);
+    CheckedCall(phi::glGetProgramiv, m_id, GL_LINK_STATUS, &status);
     int length;
-    CheckedCall(phi::glGetProgramiv, m_bind, GL_INFO_LOG_LENGTH, &length);
+    CheckedCall(phi::glGetProgramiv, m_id, GL_INFO_LOG_LENGTH, &length);
     if (length > 0) {
         string log(length - 1, 0);
-        CheckedCall(phi::glGetProgramInfoLog, m_bind, length - 1, &length, &log[0]);
+        CheckedCall(phi::glGetProgramInfoLog, m_id, length - 1, &length, &log[0]);
         PHI_LOG(DEBUG, "Program link log:\n%s\n", log.c_str());
     }
     if (status == GL_FALSE) {
         throw logic_error("Cannot link program");
     }
-    m_constants = DiscoverProgramConstants(m_bind);
-    m_attributes = DiscoverProgramAttributes(m_bind);
-    PHI_LOG(TRACE, "Program: linked program (ID=%u)", m_bind);
+    m_constants = DiscoverProgramConstants(m_id);
+    m_attributes = DiscoverProgramAttributes(m_id);
+    PHI_LOG(TRACE, "Program: linked program (ID=%u)", m_id);
 }
 
 } // namespace phi

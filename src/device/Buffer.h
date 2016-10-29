@@ -19,7 +19,7 @@ class Buffer : virtual public Resource {
     void Destroy();
 
     BufferType m_type;
-    GLuint m_bind;
+    GLuint m_id;
     size_t m_size;
 
 public:
@@ -37,7 +37,7 @@ public:
     }
 
     virtual GLuint GetId() const {
-        return m_bind;
+        return m_id;
     }
 };
 

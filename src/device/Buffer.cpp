@@ -22,10 +22,10 @@ const char *BufferTypeString(BufferType type) {
 }
 
 void Buffer::Destroy() {
-    if (m_bind) {
-        CheckedCall(phi::glDeleteBuffers, 1, &m_bind);
+    if (m_id) {
+        CheckedCall(phi::glDeleteBuffers, 1, &m_id);
         PHI_LOG(TRACE, "%s buffer: deleted (ID=%u)", BufferTypeString(m_type),
-                m_bind);
+                m_id);
     }
 }
 
@@ -33,14 +33,14 @@ Buffer &Buffer::operator=(Buffer &&other) {
     if (&other != this) {
         Destroy();
         m_type = other.m_type;
-        m_bind = other.m_bind;
+        m_id = other.m_id;
         m_size = other.m_size;
-        other.m_bind = GL_NONE;
+        other.m_id = GL_NONE;
     }
     return *this;
 }
 
-Buffer::Buffer(Buffer &&other) : m_bind(GL_NONE) {
+Buffer::Buffer(Buffer &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
@@ -48,11 +48,11 @@ Buffer::Buffer(BufferType type,
                BufferHint usage,
                const void *data,
                size_t size)
-        : m_type(type), m_bind(GL_NONE), m_size(size) {
-    CheckedCall(phi::glCreateBuffers, 1, &m_bind);
-    CheckedCall(phi::glNamedBufferData, m_bind, size, data, (GLenum) usage);
+        : m_type(type), m_id(GL_NONE), m_size(size) {
+    CheckedCall(phi::glCreateBuffers, 1, &m_id);
+    CheckedCall(phi::glNamedBufferData, m_id, size, data, (GLenum) usage);
     PHI_LOG(TRACE, "%s buffer: created (ID=%u) of size %u",
-            BufferTypeString(m_type), m_bind, size);
+            BufferTypeString(m_type), m_id, size);
 }
 
 Buffer::~Buffer() {
@@ -63,7 +63,7 @@ void Buffer::UpdateData(const void *data, size_t size, size_t offset) {
     if (offset + size > m_size) {
         throw invalid_argument("Data size exceeds buffer capacity");
     }
-    CheckedCall(phi::glNamedBufferSubData, m_bind, offset, size, data);
+    CheckedCall(phi::glNamedBufferSubData, m_id, offset, size, data);
 }
 
 } // namespace phi
