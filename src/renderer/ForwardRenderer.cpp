@@ -19,10 +19,11 @@ using namespace std;
 using namespace glm;
 
 ForwardRenderer::ForwardRenderer(int width, int height)
-        : m_proj(), m_vao(GL_NONE), m_last() {
+        : m_proj(), m_width(width), m_height(height), m_vao(GL_NONE), m_last() {
     Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_SCISSOR_TEST);
     glDepthFunc(GL_LESS);
     glDepthRange(0.0f, 1.0f);
     glFrontFace(GL_CCW);
@@ -240,10 +241,16 @@ void ForwardRenderer::Resize(int width, int height) {
     m_proj = perspectiveFov(radians(70.0f), float(width), float(height), 0.1f,
                             10000.0f);
     SetViewport(0, 0, width, height);
+    m_width = width;
+    m_height = height;
 }
 
 void ForwardRenderer::SetViewport(int x, int y, int w, int h) {
     glViewport(x, y, w, h);
+}
+
+void ForwardRenderer::SetScissor(int x, int y, int w, int h) {
+    glScissor(x, y, w, h);
 }
 
 } // namespace phi
