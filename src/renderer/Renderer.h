@@ -6,6 +6,7 @@
 namespace phi {
 class Scene;
 class Camera;
+class FrameBuffer;
 struct DrawCall;
 
 class Renderer {
@@ -45,6 +46,12 @@ public:
      * Sets current scissor box. It works equivalently to @ref glScissor
      */
     virtual void SetScissor(int x, int y, int w, int h) = 0;
+
+    /**
+     * Sets current render target to a FrameBuffer. To return to a default
+     * framebuffer one one can set @p target to DefaultFrameBuffer::Instance().
+     */
+    virtual void SetFrameBuffer(phi::FrameBuffer &target) = 0;
 };
 
 } // namespace phi

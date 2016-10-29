@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "FrameBuffer.h"
 #include "Utils.h"
 
@@ -6,6 +8,11 @@
 namespace phi {
 using namespace std;
 
+phi::DefaultFrameBuffer &DefaultFrameBuffer::Instance() {
+    static phi::DefaultFrameBuffer target;
+    return target;
+}
+
 void FrameBuffer::Destroy() {
     if (m_bind) {
         CheckedCall(phi::glDeleteFramebuffers, 1, &m_bind);
@@ -13,29 +20,25 @@ void FrameBuffer::Destroy() {
     }
 }
 
-FrameBuffer &FrameBuffer::operator=(FrameBuffer &&other) {
+FrameBuffer &FrameBuffer::operator=(phi::FrameBuffer &&other) {
     if (this != &other) {
         Destroy();
         m_bind = other.m_bind;
         m_width = other.m_width;
         m_height = other.m_height;
-        m_color_attachments = move(other.m_color_attachments);
-        m_depth_attachment = move(other.m_depth_attachment);
         other.m_bind = GL_NONE;
     }
     return *this;
 }
 
-FrameBuffer::FrameBuffer(FrameBuffer &&other) : m_bind(GL_NONE) {
+FrameBuffer::FrameBuffer(phi::FrameBuffer &&other) : m_bind(GL_NONE) {
     *this = move(other);
 }
 
 FrameBuffer::FrameBuffer(int width, int height)
         : m_bind(GL_NONE),
           m_width(width),
-          m_height(height),
-          m_color_attachments(),
-          m_depth_attachment(nullptr) {
+          m_height(height) {
     CheckedCall(phi::glCreateFramebuffers, 1, &m_bind);
     PHI_LOG(TRACE, "Created FrameBuffer (ID=%u)", m_bind);
 }
@@ -44,30 +47,39 @@ FrameBuffer::~FrameBuffer() {
     Destroy();
 }
 
-void FrameBuffer::SetColorAttachment(int index, Texture2D *color_texture) {
-    assert(color_texture);
-    TextureFormat format = color_texture->GetFormat();
-    assert(format != TextureFormat::DEPTH_16
-           && format != TextureFormat::DEPTH_24
-           && format != TextureFormat::DEPTH_32);
-    CheckedCall(phi::glNamedFramebufferTexture, m_bind, GL_COLOR_ATTACHMENT0 + index,
-                color_texture->GetId(), 0);
-    m_color_attachments[index] = color_texture;
+void FrameBuffer::SetColorAttachment(const phi::ColorAttachment &attachment) {
+    assert(attachment.color);
+    phi::TextureFormat format = attachment.color->GetFormat();
+    assert(format != phi::TextureFormat::DEPTH_16
+           && format != phi::TextureFormat::DEPTH_24
+           && format != phi::TextureFormat::DEPTH_32);
+    GLenum name = GL_COLOR_ATTACHMENT0 + attachment.index;
+
+    m_buffers.push_back(name);
+    std::sort(std::begin(m_buffers), std::end(m_buffers));
+    m_buffers.erase(std::unique(std::begin(m_buffers), std::end(m_buffers)),
+                    std::end(m_buffers));
+
+    CheckedCall(phi::glNamedFramebufferTexture, m_bind,
+                GL_COLOR_ATTACHMENT0 + attachment.index,
+                attachment.color->GetId(), 0);
+    CheckedCall(phi::glNamedFramebufferDrawBuffers, m_bind,
+                (GLsizei) m_buffers.size(), m_buffers.data());
 }
 
-void FrameBuffer::SetDepthAttachment(Texture2D *depth_texture) {
-    assert(depth_texture);
-    TextureFormat format = depth_texture->GetFormat();
-    assert(format == TextureFormat::DEPTH_16
-           || format == TextureFormat::DEPTH_24
-           || format == TextureFormat::DEPTH_32);
+void FrameBuffer::SetDepthAttachment(const phi::DepthAttachment &attachment) {
+    assert(attachment.depth);
+    phi::TextureFormat format = attachment.depth->GetFormat();
+    assert(format == phi::TextureFormat::DEPTH_16
+           || format == phi::TextureFormat::DEPTH_24
+           || format == phi::TextureFormat::DEPTH_32);
     CheckedCall(phi::glNamedFramebufferTexture, m_bind, GL_DEPTH_ATTACHMENT,
-                depth_texture->GetId(), 0);
+                attachment.depth->GetId(), 0);
 }
 
 bool FrameBuffer::IsReady() const {
     return CheckedCall(phi::glCheckNamedFramebufferStatus, m_bind, GL_FRAMEBUFFER)
-           == GL_FRAMEBUFFER_COMPLETE;
+               == GL_FRAMEBUFFER_COMPLETE;
 }
 
 } // namespace phi

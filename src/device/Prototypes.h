@@ -10,6 +10,8 @@ namespace phi {
 extern PFNGLATTACHSHADERPROC glAttachShader;
 extern PFNGLBINDTEXTUREEXTPROC glBindTexture;
 extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
+extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
 extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;

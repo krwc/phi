@@ -66,6 +66,8 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
     PHI_LOAD_PROC_HELPER(glAttachShader);
     PHI_LOAD_PROC_HELPER(glBindTexture);
     PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
+    PHI_LOAD_PROC_HELPER(glBindFramebuffer);
+    PHI_LOAD_PROC_HELPER(glNamedFramebufferDrawBuffers);
     PHI_LOAD_PROC_HELPER(glCreateVertexArrays);
     PHI_LOAD_PROC_HELPER(glBindVertexArray);
     PHI_LOAD_PROC_HELPER(glEnableVertexAttribArray);
