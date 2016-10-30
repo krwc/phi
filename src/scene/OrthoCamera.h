@@ -3,8 +3,6 @@
 
 #include "scene/Camera.h"
 
-#include "math/AABB.h"
-
 namespace phi {
 
 class OrthoCamera : public Camera {
@@ -14,16 +12,14 @@ class OrthoCamera : public Camera {
 public:
     /**
      * Orthograpic projection camera.
-     *
-     * @param position  Position of the camera.
-     * @param direction Direction where it is looking.
-     * @param extents   Viewing frustum extents (ignoring rotation, as it will
-     *                  be applied automatically according to @p direction)
-     *                  as AABB.
+     * @param view          View matrix of this camera (containing rotations /
+     *                      translations)
+     * @param extents_min   Min vertex of viewing volume.
+     * @param extents_max   Max vertex of viewing volume.
      */
-    OrthoCamera(const glm::vec3 &position,
-                const glm::vec3 &direction,
-                const phi::AABB &extents);
+    OrthoCamera(const glm::mat4 &view = glm::mat4(1.0f),
+                const glm::vec3 &extents_min = {-1,-1,-1},
+                const glm::vec3 &extents_max = {1,1,1});
 
     virtual const glm::mat4 &GetViewMatrix() const {
         return m_view;
