@@ -2,7 +2,7 @@
 #include "DrawCall.h"
 #include "Renderer.h"
 
-#include "math/Box.h"
+#include "math/AABB.h"
 
 #include "device/Sampler.h"
 
@@ -86,25 +86,25 @@ DebugDrawer::DebugDrawer(const Camera &view, Renderer &renderer)
     m_quad_program.Link();
 }
 
-void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
-    auto MakeVertex = [&](Box::Vertex vertex) {
+void DebugDrawer::DrawAABB(const AABB &box, const vec3 &color) {
+    auto MakeVertex = [&](AABB::Vertex vertex) {
         return vec4(box.GetVertex(vertex), 1);
     };
     std::vector<vec4> data = {
-        MakeVertex(Box::Vertex::MinMinMin), MakeVertex(Box::Vertex::MaxMinMin),
-        MakeVertex(Box::Vertex::MaxMinMin), MakeVertex(Box::Vertex::MaxMaxMin),
-        MakeVertex(Box::Vertex::MaxMaxMin), MakeVertex(Box::Vertex::MinMaxMin),
-        MakeVertex(Box::Vertex::MinMaxMin), MakeVertex(Box::Vertex::MinMinMin),
+        MakeVertex(AABB::Vertex::MinMinMin), MakeVertex(AABB::Vertex::MaxMinMin),
+        MakeVertex(AABB::Vertex::MaxMinMin), MakeVertex(AABB::Vertex::MaxMaxMin),
+        MakeVertex(AABB::Vertex::MaxMaxMin), MakeVertex(AABB::Vertex::MinMaxMin),
+        MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMinMin),
 
-        MakeVertex(Box::Vertex::MinMinMax), MakeVertex(Box::Vertex::MaxMinMax),
-        MakeVertex(Box::Vertex::MaxMinMax), MakeVertex(Box::Vertex::MaxMaxMax),
-        MakeVertex(Box::Vertex::MaxMaxMax), MakeVertex(Box::Vertex::MinMaxMax),
-        MakeVertex(Box::Vertex::MinMaxMax), MakeVertex(Box::Vertex::MinMinMax),
+        MakeVertex(AABB::Vertex::MinMinMax), MakeVertex(AABB::Vertex::MaxMinMax),
+        MakeVertex(AABB::Vertex::MaxMinMax), MakeVertex(AABB::Vertex::MaxMaxMax),
+        MakeVertex(AABB::Vertex::MaxMaxMax), MakeVertex(AABB::Vertex::MinMaxMax),
+        MakeVertex(AABB::Vertex::MinMaxMax), MakeVertex(AABB::Vertex::MinMinMax),
 
-        MakeVertex(Box::Vertex::MinMinMin), MakeVertex(Box::Vertex::MinMinMax),
-        MakeVertex(Box::Vertex::MaxMinMin), MakeVertex(Box::Vertex::MaxMinMax),
-        MakeVertex(Box::Vertex::MaxMaxMin), MakeVertex(Box::Vertex::MaxMaxMax),
-        MakeVertex(Box::Vertex::MinMaxMin), MakeVertex(Box::Vertex::MinMaxMax),
+        MakeVertex(AABB::Vertex::MinMinMin), MakeVertex(AABB::Vertex::MinMinMax),
+        MakeVertex(AABB::Vertex::MaxMinMin), MakeVertex(AABB::Vertex::MaxMinMax),
+        MakeVertex(AABB::Vertex::MaxMaxMin), MakeVertex(AABB::Vertex::MaxMaxMax),
+        MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMaxMax),
     };
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
     glm::vec4 color4 = glm::vec4(color, 1.0f);

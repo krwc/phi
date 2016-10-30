@@ -39,7 +39,7 @@ Buffer *SimpleMesh::GetVertexBuffer() {
     return m_vbo.get();
 }
 
-Box SimpleMesh::GetBox() const {
+AABB SimpleMesh::GetAABB() const {
     return GetTransform() * m_box;
 }
 

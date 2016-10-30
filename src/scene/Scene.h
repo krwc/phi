@@ -4,7 +4,7 @@
 namespace phi {
 class DrawCallQueue;
 class Camera;
-class Box;
+class AABB;
 class Entity;
 class PointLight;
 class DirLight;
@@ -18,7 +18,7 @@ public:
     virtual void AddLight(phi::PointLight *) = 0;
     virtual void Render(phi::DrawCallQueue *) = 0;
     virtual const phi::Camera *GetCamera() const = 0;
-    virtual const phi::Box &GetBox() const = 0;
+    virtual const phi::AABB &GetAABB() const = 0;
 };
 
 } // namespace phi

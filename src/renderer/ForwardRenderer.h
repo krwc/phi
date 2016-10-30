@@ -5,7 +5,7 @@
 #include "DrawCallQueue.h"
 #include "Renderer.h"
 
-#include "math/Box.h"
+#include "math/AABB.h"
 #include "math/Math.h"
 
 #include "device/FrameBuffer.h"

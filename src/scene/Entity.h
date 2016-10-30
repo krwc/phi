@@ -1,7 +1,7 @@
 #ifndef PHI_SCENE_ENTITY_H
 #define PHI_SCENE_ENTITY_H
 
-#include "math/Box.h"
+#include "math/AABB.h"
 #include "math/Math.h"
 #include "math/Transformable.h"
 
@@ -21,7 +21,7 @@ public:
     /**
      * Returns current world-space bounding box.
      */
-    virtual phi::Box GetBox() const = 0;
+    virtual phi::AABB GetAABB() const = 0;
 };
 
 } // namespace phi
