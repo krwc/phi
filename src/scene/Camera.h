@@ -9,6 +9,7 @@ class Camera {
 public:
     virtual ~Camera() {}
     virtual const glm::mat4 &GetViewMatrix() const = 0;
+    virtual const glm::mat4 &GetProjMatrix() const = 0;
 };
 
 } // namespace phi
