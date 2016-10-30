@@ -4,7 +4,7 @@
 
 #include "Scene.h"
 
-#include "math/Box.h"
+#include "math/AABB.h"
 
 namespace phi {
 
@@ -15,7 +15,7 @@ class FlatScene : public Scene {
     std::vector<phi::Entity *> m_entities;
     std::vector<phi::PointLight *> m_point_lights;
     std::vector<phi::DirLight *> m_dir_lights;
-    mutable phi::Box m_box;
+    mutable phi::AABB m_box;
     const phi::Camera *m_camera;
 
 public:
@@ -27,7 +27,7 @@ public:
     virtual const phi::Camera *GetCamera() const {
         return m_camera;
     }
-    virtual const phi::Box &GetBox() const;
+    virtual const phi::AABB &GetAABB() const;
 };
 
 } // namespace phi

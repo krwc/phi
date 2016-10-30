@@ -2,7 +2,7 @@
 #include "DrawCall.h"
 #include "Renderer.h"
 
-#include "math/Box.h"
+#include "math/AABB.h"
 
 #include "device/Sampler.h"
 
@@ -86,31 +86,31 @@ DebugDrawer::DebugDrawer(const Camera &view, Renderer &renderer)
     m_quad_program.Link();
 }
 
-void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
-    auto MakeVertex = [&](Box::Vertex vertex) {
+void DebugDrawer::DrawAABB(const AABB &box, const vec3 &color) {
+    auto MakeVertex = [&](AABB::Vertex vertex) {
         return vec4(box.GetVertex(vertex), 1);
     };
     std::vector<vec4> data = {
-        MakeVertex(Box::Vertex::MinMinMin), MakeVertex(Box::Vertex::MaxMinMin),
-        MakeVertex(Box::Vertex::MaxMinMin), MakeVertex(Box::Vertex::MaxMaxMin),
-        MakeVertex(Box::Vertex::MaxMaxMin), MakeVertex(Box::Vertex::MinMaxMin),
-        MakeVertex(Box::Vertex::MinMaxMin), MakeVertex(Box::Vertex::MinMinMin),
+        MakeVertex(AABB::Vertex::MinMinMin), MakeVertex(AABB::Vertex::MaxMinMin),
+        MakeVertex(AABB::Vertex::MaxMinMin), MakeVertex(AABB::Vertex::MaxMaxMin),
+        MakeVertex(AABB::Vertex::MaxMaxMin), MakeVertex(AABB::Vertex::MinMaxMin),
+        MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMinMin),
 
-        MakeVertex(Box::Vertex::MinMinMax), MakeVertex(Box::Vertex::MaxMinMax),
-        MakeVertex(Box::Vertex::MaxMinMax), MakeVertex(Box::Vertex::MaxMaxMax),
-        MakeVertex(Box::Vertex::MaxMaxMax), MakeVertex(Box::Vertex::MinMaxMax),
-        MakeVertex(Box::Vertex::MinMaxMax), MakeVertex(Box::Vertex::MinMinMax),
+        MakeVertex(AABB::Vertex::MinMinMax), MakeVertex(AABB::Vertex::MaxMinMax),
+        MakeVertex(AABB::Vertex::MaxMinMax), MakeVertex(AABB::Vertex::MaxMaxMax),
+        MakeVertex(AABB::Vertex::MaxMaxMax), MakeVertex(AABB::Vertex::MinMaxMax),
+        MakeVertex(AABB::Vertex::MinMaxMax), MakeVertex(AABB::Vertex::MinMinMax),
 
-        MakeVertex(Box::Vertex::MinMinMin), MakeVertex(Box::Vertex::MinMinMax),
-        MakeVertex(Box::Vertex::MaxMinMin), MakeVertex(Box::Vertex::MaxMinMax),
-        MakeVertex(Box::Vertex::MaxMaxMin), MakeVertex(Box::Vertex::MaxMaxMax),
-        MakeVertex(Box::Vertex::MinMaxMin), MakeVertex(Box::Vertex::MinMaxMax),
+        MakeVertex(AABB::Vertex::MinMinMin), MakeVertex(AABB::Vertex::MinMinMax),
+        MakeVertex(AABB::Vertex::MaxMinMin), MakeVertex(AABB::Vertex::MaxMinMax),
+        MakeVertex(AABB::Vertex::MaxMaxMin), MakeVertex(AABB::Vertex::MaxMaxMax),
+        MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMaxMax),
     };
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
     glm::vec4 color4 = glm::vec4(color, 1.0f);
     phi::DrawCall draw{};
     draw.primitive = phi::Primitive::Lines;
-    draw.transform = m_view.GetViewMatrix();
+    draw.transform = glm::mat4(1.0f);
     draw.program = &m_debug_program;
     draw.layout = &debug_layout;
     draw.vbo = &m_vbo;
@@ -118,7 +118,7 @@ void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
     draw.texture_bindings = {};
     draw.count = data.size();
     draw.offset = 0;
-    m_renderer.Execute(draw);
+    m_renderer.Execute(draw, m_view);
 }
 
 void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int h) {
@@ -129,7 +129,7 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     m_vbo.UpdateData(quad, sizeof(quad));
     DrawCall draw{};
     draw.primitive = Primitive::Triangles;
-    draw.transform = m_view.GetViewMatrix();
+    draw.transform = glm::mat4(1.0f);
     draw.program = &m_quad_program;
     draw.layout = &quad_layout;
     draw.vbo = &m_vbo;
@@ -138,7 +138,7 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     };
     draw.count = 6;
     draw.offset = 0;
-    m_renderer.Execute(draw);
+    m_renderer.Execute(draw, m_view);
 }
 
 } // namespace phi

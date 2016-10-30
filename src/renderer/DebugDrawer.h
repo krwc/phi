@@ -10,7 +10,7 @@
 namespace phi {
 class Renderer;
 class Camera;
-class Box;
+class AABB;
 
 class DebugDrawer {
     // 4K should be enough to draw single primitive
@@ -25,7 +25,7 @@ class DebugDrawer {
 
 public:
     DebugDrawer(const phi::Camera &view, phi::Renderer &renderer);
-    void DrawBox(const phi::Box &box, const glm::vec3 &color = { 1, 1, 1 });
+    void DrawAABB(const phi::AABB &box, const glm::vec3 &color = { 1, 1, 1 });
     void DrawTexture(const phi::Texture2D *texture, int x, int y, int w, int h);
 };
 

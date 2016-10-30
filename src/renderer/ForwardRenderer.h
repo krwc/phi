@@ -5,7 +5,7 @@
 #include "DrawCallQueue.h"
 #include "Renderer.h"
 
-#include "math/Box.h"
+#include "math/AABB.h"
 #include "math/Math.h"
 
 #include "device/FrameBuffer.h"
@@ -21,7 +21,6 @@ class ForwardRenderer : public Renderer {
     friend class DebugDrawer;
 
     std::vector<const phi::DirLight *> m_shadow_casters;
-    glm::mat4 m_proj;
     int m_width;
     int m_height;
     GLuint m_vao;
@@ -33,7 +32,9 @@ class ForwardRenderer : public Renderer {
         const phi::Buffer *ibo;
     } m_last;
 
-    void BindGlobals(const glm::mat4 &view, const glm::mat4 &model);
+    void BindGlobals(const glm::mat4 &proj,
+                     const glm::mat4 &view,
+                     const glm::mat4 &model);
     void BindLights(const std::vector<phi::DirLight *> &,
                     const std::vector<phi::PointLight *> &);
     void BindProgram(phi::Program *program);
@@ -41,12 +42,14 @@ class ForwardRenderer : public Renderer {
     void BindVbo(const phi::Buffer *buffer);
     void BindIbo(const phi::Buffer *buffer);
     void Draw(phi::Primitive, int start, int count);
-    void Execute(const glm::mat4 &view, const phi::DrawCall &);
+    void Execute(const glm::mat4 &proj,
+                 const glm::mat4 &view,
+                 const phi::DrawCall &);
 
 public:
     ForwardRenderer(int width, int height);
     virtual void Render(phi::Scene &);
-    virtual void Execute(const phi::DrawCall &);
+    virtual void Execute(const phi::DrawCall &, const phi::Camera &);
     virtual void Resize(int width, int height);
     virtual void SetViewport(int x, int y, int w, int h);
     virtual void SetScissor(int x, int y, int w, int h);

@@ -31,10 +31,10 @@ void FlatScene::Render(phi::DrawCallQueue *queue) {
     }
 }
 
-const phi::Box &FlatScene::GetBox() const {
+const phi::AABB &FlatScene::GetAABB() const {
     m_box = {};
     for (const auto &entity : m_entities) {
-        m_box.Cover(entity->GetBox());
+        m_box.Cover(entity->GetAABB());
     }
     return m_box;
 }

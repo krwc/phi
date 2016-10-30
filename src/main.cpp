@@ -184,6 +184,7 @@ void Application::HandleResize() {
     glfwGetFramebufferSize(window, &w, &h);
     if (w != width || h != height) {
         renderer->Resize(w, h);
+        camera->SetAspectRatio(float(w) / float(h));
         width = w;
         height = h;
     }
@@ -269,9 +270,9 @@ int main() {
         box->SetPosition({R*sin(T*app.time), 8, R*cos(T*app.time)});
         red_bulb->SetPosition(box->GetPosition());
         app.Render();
-        app.debug->DrawBox(box->GetBox());
-        app.debug->DrawBox(torus->GetBox());
-        app.debug->DrawBox(app.scene->GetBox());
+        app.debug->DrawAABB(box->GetAABB());
+        app.debug->DrawAABB(torus->GetAABB());
+        app.debug->DrawAABB(app.scene->GetAABB());
         app.renderer->SetViewport(0, 0, 200, 200);
         app.debug->DrawTexture(&texture, 0, 0, 0, 0);
         app.renderer->SetViewport(0, 0, app.width, app.height);

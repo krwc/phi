@@ -1,10 +1,10 @@
-#ifndef PHI_MATH_BOX_H
-#define PHI_MATH_BOX_H
+#ifndef PHI_MATH_AABB_H
+#define PHI_MATH_AABB_H
 #include "Math.h"
 
 namespace phi {
 
-class Box {
+class AABB {
     glm::vec3 m_min;
     glm::vec3 m_max;
 
@@ -19,14 +19,14 @@ public:
         MaxMaxMin = 6,
         MaxMaxMax = 7
     };
-    Box(const glm::vec3 &min, const glm::vec3 &max);
-    Box();
+    AABB(const glm::vec3 &min, const glm::vec3 &max);
+    AABB();
 
-    /** Resizes this box to cover point @p point. */
+    /** Resizes this AABB to cover point @p point. */
     void Cover(const glm::vec3 &point);
 
-    /** Resizes this box to cover passed @p box. */
-    void Cover(const phi::Box &box);
+    /** Resizes this AABB to cover passed @p AABB. */
+    void Cover(const phi::AABB &aabb);
 
     glm::vec3 GetCenter() const;
 
@@ -36,10 +36,10 @@ public:
     const glm::vec3 &GetMax() const {
         return m_max;
     }
-    glm::vec3 GetVertex(Box::Vertex vertex) const;
+    glm::vec3 GetVertex(AABB::Vertex vertex) const;
 };
 
-phi::Box operator*(const glm::mat4 &transformation, const Box &box);
+phi::AABB operator*(const glm::mat4 &transformation, const phi::AABB &box);
 
 } // namespace phi
 
