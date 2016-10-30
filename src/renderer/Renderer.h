@@ -21,12 +21,14 @@ public:
 
     /**
      * This is a lower level method that might be used to perform "manual"
-     * rendering (without packing data into the scene). The idea is just to execute
-     * draw call encapsulated in @p call.
+     * rendering (without packing data into the scene). The idea is just to
+     * execute draw call encapsulated in @p call.
      *
      * @param call      Draw call to execute.
+     * @param camera    Camera that will be queried for view & proj matrices.
      */
-    virtual void Execute(const phi::DrawCall &call) = 0;
+    virtual void Execute(const phi::DrawCall &call,
+                         const phi::Camera &camera) = 0;
 
     /**
      * This method should be called whenever view changes, to be able to properly

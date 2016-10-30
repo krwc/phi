@@ -19,7 +19,7 @@ using namespace std;
 using namespace glm;
 
 ForwardRenderer::ForwardRenderer(int width, int height)
-        : m_proj(), m_width(width), m_height(height), m_vao(GL_NONE), m_last() {
+        : m_width(width), m_height(height), m_vao(GL_NONE), m_last() {
     Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
@@ -52,11 +52,12 @@ int NumAttributeComponents(GLenum type) {
 
 }
 
-void ForwardRenderer::BindGlobals(const glm::mat4 &view,
+void ForwardRenderer::BindGlobals(const glm::mat4 &proj,
+                                  const glm::mat4 &view,
                                   const glm::mat4 &model) {
     if (!!m_last.program->FindConstant("g_ProjViewModelMatrix")) {
         m_last.program->SetConstant("g_ProjViewModelMatrix",
-                                    m_proj * view * model);
+                                    proj * view * model);
     }
     if (!!m_last.program->FindConstant("g_ViewModelMatrix")) {
         m_last.program->SetConstant("g_ViewModelMatrix", view * model);
@@ -191,22 +192,23 @@ void ForwardRenderer::Draw(Primitive type, int start, int count) {
     }
 }
 
-void ForwardRenderer::Execute(const glm::mat4 &view,
+void ForwardRenderer::Execute(const glm::mat4 &proj,
+                              const glm::mat4 &view,
                               const phi::DrawCall &draw) {
     BindProgram(draw.program);
-    BindGlobals(view, draw.transform);
+    BindGlobals(proj, view, draw.transform);
     BindLights(draw.dir_lights, draw.point_lights);
     for (const auto &constant : draw.program_constants) {
         m_last.program->SetConstant(constant.name, constant.value);
     }
     uint32_t texture_unit = 0;
-    for (const auto &texture : draw.texture_bindings) {
-        assert(texture.sampler);
-        assert(texture.texture);
+    for (const phi::TextureBinding &binding : draw.texture_bindings) {
+        assert(binding.sampler);
+        assert(binding.texture);
         CheckedCall(glActiveTexture, GL_TEXTURE0 + texture_unit);
-        CheckedCall(phi::glBindSampler, texture_unit, texture.sampler->GetId());
-        CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, texture.texture->GetId());
-        m_last.program->SetConstant(texture.name, texture_unit++);
+        CheckedCall(phi::glBindSampler, texture_unit, binding.sampler->GetId());
+        CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, binding.texture->GetId());
+        m_last.program->SetConstant(binding.name, texture_unit++);
     }
     BindVbo(draw.vbo);
     BindLayout(draw.layout);
@@ -228,23 +230,23 @@ void ForwardRenderer::Render(phi::Scene &scene) {
         }
     }
     auto camera = scene.GetCamera();
+    auto proj = camera->GetProjMatrix();
     auto view = camera->GetViewMatrix();
     for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
-        Execute(view, drawcall);
+        Execute(proj, view, drawcall);
     }
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
 }
 
-void ForwardRenderer::Execute(const phi::DrawCall &command) {
-    glm::mat4 dummy(1.0f);
-    Execute(dummy, command);
+void ForwardRenderer::Execute(const phi::DrawCall &drawcall,
+                              const phi::Camera &camera) {
+    Execute(camera.GetProjMatrix(), camera.GetViewMatrix(), drawcall);
 }
 
 void ForwardRenderer::Resize(int width, int height) {
-    m_proj = perspectiveFov(radians(70.0f), float(width), float(height), 0.1f,
-                            10000.0f);
     SetViewport(0, 0, width, height);
+    SetScissor(0, 0, width, height);
     m_width = width;
     m_height = height;
 }

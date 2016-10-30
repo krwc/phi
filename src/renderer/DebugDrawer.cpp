@@ -110,7 +110,7 @@ void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
     glm::vec4 color4 = glm::vec4(color, 1.0f);
     phi::DrawCall draw{};
     draw.primitive = phi::Primitive::Lines;
-    draw.transform = m_view.GetViewMatrix();
+    draw.transform = glm::mat4(1.0f);
     draw.program = &m_debug_program;
     draw.layout = &debug_layout;
     draw.vbo = &m_vbo;
@@ -118,7 +118,7 @@ void DebugDrawer::DrawBox(const Box &box, const vec3 &color) {
     draw.texture_bindings = {};
     draw.count = data.size();
     draw.offset = 0;
-    m_renderer.Execute(draw);
+    m_renderer.Execute(draw, m_view);
 }
 
 void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int h) {
@@ -129,7 +129,7 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     m_vbo.UpdateData(quad, sizeof(quad));
     DrawCall draw{};
     draw.primitive = Primitive::Triangles;
-    draw.transform = m_view.GetViewMatrix();
+    draw.transform = glm::mat4(1.0f);
     draw.program = &m_quad_program;
     draw.layout = &quad_layout;
     draw.vbo = &m_vbo;
@@ -138,7 +138,7 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     };
     draw.count = 6;
     draw.offset = 0;
-    m_renderer.Execute(draw);
+    m_renderer.Execute(draw, m_view);
 }
 
 } // namespace phi
