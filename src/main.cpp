@@ -28,6 +28,7 @@ struct Application {
     int height;
     bool grab_mouse;
     GLFWwindow *window;
+    glm::quat rotation;
     double last_x;
     double last_y;
     double time;
@@ -63,6 +64,8 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 #define PHI_LOAD_PROC_HELPER(name) PHI_LOAD_PROC(name, glfwGetProcAddress)
+    PHI_LOAD_PROC_HELPER(glBlendFuncSeparate);
+    PHI_LOAD_PROC_HELPER(glBlendEquationSeparate);
     PHI_LOAD_PROC_HELPER(glAttachShader);
     PHI_LOAD_PROC_HELPER(glBindTexture);
     PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
@@ -122,7 +125,7 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
 
     renderer = make_unique<phi::ForwardRenderer>(width, height);
     camera = make_unique<phi::FreeLookCamera>();
-    debug = make_unique<phi::DebugDrawer>(*camera.get(), *renderer.get());
+    debug = make_unique<phi::DebugDrawer>(*renderer.get());
     scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
@@ -163,8 +166,15 @@ void Application::HandleInput() {
         double dy = last_y - my;
         last_x = mx;
         last_y = my;
-        camera->RotateX(-dy * 0.2);
-        camera->RotateY(-dx * 0.2);
+
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+            glm::quat x = glm::rotate(glm::quat(), glm::radians(float(dy) * 0.2f), { 1, 0, 0 });
+            glm::quat y = glm::rotate(glm::quat(), glm::radians(float(dx) * 0.2f), { 0, 1, 0 });
+            rotation = x * y;
+        } else {
+            camera->RotateX(-dy * 0.2);
+            camera->RotateY(-dx * 0.2);
+        }
     }
 }
 
@@ -231,6 +241,7 @@ int main() {
     auto sun = make_unique<phi::DirLight>();
     sun->SetPosition({0,3,10});
     sun->SetColor({1,1,1});
+    sun->SetShadowCasting(true);
 
     auto red_bulb = make_unique<phi::PointLight>();
     red_bulb->SetPosition({0,4,8});
@@ -268,14 +279,10 @@ int main() {
         }
         box->SetRotation({4*app.time, 3*app.time, 0});
         box->SetPosition({R*sin(T*app.time), 8, R*cos(T*app.time)});
+        auto p = sun->GetPosition();
+        sun->SetPosition(mat3_cast(app.rotation) * p);
         red_bulb->SetPosition(box->GetPosition());
         app.Render();
-        app.debug->DrawAABB(box->GetAABB());
-        app.debug->DrawAABB(torus->GetAABB());
-        app.debug->DrawAABB(app.scene->GetAABB());
-        app.renderer->SetViewport(0, 0, 200, 200);
-        app.debug->DrawTexture(&texture, 0, 0, 0, 0);
-        app.renderer->SetViewport(0, 0, app.width, app.height);
         app.Swap();
 
     }

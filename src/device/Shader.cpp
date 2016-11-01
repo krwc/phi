@@ -105,6 +105,7 @@ void Program::SetConstant(GLint location, GLenum type, const void *data) {
     case GL_BOOL:
     case GL_SAMPLER_2D:
     case GL_SAMPLER_2D_ARRAY:
+    case GL_SAMPLER_2D_SHADOW:
         CheckedCall(phi::glProgramUniform1i, m_id, location,
                     *((const GLint *) data));
         break;

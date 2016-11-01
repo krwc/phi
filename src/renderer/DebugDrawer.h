@@ -16,7 +16,6 @@ class DebugDrawer {
     // 4K should be enough to draw single primitive
     static const size_t BUFFER_SIZE = 4096;
 
-    const phi::Camera &m_view;
     phi::Renderer &m_renderer;
     phi::Buffer m_vbo;
     phi::Program m_debug_program;
@@ -24,9 +23,11 @@ class DebugDrawer {
     glm::mat4 m_dummy;
 
 public:
-    DebugDrawer(const phi::Camera &view, phi::Renderer &renderer);
-    void DrawAABB(const phi::AABB &box, const glm::vec3 &color = { 1, 1, 1 });
-    void DrawTexture(const phi::Texture2D *texture, int x, int y, int w, int h);
+    DebugDrawer(phi::Renderer &renderer);
+    void DrawAABB(const phi::Camera &m_view,
+                  const phi::AABB &box,
+                  const glm::vec3 &color = { 1, 1, 1 });
+    void DrawTexture(const phi::Texture2D &texture, int x, int y, int w, int h);
 };
 
 } // namespace phi

@@ -1,6 +1,8 @@
 #include "ForwardRenderer.h"
 #include "DataBinding.h"
+#include "DebugDrawer.h"
 #include "Material.h"
+#include "ShadowMapPass.h"
 
 #include "device/Buffer.h"
 #include "device/Layout.h"
@@ -19,12 +21,18 @@ using namespace std;
 using namespace glm;
 
 ForwardRenderer::ForwardRenderer(int width, int height)
-        : m_width(width), m_height(height), m_vao(GL_NONE), m_last() {
+        : m_width(width),
+          m_height(height),
+          m_zwrite(true),
+          m_scissor({ 0, 0, width, height }),
+          m_viewport({ 0, 0, width, height }),
+          m_vao(GL_NONE),
+          m_last() {
     Resize(width, height);
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
@@ -141,9 +149,6 @@ void ForwardRenderer::BindLayout(const phi::Layout *layout) {
     for (const auto &entry : layout->GetEntries()) {
         auto info = m_last.program->FindAttribute(entry.name);
         if (!info) {
-            PHI_LOG(WARNING, "Ignoring layout <-> shader attribute '%s' as "
-                             "shader does not specify it",
-                    entry.name.c_str());
             continue;
         }
 
@@ -235,6 +240,16 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
         Execute(proj, view, drawcall);
     }
+
+    // Yes, I know; But keep in mind this is temporary.
+    static phi::ShadowMapPass<phi::DirLight> shadowpass(1024);
+    shadowpass.SetDrawCalls(Q.GetDrawCalls());
+    shadowpass.SetObjectsAABB(scene.GetAABB());
+    for (const phi::DirLight *light: m_shadow_casters) {
+        shadowpass.SetLight(*light);
+        shadowpass.Draw(*this, *camera);
+    }
+
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
 }
@@ -245,22 +260,45 @@ void ForwardRenderer::Execute(const phi::DrawCall &drawcall,
 }
 
 void ForwardRenderer::Resize(int width, int height) {
-    SetViewport(0, 0, width, height);
-    SetScissor(0, 0, width, height);
+    SetViewport({ 0, 0, width, height });
+    SetScissor({ 0, 0, width, height });
     m_width = width;
     m_height = height;
 }
 
-void ForwardRenderer::SetViewport(int x, int y, int w, int h) {
-    glViewport(x, y, w, h);
+void ForwardRenderer::SetViewport(const phi::Rect2D &viewport) {
+    m_viewport = viewport;
+    glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
 }
 
-void ForwardRenderer::SetScissor(int x, int y, int w, int h) {
-    glScissor(x, y, w, h);
+void ForwardRenderer::SetScissor(const phi::Rect2D &scissor) {
+    m_scissor = scissor;
+    glScissor(scissor.x, scissor.y, scissor.w, scissor.h);
 }
 
 void ForwardRenderer::SetFrameBuffer(phi::FrameBuffer &target) {
     CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, target.GetId());
+}
+
+const phi::Rect2D &ForwardRenderer::GetViewport() const {
+    return m_viewport;
+}
+
+const phi::Rect2D &ForwardRenderer::GetScissor() const {
+    return m_scissor;
+}
+
+void ForwardRenderer::ClearDepth() {
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void ForwardRenderer::SetZWrite(bool enabled) {
+    m_zwrite = enabled;
+    glDepthMask(enabled ? GL_TRUE : GL_FALSE);
+}
+
+bool ForwardRenderer::GetZWrite() const {
+    return m_zwrite;
 }
 
 } // namespace phi

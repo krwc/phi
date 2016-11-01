@@ -6,6 +6,7 @@
 #include "Renderer.h"
 
 #include "math/AABB.h"
+#include "math/Rect2D.h"
 #include "math/Math.h"
 
 #include "device/FrameBuffer.h"
@@ -23,6 +24,11 @@ class ForwardRenderer : public Renderer {
     std::vector<const phi::DirLight *> m_shadow_casters;
     int m_width;
     int m_height;
+    bool m_zwrite;
+    phi::Rect2D m_scissor;
+    phi::Rect2D m_viewport;
+    glm::mat4 m_shadow_matrix;
+
     GLuint m_vao;
 
     struct State {
@@ -51,9 +57,14 @@ public:
     virtual void Render(phi::Scene &);
     virtual void Execute(const phi::DrawCall &, const phi::Camera &);
     virtual void Resize(int width, int height);
-    virtual void SetViewport(int x, int y, int w, int h);
-    virtual void SetScissor(int x, int y, int w, int h);
+    virtual void SetViewport(const phi::Rect2D &);
+    virtual void SetScissor(const phi::Rect2D &);
     virtual void SetFrameBuffer(phi::FrameBuffer &target);
+    virtual const phi::Rect2D &GetViewport() const;
+    virtual const phi::Rect2D &GetScissor() const;
+    virtual void ClearDepth();
+    virtual void SetZWrite(bool enabled);
+    virtual bool GetZWrite() const;
 };
 
 } // namespace phi
