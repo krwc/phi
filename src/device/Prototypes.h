@@ -7,6 +7,8 @@
 
 namespace phi {
 
+extern PFNGLBLENDFUNCSEPARATEPROC glBlendFuncSeparate;
+extern PFNGLBLENDEQUATIONSEPARATEPROC glBlendEquationSeparate;
 extern PFNGLATTACHSHADERPROC glAttachShader;
 extern PFNGLBINDTEXTUREEXTPROC glBindTexture;
 extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;

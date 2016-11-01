@@ -3,10 +3,12 @@
 #include "Renderer.h"
 
 #include "math/AABB.h"
+#include "math/Rect2D.h"
 
 #include "device/Sampler.h"
 
 #include "scene/Camera.h"
+#include "scene/DummyCamera.h"
 
 #include <vector>
 
@@ -68,9 +70,8 @@ const phi::Layout debug_layout{ { "in_position", 0, sizeof(vec4),
                                   Type::Float } };
 } // namespace
 
-DebugDrawer::DebugDrawer(const Camera &view, Renderer &renderer)
-        : m_view(view),
-          m_renderer(renderer),
+DebugDrawer::DebugDrawer(Renderer &renderer)
+        : m_renderer(renderer),
           m_vbo(BufferType::Vertex,
                 BufferHint::Dynamic,
                 nullptr,
@@ -86,7 +87,9 @@ DebugDrawer::DebugDrawer(const Camera &view, Renderer &renderer)
     m_quad_program.Link();
 }
 
-void DebugDrawer::DrawAABB(const AABB &box, const vec3 &color) {
+void DebugDrawer::DrawAABB(const phi::Camera &view,
+                           const phi::AABB &box,
+                           const vec3 &color) {
     auto MakeVertex = [&](AABB::Vertex vertex) {
         return vec4(box.GetVertex(vertex), 1);
     };
@@ -118,14 +121,10 @@ void DebugDrawer::DrawAABB(const AABB &box, const vec3 &color) {
     draw.texture_bindings = {};
     draw.count = data.size();
     draw.offset = 0;
-    m_renderer.Execute(draw, m_view);
+    m_renderer.Execute(draw, view);
 }
 
-void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int h) {
-    (void) x;
-    (void) y;
-    (void) w;
-    (void) h;
+void DebugDrawer::DrawTexture(const Texture2D &texture, int x, int y, int w, int h) {
     m_vbo.UpdateData(quad, sizeof(quad));
     DrawCall draw{};
     draw.primitive = Primitive::Triangles;
@@ -134,11 +133,17 @@ void DebugDrawer::DrawTexture(const Texture2D *texture, int x, int y, int w, int
     draw.layout = &quad_layout;
     draw.vbo = &m_vbo;
     draw.texture_bindings = {
-        { "img", texture, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp) }
+        { "img", &texture, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp) }
     };
     draw.count = 6;
     draw.offset = 0;
-    m_renderer.Execute(draw, m_view);
+    const phi::Rect2D viewport = m_renderer.GetViewport();
+    const phi::Rect2D scissor = m_renderer.GetScissor();
+    m_renderer.SetViewport({x, y, w, h});
+    m_renderer.SetScissor({x, y, w, h});
+    m_renderer.Execute(draw, phi::DummyCamera{});
+    m_renderer.SetViewport(viewport);
+    m_renderer.SetScissor(scissor);
 }
 
 } // namespace phi

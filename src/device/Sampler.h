@@ -7,7 +7,7 @@
 namespace phi {
 
 enum class WrapMode {
-    Clamp = GL_CLAMP_TO_EDGE,
+    Clamp = GL_CLAMP_TO_BORDER,
     Repeat = GL_REPEAT
 };
 
