@@ -117,21 +117,6 @@ void ShadowMapPass<phi::DirLight>::Draw(const phi::Camera &camera) {
     m_renderer.SetScissor(scissor);
 
     m_renderer.SetFrameBuffer(DefaultFrameBuffer::Instance());
-#if 0
-    glm::mat4 shadow_matrix = light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
-    m_renderer.SetZWrite(false);
-    for (const phi::DrawCall &drawcall : m_drawcalls) {
-        DrawCall shadow_drawcall = drawcall;
-        shadow_drawcall.program = &m_shadow_program;
-        shadow_drawcall.texture_bindings = {
-            { "DepthMap", &m_depth, Sampler::Bilinear2D(WrapMode::Clamp) }
-        };
-        shadow_drawcall.program_constants = { { "g_ShadowMatrix",
-                                                &shadow_matrix } };
-        m_renderer.Execute(shadow_drawcall, camera);
-    }
-    m_renderer.SetZWrite(true);
-#endif
 }
 
 const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {
