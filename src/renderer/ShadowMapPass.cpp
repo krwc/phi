@@ -30,48 +30,15 @@ void main() {
 }
 )";
 
-const char *shadowmap_vertex_shader = R"(
-#version 430
-layout(location=0) in vec4 in_position;
-uniform mat4 g_ShadowMatrix;
-uniform mat4 g_ModelMatrix;
-uniform mat4 g_ProjViewModelMatrix;
-
-out vec4 ShadowCoord;
-
-void main() {
-    gl_Position = g_ProjViewModelMatrix * in_position;
-    ShadowCoord = g_ShadowMatrix * g_ModelMatrix * in_position;
-}
-)";
-
-const char *shadowmap_fragment_shader = R"(
-#version 430
-uniform sampler2D DepthMap;
-out vec4 FragColor;
-in vec4 ShadowCoord;
-
-void main() {
-    const float bias = 0.0005;
-    vec3 ProjCoords = 0.5 * ShadowCoord.xyz / ShadowCoord.w + 0.5;
-    float CurrentDepth = ProjCoords.z - bias;
-    float ClosestDepth = texture(DepthMap, ProjCoords.xy).r;
-
-    if (CurrentDepth > ClosestDepth) {
-        FragColor = vec4(0,0,0,1);
-    } else {
-        discard;
-    }
-}
-)";
 }
 
-ShadowMapPass<phi::DirLight>::ShadowMapPass(uint32_t resolution)
+ShadowMapPass<phi::DirLight>::ShadowMapPass(phi::Renderer &renderer,
+                                            uint32_t resolution)
         : m_resolution(resolution),
           m_needs_update(true),
+          m_renderer(renderer),
           m_fbo(resolution, resolution),
           m_depth_program(),
-          m_shadow_program(),
           m_depth(resolution, resolution, phi::TextureFormat::DEPTH_24) {
     m_fbo.SetDepthAttachment(phi::DepthAttachment{ &m_depth });
     assert(m_fbo.IsReady());
@@ -79,10 +46,6 @@ ShadowMapPass<phi::DirLight>::ShadowMapPass(uint32_t resolution)
     m_depth_program.SetSource(phi::ShaderType::Vertex, depth_vertex_shader);
     m_depth_program.SetSource(phi::ShaderType::Fragment, depth_fragment_shader);
     m_depth_program.Link();
-
-    m_shadow_program.SetSource(phi::ShaderType::Vertex, shadowmap_vertex_shader);
-    m_shadow_program.SetSource(phi::ShaderType::Fragment, shadowmap_fragment_shader);
-    m_shadow_program.Link();
 }
 
 void ShadowMapPass<phi::DirLight>::RecomputeLightFrustum() const {
@@ -137,26 +100,26 @@ void ShadowMapPass<phi::DirLight>::SetObjectsAABB(const phi::AABB &aabb) {
     m_aabb = aabb;
 }
 
-void ShadowMapPass<phi::DirLight>::Draw(phi::Renderer &renderer,
-                                        const phi::Camera &camera) {
+void ShadowMapPass<phi::DirLight>::Draw(const phi::Camera &camera) {
     const phi::Camera &light_camera = GetLightCamera();
     const phi::Rect2D shadowmap_rect{ 0, 0, (int) m_resolution, (int) m_resolution };
-    phi::Rect2D viewport = renderer.GetViewport();
-    phi::Rect2D scissor = renderer.GetScissor();
+    phi::Rect2D viewport = m_renderer.GetViewport();
+    phi::Rect2D scissor = m_renderer.GetScissor();
 
-    renderer.SetFrameBuffer(m_fbo);
-    renderer.SetViewport(shadowmap_rect);
-    renderer.SetScissor(shadowmap_rect);
-    renderer.ClearDepth();
+    m_renderer.SetFrameBuffer(m_fbo);
+    m_renderer.SetViewport(shadowmap_rect);
+    m_renderer.SetScissor(shadowmap_rect);
+    m_renderer.ClearDepth();
     for (const phi::DrawCall &drawcall : m_drawcalls) {
-        renderer.Execute(drawcall, light_camera);
+        m_renderer.Execute(drawcall, light_camera);
     }
-    renderer.SetViewport(viewport);
-    renderer.SetScissor(scissor);
+    m_renderer.SetViewport(viewport);
+    m_renderer.SetScissor(scissor);
 
-    renderer.SetFrameBuffer(DefaultFrameBuffer::Instance());
+    m_renderer.SetFrameBuffer(DefaultFrameBuffer::Instance());
+#if 0
     glm::mat4 shadow_matrix = light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
-    renderer.SetZWrite(false);
+    m_renderer.SetZWrite(false);
     for (const phi::DrawCall &drawcall : m_drawcalls) {
         DrawCall shadow_drawcall = drawcall;
         shadow_drawcall.program = &m_shadow_program;
@@ -165,9 +128,10 @@ void ShadowMapPass<phi::DirLight>::Draw(phi::Renderer &renderer,
         };
         shadow_drawcall.program_constants = { { "g_ShadowMatrix",
                                                 &shadow_matrix } };
-        renderer.Execute(shadow_drawcall, camera);
+        m_renderer.Execute(shadow_drawcall, camera);
     }
-    renderer.SetZWrite(true);
+    m_renderer.SetZWrite(true);
+#endif
 }
 
 const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {
@@ -176,6 +140,11 @@ const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {
         RecomputeLightFrustum();
     }
     return m_light_camera;
+}
+
+glm::mat4 ShadowMapPass<phi::DirLight>::GetShadowMatrix() const {
+    const phi::Camera &light_camera = GetLightCamera();
+    return light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
 }
 
 } // namespace phi

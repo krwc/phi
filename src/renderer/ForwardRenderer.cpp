@@ -237,19 +237,30 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     auto camera = scene.GetCamera();
     auto proj = camera->GetProjMatrix();
     auto view = camera->GetViewMatrix();
-    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
-        Execute(proj, view, drawcall);
-    }
 
     // Yes, I know; But keep in mind this is temporary.
-    static phi::ShadowMapPass<phi::DirLight> shadowpass(1024);
+    const uint32_t shadowmap_res = 2048;
+    static phi::ShadowMapPass<phi::DirLight> shadowpass(*this, shadowmap_res);
     shadowpass.SetDrawCalls(Q.GetDrawCalls());
     shadowpass.SetObjectsAABB(scene.GetAABB());
     for (const phi::DirLight *light: m_shadow_casters) {
         shadowpass.SetLight(*light);
-        shadowpass.Draw(*this, *camera);
+        shadowpass.Draw(*camera);
     }
 
+    auto shadow_matrix = shadowpass.GetShadowMatrix();
+    float shadow_texel_size = 1./shadowmap_res;
+    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
+        phi::DrawCall current = drawcall;
+        current.texture_bindings.push_back(
+                { "DepthMap", &shadowpass.GetShadowMap(),
+                  Sampler::Nearest2D(WrapMode::Clamp) });
+        current.program_constants.push_back(
+                { "g_ShadowMatrix", &shadow_matrix });
+        current.program_constants.push_back(
+                { "DepthTexelSize", &shadow_texel_size });
+        Execute(proj, view, current);
+    }
     m_last = ForwardRenderer::State{};
     m_shadow_casters.clear();
 }

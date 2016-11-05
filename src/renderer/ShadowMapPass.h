@@ -22,7 +22,7 @@ class ShadowMapPassBase {
 public:
     virtual ~ShadowMapPassBase() {}
     /** Draws to a shadow map. */
-    virtual void Draw(phi::Renderer &, const phi::Camera &) = 0;
+    virtual void Draw(const phi::Camera &) = 0;
     /** Returns texture reference representing shadow map */
     virtual const phi::Texture &GetShadowMap() const = 0;
     /** Returns light camera */
@@ -43,16 +43,16 @@ class ShadowMapPass<phi::DirLight>
     mutable phi::OrthoCamera m_light_camera;
     phi::DirLight m_light;
     phi::AABB m_aabb;
+    phi::Renderer &m_renderer;
 
     phi::FrameBuffer m_fbo;
     phi::Program m_depth_program;
-    phi::Program m_shadow_program;
     phi::Texture2D m_depth;
 
     void RecomputeLightFrustum() const;
 
 public:
-    ShadowMapPass(uint32_t resolution);
+    ShadowMapPass(phi::Renderer &renderer, uint32_t resolution);
 
     /**
      * @param light Directional light for which shadow map shall be computed.
@@ -70,11 +70,13 @@ public:
      */
     void SetObjectsAABB(const phi::AABB &aabb);
 
-    virtual void Draw(phi::Renderer &, const phi::Camera &);
+    virtual void Draw(const phi::Camera &);
 
     virtual const phi::Texture2D &GetShadowMap() const {
         return m_depth;
     }
+
+    glm::mat4 GetShadowMatrix() const;
 
     virtual const phi::Camera &GetLightCamera() const;
 };
