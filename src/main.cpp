@@ -3,8 +3,7 @@
 #include <string>
 
 // This MUST be included before GLFW headers.
-#include "device/Prototypes.h"
-#include "device/Texture.h"
+#include "device/Device.h"
 
 #include <GLFW/glfw3.h>
 
@@ -32,6 +31,7 @@ struct Application {
     double last_x;
     double last_y;
     double time;
+    unique_ptr<phi::Device> device;
     unique_ptr<phi::Renderer> renderer;
     unique_ptr<phi::DebugDrawer> debug;
     unique_ptr<phi::FreeLookCamera> camera;
@@ -63,69 +63,13 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
     }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
-#define PHI_LOAD_PROC_HELPER(name) PHI_LOAD_PROC(name, glfwGetProcAddress)
-    PHI_LOAD_PROC_HELPER(glBlendFuncSeparate);
-    PHI_LOAD_PROC_HELPER(glBlendEquationSeparate);
-    PHI_LOAD_PROC_HELPER(glAttachShader);
-    PHI_LOAD_PROC_HELPER(glBindTexture);
-    PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
-    PHI_LOAD_PROC_HELPER(glBindFramebuffer);
-    PHI_LOAD_PROC_HELPER(glNamedFramebufferDrawBuffers);
-    PHI_LOAD_PROC_HELPER(glCreateVertexArrays);
-    PHI_LOAD_PROC_HELPER(glBindVertexArray);
-    PHI_LOAD_PROC_HELPER(glEnableVertexAttribArray);
-    PHI_LOAD_PROC_HELPER(glDisableVertexAttribArray);
-    PHI_LOAD_PROC_HELPER(glVertexAttribPointer);
-    PHI_LOAD_PROC_HELPER(glBindBuffer);
-    PHI_LOAD_PROC_HELPER(glDrawArrays);
-    PHI_LOAD_PROC_HELPER(glDrawElements);
-    PHI_LOAD_PROC_HELPER(glUseProgram);
-    PHI_LOAD_PROC_HELPER(glCompileShader);
-    PHI_LOAD_PROC_HELPER(glCreateBuffers);
-    PHI_LOAD_PROC_HELPER(glCreateSamplers);
-    PHI_LOAD_PROC_HELPER(glDeleteSamplers);
-    PHI_LOAD_PROC_HELPER(glBindSampler);
-    PHI_LOAD_PROC_HELPER(glSamplerParameteri);
-    PHI_LOAD_PROC_HELPER(glCreateFramebuffers);
-    PHI_LOAD_PROC_HELPER(glCreateProgram);
-    PHI_LOAD_PROC_HELPER(glCreateShader);
-    PHI_LOAD_PROC_HELPER(glDeleteBuffers);
-    PHI_LOAD_PROC_HELPER(glDeleteFramebuffers);
-    PHI_LOAD_PROC_HELPER(glDeleteProgram);
-    PHI_LOAD_PROC_HELPER(glDeleteShader);
-    PHI_LOAD_PROC_HELPER(glDeleteTextures);
-    PHI_LOAD_PROC_HELPER(glDetachShader);
-    PHI_LOAD_PROC_HELPER(glGenerateMipmap);
-    PHI_LOAD_PROC_HELPER(glCreateTextures);
-    PHI_LOAD_PROC_HELPER(glGetActiveAttrib);
-    PHI_LOAD_PROC_HELPER(glGetActiveUniform);
-    PHI_LOAD_PROC_HELPER(glGetAttribLocation);
-    PHI_LOAD_PROC_HELPER(glGetIntegerv);
-    PHI_LOAD_PROC_HELPER(glGetProgramInfoLog);
-    PHI_LOAD_PROC_HELPER(glGetProgramiv);
-    PHI_LOAD_PROC_HELPER(glGetShaderInfoLog);
-    PHI_LOAD_PROC_HELPER(glGetShaderiv);
-    PHI_LOAD_PROC_HELPER(glGetUniformLocation);
-    PHI_LOAD_PROC_HELPER(glLinkProgram);
-    PHI_LOAD_PROC_HELPER(glNamedBufferData);
-    PHI_LOAD_PROC_HELPER(glNamedBufferSubData);
-    PHI_LOAD_PROC_HELPER(glNamedFramebufferTexture);
-    PHI_LOAD_PROC_HELPER(glProgramUniform1fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform1i);
-    PHI_LOAD_PROC_HELPER(glProgramUniform2fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform3fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform4fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix3fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix4fv);
-    PHI_LOAD_PROC_HELPER(glShaderSource);
-    PHI_LOAD_PROC_HELPER(glTexImage2D);
-    PHI_LOAD_PROC_HELPER(glTexSubImage2D);
-#undef PHI_LOAD_PROC_HELPER
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 
-    renderer = make_unique<phi::ForwardRenderer>(width, height);
+    device = make_unique<phi::Device>((phi::ProcLoader *) glfwGetProcAddress,
+                                      width, height);
+    renderer = make_unique<phi::ForwardRenderer>(*device.get());
     camera = make_unique<phi::FreeLookCamera>();
-    debug = make_unique<phi::DebugDrawer>(*renderer.get());
+    debug = make_unique<phi::DebugDrawer>(*device.get());
     scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
@@ -193,7 +137,7 @@ void Application::HandleResize() {
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);
     if (w != width || h != height) {
-        renderer->Resize(w, h);
+        device->Resize(w, h);
         camera->SetAspectRatio(float(w) / float(h));
         width = w;
         height = h;
@@ -263,15 +207,6 @@ int main() {
     const float R = 20.0f;
     const float T = 0.1f;
 
-    phi::Texture2D texture(200, 200, phi::TextureFormat::RGBA_8888);
-    std::vector<uint8_t> data(4*200*200);
-    for (uint32_t i = 0; i < data.size(); i += 4) {
-        data[i + 0] = rand() % 255;
-        data[i + 1] = rand() % 255;
-        data[i + 2] = rand() % 255;
-        data[i + 3] = 255;
-    }
-    texture.Write(0, 0, 0, 200, 200, data.data());
     bool running = true;
     while (running) {
         if (glfwWindowShouldClose(app.window)) {
@@ -284,7 +219,6 @@ int main() {
         red_bulb->SetPosition(box->GetPosition());
         app.Render();
         app.Swap();
-
     }
     glfwDestroyWindow(app.window);
     return 0;

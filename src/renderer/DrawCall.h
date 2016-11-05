@@ -4,6 +4,7 @@
 
 #include "DataBinding.h"
 
+#include "device/Primitive.h"
 #include "device/Prototypes.h"
 
 #include "math/Math.h"
@@ -14,14 +15,6 @@ class Layout;
 class Buffer;
 class PointLight;
 class DirLight;
-
-enum class Primitive {
-    Triangles = GL_TRIANGLES,
-    Points = GL_POINTS,
-    Lines = GL_LINES,
-    LineStrip = GL_LINE_STRIP,
-    Invalid = GL_NONE
-};
 
 struct DrawCall {
     phi::Primitive primitive;

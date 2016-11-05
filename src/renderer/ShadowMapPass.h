@@ -22,7 +22,7 @@ class ShadowMapPassBase {
 public:
     virtual ~ShadowMapPassBase() {}
     /** Draws to a shadow map. */
-    virtual void Draw(const phi::Camera &) = 0;
+    virtual void Draw() = 0;
     /** Returns texture reference representing shadow map */
     virtual const phi::Texture &GetShadowMap() const = 0;
     /** Returns light camera */
@@ -70,7 +70,7 @@ public:
      */
     void SetObjectsAABB(const phi::AABB &aabb);
 
-    virtual void Draw(const phi::Camera &);
+    virtual void Draw();
 
     virtual const phi::Texture2D &GetShadowMap() const {
         return m_depth;

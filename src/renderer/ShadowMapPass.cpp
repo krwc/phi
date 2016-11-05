@@ -1,6 +1,7 @@
 #include "ShadowMapPass.h"
 #include "Renderer.h"
 
+#include "device/Device.h"
 #include "device/Sampler.h"
 
 #include "math/Rect2D.h"
@@ -100,23 +101,23 @@ void ShadowMapPass<phi::DirLight>::SetObjectsAABB(const phi::AABB &aabb) {
     m_aabb = aabb;
 }
 
-void ShadowMapPass<phi::DirLight>::Draw(const phi::Camera &camera) {
+void ShadowMapPass<phi::DirLight>::Draw() {
     const phi::Camera &light_camera = GetLightCamera();
     const phi::Rect2D shadowmap_rect{ 0, 0, (int) m_resolution, (int) m_resolution };
-    phi::Rect2D viewport = m_renderer.GetViewport();
-    phi::Rect2D scissor = m_renderer.GetScissor();
+    phi::Device &device = m_renderer.GetDevice();
+    phi::Rect2D viewport = device.GetViewport();
+    phi::Rect2D scissor = device.GetScissor();
 
-    m_renderer.SetFrameBuffer(m_fbo);
-    m_renderer.SetViewport(shadowmap_rect);
-    m_renderer.SetScissor(shadowmap_rect);
-    m_renderer.ClearDepth();
+    device.SetFrameBuffer(m_fbo);
+    device.SetViewport(shadowmap_rect);
+    device.SetScissor(shadowmap_rect);
+    device.ClearDepth();
     for (const phi::DrawCall &drawcall : m_drawcalls) {
         m_renderer.Execute(drawcall, light_camera);
     }
-    m_renderer.SetViewport(viewport);
-    m_renderer.SetScissor(scissor);
-
-    m_renderer.SetFrameBuffer(DefaultFrameBuffer::Instance());
+    device.SetViewport(viewport);
+    device.SetScissor(scissor);
+    device.SetFrameBuffer(DefaultFrameBuffer::Instance());
 }
 
 const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {

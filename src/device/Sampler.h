@@ -25,9 +25,9 @@ public:
         return m_id;
     }
 
-    static const phi::Sampler *Nearest2D(phi::WrapMode mode);
-    static const phi::Sampler *Bilinear2D(phi::WrapMode mode);
-    static const phi::Sampler *Trilinear2D(phi::WrapMode mode);
+    static const phi::Sampler &Nearest2D(phi::WrapMode mode);
+    static const phi::Sampler &Bilinear2D(phi::WrapMode mode);
+    static const phi::Sampler &Trilinear2D(phi::WrapMode mode);
 };
 
 } // namespace phi

@@ -70,8 +70,8 @@ const phi::Layout debug_layout{ { "in_position", 0, sizeof(vec4),
                                   Type::Float } };
 } // namespace
 
-DebugDrawer::DebugDrawer(Renderer &renderer)
-        : m_renderer(renderer),
+DebugDrawer::DebugDrawer(phi::Device &device)
+        : m_device(device),
           m_vbo(BufferType::Vertex,
                 BufferHint::Dynamic,
                 nullptr,
@@ -110,40 +110,29 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
         MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMaxMax),
     };
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
-    glm::vec4 color4 = glm::vec4(color, 1.0f);
-    phi::DrawCall draw{};
-    draw.primitive = phi::Primitive::Lines;
-    draw.transform = glm::mat4(1.0f);
-    draw.program = &m_debug_program;
-    draw.layout = &debug_layout;
-    draw.vbo = &m_vbo;
-    draw.program_constants = { { "Color", &color4 } };
-    draw.texture_bindings = {};
-    draw.count = data.size();
-    draw.offset = 0;
-    m_renderer.Execute(draw, view);
+    m_device.BindProgram(m_debug_program);
+    m_device.BindVbo(m_vbo);
+    m_device.BindLayout(debug_layout);
+    m_debug_program.SetConstant("g_ProjViewModelMatrix",
+                                view.GetProjMatrix() * view.GetViewMatrix());
+    m_debug_program.SetConstant("Color", glm::vec4(color, 1.0f));
+    m_device.Draw(phi::Primitive::Lines, 0, 6);
 }
 
 void DebugDrawer::DrawTexture(const Texture2D &texture, int x, int y, int w, int h) {
     m_vbo.UpdateData(quad, sizeof(quad));
-    DrawCall draw{};
-    draw.primitive = Primitive::Triangles;
-    draw.transform = glm::mat4(1.0f);
-    draw.program = &m_quad_program;
-    draw.layout = &quad_layout;
-    draw.vbo = &m_vbo;
-    draw.texture_bindings = {
-        { "img", &texture, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp) }
-    };
-    draw.count = 6;
-    draw.offset = 0;
-    const phi::Rect2D viewport = m_renderer.GetViewport();
-    const phi::Rect2D scissor = m_renderer.GetScissor();
-    m_renderer.SetViewport({x, y, w, h});
-    m_renderer.SetScissor({x, y, w, h});
-    m_renderer.Execute(draw, phi::DummyCamera{});
-    m_renderer.SetViewport(viewport);
-    m_renderer.SetScissor(scissor);
+    m_device.BindProgram(m_quad_program);
+    m_device.BindVbo(m_vbo);
+    m_device.BindLayout(quad_layout);
+    m_device.BindTexture(0, texture);
+    m_device.BindSampler(0, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
+    auto viewport = m_device.GetViewport();
+    auto scissor = m_device.GetScissor();
+    m_device.SetViewport({ x, y, w, h });
+    m_device.SetScissor({ x, y, w, h });
+    m_device.Draw(phi::Primitive::Triangles, 0, 6);
+    m_device.SetViewport(viewport);
+    m_device.SetScissor(scissor);
 }
 
 } // namespace phi

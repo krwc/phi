@@ -25,7 +25,7 @@ Sampler::~Sampler() {
     CheckedCall(phi::glDeleteSamplers, 1, &m_id);
 }
 
-const phi::Sampler *Sampler::Nearest2D(phi::WrapMode mode) {
+const phi::Sampler &Sampler::Nearest2D(phi::WrapMode mode) {
     static phi::Sampler clamping =
             Sampler(GL_NEAREST, GL_NEAREST, WrapMode::Clamp,
                     TextureType::Texture2D);
@@ -33,12 +33,12 @@ const phi::Sampler *Sampler::Nearest2D(phi::WrapMode mode) {
             Sampler(GL_NEAREST, GL_NEAREST, WrapMode::Repeat,
                     TextureType::Texture2D);
     if (mode == WrapMode::Clamp) {
-        return &clamping;
+        return clamping;
     }
-    return &repeating;
+    return repeating;
 }
 
-const phi::Sampler *Sampler::Bilinear2D(phi::WrapMode mode) {
+const phi::Sampler &Sampler::Bilinear2D(phi::WrapMode mode) {
     static phi::Sampler clamping =
             Sampler(GL_LINEAR, GL_LINEAR, WrapMode::Clamp,
                     TextureType::Texture2D);
@@ -46,12 +46,12 @@ const phi::Sampler *Sampler::Bilinear2D(phi::WrapMode mode) {
             Sampler(GL_LINEAR, GL_LINEAR, WrapMode::Repeat,
                     TextureType::Texture2D);
     if (mode == WrapMode::Clamp) {
-        return &clamping;
+        return clamping;
     }
-    return &repeating;
+    return repeating;
 }
 
-const phi::Sampler *Sampler::Trilinear2D(phi::WrapMode mode) {
+const phi::Sampler &Sampler::Trilinear2D(phi::WrapMode mode) {
     static phi::Sampler clamping =
             Sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, WrapMode::Clamp,
                     TextureType::Texture2D);
@@ -59,9 +59,9 @@ const phi::Sampler *Sampler::Trilinear2D(phi::WrapMode mode) {
             Sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, WrapMode::Repeat,
                     TextureType::Texture2D);
     if (mode == WrapMode::Clamp) {
-        return &clamping;
+        return clamping;
     }
-    return &repeating;
+    return repeating;
 }
 
 } // namespace phi
