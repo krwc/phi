@@ -19,6 +19,9 @@ const char *vertex_shader = R"(
     uniform mat4 g_ModelMatrix;
     uniform mat3 g_NormalMatrix;
 
+    uniform mat4 g_ShadowMatrix;
+
+    out vec4 ShadowCoord;
     out vec3 N;
     out vec3 P;
 
@@ -27,15 +30,19 @@ const char *vertex_shader = R"(
         gl_Position = Transformed;
         N = normalize(g_NormalMatrix * in_normal);
         P = (g_ModelMatrix * in_position).xyz;
+        ShadowCoord = g_ShadowMatrix * g_ModelMatrix * in_position;
     }
 )";
 
 const char *fragment_shader = R"(
     #version 430
     uniform vec3 diffuse;
+    uniform float DepthTexelSize;
+    uniform sampler2D DepthMap;
     out vec4 FragColor;
     in vec3 N;
     in vec3 P;
+    in vec4 ShadowCoord;
 
     struct DirectionalLight {
         vec3 Position;
@@ -85,11 +92,37 @@ const char *fragment_shader = R"(
         return Intensity;
     }
 
+    float PCF3x3(float CurrentDepth, vec2 ProjCoords, vec2 Offset) {
+        float Intensity = 0.0f;
+        for (float i = -1.0f + Offset.x; i <= 1.0f + Offset.x; i += 1.0f) {
+            for (float j = -1.0f + Offset.y; j <= 1.0f + Offset.y; j += 1.0f) {
+                float Closest = texture(DepthMap, ProjCoords + DepthTexelSize * vec2(i, j)).r;
+                Intensity += CurrentDepth > Closest ? 1.0 : 0.0;
+            }
+        }
+        return Intensity / 9.0f;
+    }
+
+    float ShadowIntensity(vec4 coord) {
+        const float bias = 0.005;
+        const vec3 ProjCoords = 0.5 * coord.xyz / coord.w + 0.5;
+        const float CurrentDepth = ProjCoords.z - bias;
+        float Result = 0.0f;
+        for (float i = -1.5; i <= 1.5; i += 1.0) {
+            for (float j = -1.5; j <= 1.5; j += 1.0) {
+                Result += PCF3x3(CurrentDepth, ProjCoords.xy, vec2(i, j));
+            }
+        }
+        return Result / 16.0f;
+    }
+
     void main() {
         vec3 DirLightI = ComputeDirLightIntensity(N);
         vec3 PointLightI = ComputePointLightIntensity(N, P);
+        vec3 I = (1 - ShadowIntensity(ShadowCoord)) * DirLightI + PointLightI;
+        vec3 Lighting = clamp(I * diffuse, 0, 1);
 
-        FragColor = vec4(clamp((DirLightI + PointLightI) * diffuse, 0, 1), 1.0f);
+        FragColor = vec4(Lighting, 1.0f);
     }
 )";
 
