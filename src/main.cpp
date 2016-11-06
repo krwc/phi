@@ -137,7 +137,7 @@ void Application::HandleResize() {
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);
     if (w != width || h != height) {
-        device->Resize(w, h);
+        renderer->Resize(w, h);
         camera->SetAspectRatio(float(w) / float(h));
         width = w;
         height = h;

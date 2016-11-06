@@ -54,15 +54,6 @@ public:
     void BindSampler(int texture_unit, const phi::Sampler &sampler);
 
     /**
-     * This method should be called whenever view changes, to be able to properly
-     * adjust to a new resolution.
-     *
-     * @param width     New screen width.
-     * @param height    New screen height.
-     */
-    void Resize(int width, int height);
-
-    /**
      * Sets current viewport. It works equivalently to @ref glViewport.
      */
     void SetViewport(const phi::Rect2D &viewport);
@@ -92,6 +83,11 @@ public:
      * Clears current depth buffer.
      */
     void ClearDepth();
+
+    /**
+     * Clears current color buffer.
+     */
+    void ClearColor(float r, float g, float b, float a);
 
     /**
      * Enables / disables writing to the depth buffer.

@@ -22,6 +22,9 @@ struct ProgramConstant {
     const char *name;
     /** Pointer to the value of the constant */
     const void *value;
+
+    ProgramConstant(const char *name, const void *value)
+            : name(name), value(value) {}
 };
 
 } // namespace phi

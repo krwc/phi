@@ -2,7 +2,7 @@
 #include "DataBinding.h"
 #include "DebugDrawer.h"
 #include "Material.h"
-#include "ShadowMapPass.h"
+#include "ShadowPass.h"
 
 #include "device/Buffer.h"
 #include "device/Layout.h"
@@ -99,10 +99,12 @@ void ForwardRenderer::BindLights(
 
 void ForwardRenderer::Execute(const glm::mat4 &proj,
                               const glm::mat4 &view,
-                              const phi::DrawCall &draw) {
+                              const phi::DrawCall &draw,
+                              const std::vector<phi::DirLight *> &dir_lights,
+                              const std::vector<phi::PointLight *> &point_lights) {
     m_device.BindProgram(*draw.program);
     BindGlobals(draw.program, proj, view, draw.transform);
-    BindLights(draw.program, draw.dir_lights, draw.point_lights);
+    BindLights(draw.program, dir_lights, point_lights);
     for (const auto &constant : draw.program_constants) {
         draw.program->SetConstant(constant.name, constant.value);
     }
@@ -126,11 +128,12 @@ void ForwardRenderer::Render(phi::Scene &scene) {
     glClear(GL_DEPTH_BUFFER_BIT);
     DrawCallQueue Q;
     scene.Render(&Q);
-    for (const phi::DrawCall &drawcall : Q.GetDrawCalls()) {
-        for (const phi::DirLight *light : drawcall.dir_lights) {
-            if (light->IsCastingShadows()) {
-                m_shadow_casters.push_back(light);
-            }
+    const auto &dir_lights = scene.GetDirLights();
+    const auto &point_lights = scene.GetPointLights();
+
+    for (const phi::DirLight *light : dir_lights) {
+        if (light->IsCastingShadows()) {
+            m_shadow_casters.push_back(light);
         }
     }
     auto camera = scene.GetCamera();
@@ -139,12 +142,12 @@ void ForwardRenderer::Render(phi::Scene &scene) {
 
     // Yes, I know; But keep in mind this is temporary.
     const uint32_t shadowmap_res = 2048;
-    static phi::ShadowMapPass<phi::DirLight> shadowpass(*this, shadowmap_res);
+    static phi::ShadowPass<phi::DirLight> shadowpass(*this, shadowmap_res);
     shadowpass.SetDrawCalls(Q.GetDrawCalls());
     shadowpass.SetObjectsAABB(scene.GetAABB());
     for (const phi::DirLight *light: m_shadow_casters) {
         shadowpass.SetLight(*light);
-        shadowpass.Draw();
+        shadowpass.Run();
     }
 
     auto shadow_matrix = shadowpass.GetShadowMatrix();
@@ -153,19 +156,19 @@ void ForwardRenderer::Render(phi::Scene &scene) {
         phi::DrawCall current = drawcall;
         current.texture_bindings.push_back(
                 { "DepthMap", &shadowpass.GetShadowMap(),
-                  &Sampler::Nearest2D(WrapMode::Clamp) });
+                  &Sampler::Bilinear2D(WrapMode::Clamp) });
         current.program_constants.push_back(
                 { "g_ShadowMatrix", &shadow_matrix });
         current.program_constants.push_back(
                 { "DepthTexelSize", &shadow_texel_size });
-        Execute(proj, view, current);
+        Execute(proj, view, current, dir_lights, point_lights);
     }
     m_shadow_casters.clear();
 }
 
 void ForwardRenderer::Execute(const phi::DrawCall &drawcall,
                               const phi::Camera &camera) {
-    Execute(camera.GetProjMatrix(), camera.GetViewMatrix(), drawcall);
+    Execute(camera.GetProjMatrix(), camera.GetViewMatrix(), drawcall, {}, {});
 }
 
 phi::Device &ForwardRenderer::GetDevice() {

@@ -25,8 +25,6 @@ void FlatScene::Render(phi::DrawCallQueue *queue) {
     for (auto &entity : m_entities) {
         phi::DrawCall draw{};
         entity->Render(draw);
-        draw.point_lights = m_point_lights;
-        draw.dir_lights = m_dir_lights;
         queue->Insert(draw);
     }
 }

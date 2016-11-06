@@ -13,8 +13,6 @@ namespace phi {
 class Material;
 class Layout;
 class Buffer;
-class PointLight;
-class DirLight;
 
 struct DrawCall {
     phi::Primitive primitive;
@@ -25,8 +23,6 @@ struct DrawCall {
     const phi::Buffer *ibo;
     std::vector<phi::ProgramConstant> program_constants;
     std::vector<phi::TextureBinding> texture_bindings;
-    std::vector<phi::PointLight *> point_lights;
-    std::vector<phi::DirLight *> dir_lights;
     /* Number of primitives to draw. */
     int count;
     /* Byte offset in buffer where geometry starts. */

@@ -10,7 +10,8 @@ namespace phi {
 class Renderer;
 
 enum class MaterialId {
-    Basic
+    Basic,
+    Phong
 };
 
 class Material {

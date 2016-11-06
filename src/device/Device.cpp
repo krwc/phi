@@ -111,7 +111,8 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    Resize(viewport_width, viewport_height);
+    SetViewport({ 0, 0, viewport_width, viewport_height });
+    SetScissor({ 0, 0, viewport_width, viewport_height });
     SetZWrite(true);
 }
 
@@ -195,11 +196,6 @@ void Device::BindSampler(int texture_unit, const phi::Sampler &sampler) {
     m_state.samplers[texture_unit] = &sampler;
 }
 
-void Device::Resize(int width, int height) {
-    SetViewport({ 0, 0, width, height });
-    SetScissor({ 0, 0, width, height });
-}
-
 void Device::SetViewport(const phi::Rect2D &viewport) {
     m_viewport = viewport;
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
@@ -228,6 +224,11 @@ const phi::Rect2D &Device::GetScissor() const {
 
 void Device::ClearDepth() {
     glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void Device::ClearColor(float r, float g, float b, float a) {
+    glClearColor(r, g, b, a);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Device::SetZWrite(bool enabled) {

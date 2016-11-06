@@ -14,7 +14,8 @@
 namespace phi {
 class Layout;
 class Scene;
-class Light;
+class DirLight;
+class PointLight;
 
 class ForwardRenderer : public Renderer {
     friend class DebugDrawer;
@@ -33,12 +34,15 @@ class ForwardRenderer : public Renderer {
                     const std::vector<phi::PointLight *> &);
     void Execute(const glm::mat4 &proj,
                  const glm::mat4 &view,
-                 const phi::DrawCall &);
+                 const phi::DrawCall &,
+                 const std::vector<phi::DirLight *> &,
+                 const std::vector<phi::PointLight *> &);
 
 public:
     ForwardRenderer(phi::Device &);
     virtual void Render(phi::Scene &);
     virtual void Execute(const phi::DrawCall &, const phi::Camera &);
+    virtual void Resize(int w, int h) {}
     virtual phi::Device &GetDevice();
 };
 

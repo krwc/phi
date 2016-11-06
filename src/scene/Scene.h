@@ -19,6 +19,9 @@ public:
     virtual void Render(phi::DrawCallQueue *) = 0;
     virtual const phi::Camera *GetCamera() const = 0;
     virtual const phi::AABB &GetAABB() const = 0;
+
+    virtual const std::vector<phi::DirLight *> &GetDirLights() = 0;
+    virtual const std::vector<phi::PointLight *> &GetPointLights() = 0;
 };
 
 } // namespace phi

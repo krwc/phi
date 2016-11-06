@@ -1,5 +1,5 @@
-#ifndef PHI_RENDERER_SHADOW_MAP_PASS_H
-#define PHI_RENDERER_SHADOW_MAP_PASS_H
+#ifndef PHI_RENDERER_SHADOW_PASS_H
+#define PHI_RENDERER_SHADOW_PASS_H
 #include <memory>
 #include <vector>
 
@@ -12,17 +12,16 @@
 
 #include "math/AABB.h"
 
+#include "RenderPass.h"
 #include "DrawCall.h"
 
 namespace phi {
 class Renderer;
 
 template <typename LightType>
-class ShadowMapPassBase {
+class ShadowPassBase : public RenderPass {
 public:
-    virtual ~ShadowMapPassBase() {}
-    /** Draws to a shadow map. */
-    virtual void Draw() = 0;
+    virtual ~ShadowPassBase() {}
     /** Returns texture reference representing shadow map */
     virtual const phi::Texture &GetShadowMap() const = 0;
     /** Returns light camera */
@@ -30,13 +29,13 @@ public:
 };
 
 template <typename LightType>
-class ShadowMapPass : public ShadowMapPassBase<LightType> {
-    ShadowMapPass() = delete;
+class ShadowPass : public ShadowPassBase<LightType> {
+    ShadowPass() = delete;
 };
 
 template <>
-class ShadowMapPass<phi::DirLight>
-        : public phi::ShadowMapPassBase<phi::DirLight> {
+class ShadowPass<phi::DirLight>
+        : public phi::ShadowPassBase<phi::DirLight> {
     uint32_t m_resolution;
     std::vector<phi::DrawCall> m_drawcalls;
     mutable bool m_needs_update;
@@ -52,7 +51,7 @@ class ShadowMapPass<phi::DirLight>
     void RecomputeLightFrustum() const;
 
 public:
-    ShadowMapPass(phi::Renderer &renderer, uint32_t resolution);
+    ShadowPass(phi::Renderer &renderer, uint32_t resolution);
 
     /**
      * @param light Directional light for which shadow map shall be computed.
@@ -70,7 +69,7 @@ public:
      */
     void SetObjectsAABB(const phi::AABB &aabb);
 
-    virtual void Draw();
+    virtual void Run();
 
     virtual const phi::Texture2D &GetShadowMap() const {
         return m_depth;

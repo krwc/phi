@@ -31,6 +31,15 @@ public:
                          const phi::Camera &camera) = 0;
 
     /**
+     * This method should be called whenever view changes, to be able to properly
+     * adjust to a new resolution.
+     *
+     * @param width     New screen width.
+     * @param height    New screen height.
+     */
+    virtual void Resize(int width, int height) = 0;
+
+    /**
      * @returns device the renderer is using.
      */
     virtual phi::Device &GetDevice() = 0;

@@ -1,4 +1,4 @@
-#include "ShadowMapPass.h"
+#include "ShadowPass.h"
 #include "Renderer.h"
 
 #include "device/Device.h"
@@ -33,7 +33,7 @@ void main() {
 
 }
 
-ShadowMapPass<phi::DirLight>::ShadowMapPass(phi::Renderer &renderer,
+ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
                                             uint32_t resolution)
         : m_resolution(resolution),
           m_needs_update(true),
@@ -49,7 +49,7 @@ ShadowMapPass<phi::DirLight>::ShadowMapPass(phi::Renderer &renderer,
     m_depth_program.Link();
 }
 
-void ShadowMapPass<phi::DirLight>::RecomputeLightFrustum() const {
+void ShadowPass<phi::DirLight>::RecomputeLightFrustum() const {
     glm::vec3 light_direction = -glm::normalize(m_light.GetPosition());
     glm::mat4 light_view =
             glm::lookAtRH({ 0, 0, 0 }, light_direction, { 0, 1, 0 });
@@ -68,12 +68,12 @@ void ShadowMapPass<phi::DirLight>::RecomputeLightFrustum() const {
     m_light_camera = phi::OrthoCamera(light_view, aabb_min, aabb_max);
 }
 
-void ShadowMapPass<phi::DirLight>::SetLight(const phi::DirLight &light) {
+void ShadowPass<phi::DirLight>::SetLight(const phi::DirLight &light) {
     m_needs_update = true;
     m_light = light;
 }
 
-void ShadowMapPass<phi::DirLight>::SetDrawCalls(
+void ShadowPass<phi::DirLight>::SetDrawCalls(
         const std::vector<phi::DrawCall> &drawcalls) {
     m_needs_update = true;
     m_drawcalls.clear();
@@ -88,20 +88,18 @@ void ShadowMapPass<phi::DirLight>::SetDrawCalls(
         shadow_drawcall.ibo = drawcall.ibo;
         shadow_drawcall.program_constants = {};
         shadow_drawcall.texture_bindings = {};
-        shadow_drawcall.point_lights = {};
-        shadow_drawcall.dir_lights = {};
         shadow_drawcall.count = drawcall.count;
         shadow_drawcall.offset = drawcall.offset;
         m_drawcalls.push_back(shadow_drawcall);
     }
 }
 
-void ShadowMapPass<phi::DirLight>::SetObjectsAABB(const phi::AABB &aabb) {
+void ShadowPass<phi::DirLight>::SetObjectsAABB(const phi::AABB &aabb) {
     m_needs_update = true;
     m_aabb = aabb;
 }
 
-void ShadowMapPass<phi::DirLight>::Draw() {
+void ShadowPass<phi::DirLight>::Run() {
     const phi::Camera &light_camera = GetLightCamera();
     const phi::Rect2D shadowmap_rect{ 0, 0, (int) m_resolution, (int) m_resolution };
     phi::Device &device = m_renderer.GetDevice();
@@ -120,7 +118,7 @@ void ShadowMapPass<phi::DirLight>::Draw() {
     device.SetFrameBuffer(DefaultFrameBuffer::Instance());
 }
 
-const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {
+const phi::Camera &ShadowPass<phi::DirLight>::GetLightCamera() const {
     if (m_needs_update) {
         m_needs_update = false;
         RecomputeLightFrustum();
@@ -128,7 +126,7 @@ const phi::Camera &ShadowMapPass<phi::DirLight>::GetLightCamera() const {
     return m_light_camera;
 }
 
-glm::mat4 ShadowMapPass<phi::DirLight>::GetShadowMatrix() const {
+glm::mat4 ShadowPass<phi::DirLight>::GetShadowMatrix() const {
     const phi::Camera &light_camera = GetLightCamera();
     return light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
 }

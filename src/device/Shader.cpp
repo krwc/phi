@@ -147,6 +147,7 @@ void Program::SetSource(ShaderType type, const char *source) {
                 "Shader compilation failed:\n\n>>> Compilation log:\n%s\n",
                 compile_error.what());
         m_shaders.pop_back();
+        throw logic_error("Compilation failure");
     }
 }
 
