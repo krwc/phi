@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "device/FrameBuffer.h"
-#include "device/Shader.h"
+#include "device/Program.h"
 #include "device/Texture.h"
 
 #include "scene/Light.h"

@@ -2,7 +2,7 @@
 
 #include "renderer/Renderer.h"
 
-#include "device/Shader.h"
+#include "device/Program.h"
 
 namespace phi {
 using namespace glm;
@@ -19,9 +19,8 @@ const char *vertex_shader = R"(
     uniform mat4 g_ModelMatrix;
     uniform mat3 g_NormalMatrix;
 
-    uniform mat4 g_ShadowMatrix;
 
-    out vec4 ShadowCoord;
+    //out vec5 ShadowCoord;
     out vec3 N;
     out vec3 P;
 
@@ -30,7 +29,7 @@ const char *vertex_shader = R"(
         gl_Position = Transformed;
         N = normalize(g_NormalMatrix * in_normal);
         P = (g_ModelMatrix * in_position).xyz;
-        ShadowCoord = g_ShadowMatrix * g_ModelMatrix * in_position;
+    //  ShadowCoord = g_ShadowMatrix * g_ModelMatrix * in_position;
     }
 )";
 
@@ -39,10 +38,11 @@ const char *fragment_shader = R"(
     uniform vec3 diffuse;
     uniform float DepthTexelSize;
     uniform sampler2D DepthMap;
+    uniform mat4 g_ShadowMatrix;
     out vec4 FragColor;
     in vec3 N;
     in vec3 P;
-    in vec4 ShadowCoord;
+    //in vec4 ShadowCoord;
 
     struct DirectionalLight {
         vec3 Position;
@@ -108,15 +108,16 @@ const char *fragment_shader = R"(
         const vec3 ProjCoords = 0.5 * coord.xyz / coord.w + 0.5;
         const float CurrentDepth = ProjCoords.z - bias;
         float Result = 0.0f;
-        for (float i = -1.5; i <= 1.5; i += 1.0) {
-            for (float j = -1.5; j <= 1.5; j += 1.0) {
+        for (float i = -2*1.5; i <= 2*1.5; i += 2*1.0) {
+            for (float j = -2*1.5; j <= 2*1.5; j += 2*1.0) {
                 Result += PCF3x3(CurrentDepth, ProjCoords.xy, vec2(i, j));
             }
         }
-        return Result / 16.0f;
+        return smoothstep(0.0, 1.0,(Result / 16.0f-0.5)/(1.0-0.5));
     }
 
     void main() {
+        vec4 ShadowCoord = g_ShadowMatrix * vec4(P,1);
         vec3 DirLightI = ComputeDirLightIntensity(N);
         vec3 PointLightI = ComputePointLightIntensity(N, P);
         vec3 I = (1 - ShadowIntensity(ShadowCoord)) * DirLightI + PointLightI;

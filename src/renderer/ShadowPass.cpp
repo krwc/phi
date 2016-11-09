@@ -34,7 +34,7 @@ void main() {
 }
 
 ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
-                                            uint32_t resolution)
+                                      uint32_t resolution)
         : m_resolution(resolution),
           m_needs_update(true),
           m_renderer(renderer),

@@ -156,7 +156,7 @@ void ForwardRenderer::Render(phi::Scene &scene) {
         phi::DrawCall current = drawcall;
         current.texture_bindings.push_back(
                 { "DepthMap", &shadowpass.GetShadowMap(),
-                  &Sampler::Bilinear2D(WrapMode::Clamp) });
+                  &Sampler::Nearest2D(WrapMode::Clamp) });
         current.program_constants.push_back(
                 { "g_ShadowMatrix", &shadow_matrix });
         current.program_constants.push_back(

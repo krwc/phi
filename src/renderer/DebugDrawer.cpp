@@ -10,6 +10,8 @@
 #include "scene/Camera.h"
 #include "scene/DummyCamera.h"
 
+#include "io/File.h"
+
 #include <vector>
 
 namespace phi {
@@ -17,57 +19,11 @@ using namespace glm;
 
 namespace {
 
-const char *quad_vertex_shader = R"(
-    #version 430
-    layout(location=0) in vec2 in_position;
-    out vec2 UV;
+const phi::Layout quad_layout{{  "in_Position", 0u, sizeof(glm::vec2), Type::Float }};
+const phi::Layout debug_layout{{ "in_Position", 0u, sizeof(glm::vec4), Type::Float }};
+const glm::vec2 quad[] = { { -1, -1 }, { 1, -1 }, { -1, 1 },
+                           { -1, 1 },  { 1, -1 }, { 1, 1 } };
 
-    void main() {
-        UV = (in_position + 1.0f) * 0.5f;
-        gl_Position = vec4(in_position, 0, 1);
-    }
-)";
-
-const char *quad_fragment_shader = R"(
-    #version 430
-    uniform sampler2D img;
-    out vec4 FragColor;
-    in vec2 UV;
-
-    void main() {
-        FragColor = texture(img, UV);
-    }
-)";
-
-const phi::Layout quad_layout{ { "in_position", 0, sizeof(vec2),
-                                 Type::Float } };
-
-glm::vec2 quad[] = { { -1, -1 }, { 1, -1 }, { -1, 1 },
-                     { -1, 1 },  { 1, -1 }, { 1, 1 } };
-
-
-const char *debug_vertex_shader = R"(
-    #version 430
-    layout(location=0) in vec4 in_position;
-    uniform mat4 g_ProjViewModelMatrix;
-
-    void main() {
-        gl_Position = g_ProjViewModelMatrix * in_position;
-    }
-)";
-
-static const char *debug_fragment_shader = R"(
-    #version 430
-    uniform vec4 Color;
-    out vec4 FragColor;
-
-    void main() {
-        FragColor = Color;
-    }
-)";
-
-const phi::Layout debug_layout{ { "in_position", 0, sizeof(vec4),
-                                  Type::Float } };
 } // namespace
 
 DebugDrawer::DebugDrawer(phi::Device &device)
@@ -78,12 +34,20 @@ DebugDrawer::DebugDrawer(phi::Device &device)
                 DebugDrawer::BUFFER_SIZE),
           m_debug_program(),
           m_quad_program() {
-    m_debug_program.SetSource(ShaderType::Vertex, debug_vertex_shader);
-    m_debug_program.SetSource(ShaderType::Fragment, debug_fragment_shader);
+    m_debug_program.SetSource(
+            ShaderType::Vertex,
+            phi::io::FileContents("assets/shaders/Debug.vs").c_str());
+    m_debug_program.SetSource(
+            ShaderType::Fragment,
+            phi::io::FileContents("assets/shaders/Debug.fs").c_str());
     m_debug_program.Link();
 
-    m_quad_program.SetSource(ShaderType::Vertex, quad_vertex_shader);
-    m_quad_program.SetSource(ShaderType::Fragment, quad_fragment_shader);
+    m_quad_program.SetSource(
+            ShaderType::Vertex,
+            phi::io::FileContents("assets/shaders/Quad.vs").c_str());
+    m_quad_program.SetSource(
+            ShaderType::Fragment,
+            phi::io::FileContents("assets/shaders/QuadTexture.fs").c_str());
     m_quad_program.Link();
 }
 
@@ -113,7 +77,7 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
     m_device.BindProgram(m_debug_program);
     m_device.BindVbo(m_vbo);
     m_device.BindLayout(debug_layout);
-    m_debug_program.SetConstant("g_ProjViewModelMatrix",
+    m_debug_program.SetConstant("ProjViewModelMatrix",
                                 view.GetProjMatrix() * view.GetViewMatrix());
     m_debug_program.SetConstant("Color", glm::vec4(color, 1.0f));
     m_device.Draw(phi::Primitive::Lines, 0, 6);

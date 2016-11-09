@@ -5,7 +5,7 @@
 #include "device/Buffer.h"
 #include "device/Device.h"
 #include "device/Layout.h"
-#include "device/Shader.h"
+#include "device/Program.h"
 #include "device/Texture.h"
 
 namespace phi {
