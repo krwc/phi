@@ -92,12 +92,17 @@ public:
     /**
      * Enables / disables writing to the depth buffer.
      */
-    void SetZWrite(bool enabled);
+    void SetDepthWrite(bool enabled);
+
+    /**
+     * Enables / disables depth testing.
+     */
+    void SetDepthTest(bool enabled);
 
     /**
      * Gets current state of depth writing.
      */
-    bool GetZWrite() const;
+    bool GetDepthWrite() const;
 };
 
 } // namespace phi

@@ -40,7 +40,7 @@ void DeferredRenderer::BindGlobals(phi::Program &program,
     }
 }
 
-#define PERF_STATS 0
+#undef PERF_STATS
 
 void DeferredRenderer::Render(phi::Scene &scene) {
 #ifdef PERF_STATS
@@ -82,11 +82,11 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         config.dir_lights = &scene.GetDirLights();
         config.camera = camera;
         m_light_pass.Setup(config);
-        m_device.SetZWrite(false);
-        glDisable(GL_DEPTH_TEST);
+        m_device.SetDepthWrite(false);
+        m_device.SetDepthTest(false);
         m_light_pass.Run();
-        glEnable(GL_DEPTH_TEST);
-        m_device.SetZWrite(true);
+        m_device.SetDepthTest(true);
+        m_device.SetDepthWrite(true);
     }
     m_shadow_casters = {};
 

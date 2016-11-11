@@ -105,7 +105,7 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
     LoadProcedures(loader);
 
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
-    glEnable(GL_DEPTH_TEST);
+    SetDepthTest(true);
     glEnable(GL_SCISSOR_TEST);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
@@ -114,7 +114,7 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
     glCullFace(GL_BACK);
     SetViewport({ 0, 0, viewport_width, viewport_height });
     SetScissor({ 0, 0, viewport_width, viewport_height });
-    SetZWrite(true);
+    SetDepthWrite(true);
 }
 
 void Device::Draw(phi::Primitive type, int start, int count) {
@@ -232,12 +232,20 @@ void Device::ClearColor(float r, float g, float b, float a) {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Device::SetZWrite(bool enabled) {
+void Device::SetDepthWrite(bool enabled) {
     m_state.zwrite = enabled;
     glDepthMask(enabled ? GL_TRUE : GL_FALSE);
 }
 
-bool Device::GetZWrite() const {
+void Device::SetDepthTest(bool enabled) {
+    if (enabled) {
+        glEnable(GL_DEPTH_TEST);
+    } else {
+        glDisable(GL_DEPTH_TEST);
+    }
+}
+
+bool Device::GetDepthWrite() const {
     return m_state.zwrite;
 }
 
