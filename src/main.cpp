@@ -62,7 +62,6 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
         throw runtime_error("Cannot create GLFW window");
     }
     glfwMakeContextCurrent(window);
-//    glfwSwapInterval(1);
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 
     device = make_unique<phi::Device>((phi::ProcLoader *) glfwGetProcAddress,
