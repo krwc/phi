@@ -59,6 +59,8 @@ GLenum TextureInternalFormat(TextureFormat format) {
     case TextureFormat::RGB_888:
         return GL_RGB;
     case TextureFormat::RGBA_8888:
+    case TextureFormat::RGBA_16F:
+    case TextureFormat::RGBA_32F:
         return GL_RGBA;
     case TextureFormat::DEPTH_16:
     case TextureFormat::DEPTH_24:
@@ -79,6 +81,8 @@ GLenum TexturePixelType(TextureFormat format) {
     case TextureFormat::R_32F:
     case TextureFormat::RG_16F:
     case TextureFormat::RG_32F:
+    case TextureFormat::RGBA_16F:
+    case TextureFormat::RGBA_32F:
         return GL_FLOAT;
     case TextureFormat::DEPTH_16:
     case TextureFormat::DEPTH_24:
@@ -105,7 +109,10 @@ size_t TexturePixelSize(TextureFormat format) {
     case TextureFormat::DEPTH_32:
         return 4;
     case TextureFormat::RG_32F:
+    case TextureFormat::RGBA_16F:
         return 8;
+    case TextureFormat::RGBA_32F:
+        return 16;
     default:
         throw runtime_error("Invalid format");
     }

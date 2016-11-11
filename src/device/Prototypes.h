@@ -64,12 +64,6 @@ extern PFNGLSHADERSOURCEPROC glShaderSource;
 extern PFNGLTEXIMAGE2DPROC glTexImage2D;
 extern PFNGLTEXSUBIMAGE2DEXTPROC glTexSubImage2D;
 
-#define PHI_QUOTE(word) #word
-#define PHI_LOAD_PROC(name, loader) do { \
-    phi::name = (decltype(phi::name)) (loader(PHI_QUOTE(name))); \
-    assert(phi::name != nullptr); \
-} while (0)
-
 }
 
 #endif

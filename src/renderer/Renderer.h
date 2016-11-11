@@ -6,8 +6,7 @@
 namespace phi {
 class Scene;
 class Camera;
-class FrameBuffer;
-struct Rect2D;
+class Device;
 struct DrawCall;
 
 class Renderer {
@@ -41,45 +40,9 @@ public:
     virtual void Resize(int width, int height) = 0;
 
     /**
-     * Sets current viewport. It works equivalently to @ref glViewport.
+     * @returns device the renderer is using.
      */
-    virtual void SetViewport(const phi::Rect2D &viewport) = 0;
-
-    /**
-     * Sets current scissor box. It works equivalently to @ref glScissor
-     */
-    virtual void SetScissor(const phi::Rect2D &scissor) = 0;
-
-    /**
-     * Sets current render target to a FrameBuffer. To return to a default
-     * framebuffer one one can set @p target to DefaultFrameBuffer::Instance().
-     */
-    virtual void SetFrameBuffer(phi::FrameBuffer &target) = 0;
-
-    /**
-     * @returns Current viewport
-     */
-    virtual const phi::Rect2D &GetViewport() const = 0;
-
-    /**
-     * @returns Current scissor area.
-     */
-    virtual const phi::Rect2D &GetScissor() const = 0;
-
-    /**
-     * Clears current depth buffer.
-     */
-    virtual void ClearDepth() = 0;
-
-    /**
-     * Enables / disables writing to the depth buffer.
-     */
-    virtual void SetZWrite(bool enabled) = 0;
-
-    /**
-     * Gets current state of depth writing.
-     */
-    virtual bool GetZWrite() const = 0;
+    virtual phi::Device &GetDevice() = 0;
 };
 
 } // namespace phi

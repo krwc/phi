@@ -1,26 +1,26 @@
-#ifndef PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
-#define PHI_RENDERER_MATERIALS_BASIC_MATERIAL_H
+#ifndef PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
+#define PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
 #include <memory>
+#include <string>
 
 #include "math/Math.h"
 
-#include "renderer/DataBinding.h"
+#include "device/Program.h"
+
 #include "renderer/Material.h"
 
 namespace phi {
-class Renderer;
 
-class BasicMaterial : public phi::Material {
-    glm::vec4 m_specular;
+class PhongMaterial final : public phi::Material {
     glm::vec4 m_diffuse;
+    glm::vec4 m_specular;
     std::shared_ptr<Program> m_program;
 
 public:
-    BasicMaterial();
+    PhongMaterial();
 
-    void SetSpecular(const glm::vec4 &specular);
     void SetDiffuse(const glm::vec4 &diffuse);
-
+    void SetSpecular(const glm::vec4 &specular);
     virtual void FillTextureBindings(std::vector<phi::TextureBinding> &) const;
     virtual void FillProgramConstants(std::vector<phi::ProgramConstant> &) const;
 
@@ -29,11 +29,11 @@ public:
     }
 
     virtual phi::MaterialId GetId() const {
-        return phi::MaterialId::Basic;
+        return phi::MaterialId::Phong;
     }
 
     virtual std::string GetName() const {
-        return "mat_basic";
+        return "mat_phong";
     }
 };
 

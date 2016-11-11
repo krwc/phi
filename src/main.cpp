@@ -3,8 +3,7 @@
 #include <string>
 
 // This MUST be included before GLFW headers.
-#include "device/Prototypes.h"
-#include "device/Texture.h"
+#include "device/Device.h"
 
 #include <GLFW/glfw3.h>
 
@@ -15,9 +14,9 @@
 #include "scene/FreeLookCamera.h"
 #include "scene/Light.h"
 
-#include "renderer/ForwardRenderer.h"
+#include "renderer/DeferredRenderer.h"
 #include "renderer/DebugDrawer.h"
-#include "renderer/materials/BasicMaterial.h"
+#include "renderer/materials/PhongMaterial.h"
 
 using namespace std;
 using namespace glm;
@@ -32,6 +31,7 @@ struct Application {
     double last_x;
     double last_y;
     double time;
+    unique_ptr<phi::Device> device;
     unique_ptr<phi::Renderer> renderer;
     unique_ptr<phi::DebugDrawer> debug;
     unique_ptr<phi::FreeLookCamera> camera;
@@ -62,70 +62,13 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
         throw runtime_error("Cannot create GLFW window");
     }
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-#define PHI_LOAD_PROC_HELPER(name) PHI_LOAD_PROC(name, glfwGetProcAddress)
-    PHI_LOAD_PROC_HELPER(glBlendFuncSeparate);
-    PHI_LOAD_PROC_HELPER(glBlendEquationSeparate);
-    PHI_LOAD_PROC_HELPER(glAttachShader);
-    PHI_LOAD_PROC_HELPER(glBindTexture);
-    PHI_LOAD_PROC_HELPER(glCheckNamedFramebufferStatus);
-    PHI_LOAD_PROC_HELPER(glBindFramebuffer);
-    PHI_LOAD_PROC_HELPER(glNamedFramebufferDrawBuffers);
-    PHI_LOAD_PROC_HELPER(glCreateVertexArrays);
-    PHI_LOAD_PROC_HELPER(glBindVertexArray);
-    PHI_LOAD_PROC_HELPER(glEnableVertexAttribArray);
-    PHI_LOAD_PROC_HELPER(glDisableVertexAttribArray);
-    PHI_LOAD_PROC_HELPER(glVertexAttribPointer);
-    PHI_LOAD_PROC_HELPER(glBindBuffer);
-    PHI_LOAD_PROC_HELPER(glDrawArrays);
-    PHI_LOAD_PROC_HELPER(glDrawElements);
-    PHI_LOAD_PROC_HELPER(glUseProgram);
-    PHI_LOAD_PROC_HELPER(glCompileShader);
-    PHI_LOAD_PROC_HELPER(glCreateBuffers);
-    PHI_LOAD_PROC_HELPER(glCreateSamplers);
-    PHI_LOAD_PROC_HELPER(glDeleteSamplers);
-    PHI_LOAD_PROC_HELPER(glBindSampler);
-    PHI_LOAD_PROC_HELPER(glSamplerParameteri);
-    PHI_LOAD_PROC_HELPER(glCreateFramebuffers);
-    PHI_LOAD_PROC_HELPER(glCreateProgram);
-    PHI_LOAD_PROC_HELPER(glCreateShader);
-    PHI_LOAD_PROC_HELPER(glDeleteBuffers);
-    PHI_LOAD_PROC_HELPER(glDeleteFramebuffers);
-    PHI_LOAD_PROC_HELPER(glDeleteProgram);
-    PHI_LOAD_PROC_HELPER(glDeleteShader);
-    PHI_LOAD_PROC_HELPER(glDeleteTextures);
-    PHI_LOAD_PROC_HELPER(glDetachShader);
-    PHI_LOAD_PROC_HELPER(glGenerateMipmap);
-    PHI_LOAD_PROC_HELPER(glCreateTextures);
-    PHI_LOAD_PROC_HELPER(glGetActiveAttrib);
-    PHI_LOAD_PROC_HELPER(glGetActiveUniform);
-    PHI_LOAD_PROC_HELPER(glGetAttribLocation);
-    PHI_LOAD_PROC_HELPER(glGetIntegerv);
-    PHI_LOAD_PROC_HELPER(glGetProgramInfoLog);
-    PHI_LOAD_PROC_HELPER(glGetProgramiv);
-    PHI_LOAD_PROC_HELPER(glGetShaderInfoLog);
-    PHI_LOAD_PROC_HELPER(glGetShaderiv);
-    PHI_LOAD_PROC_HELPER(glGetUniformLocation);
-    PHI_LOAD_PROC_HELPER(glLinkProgram);
-    PHI_LOAD_PROC_HELPER(glNamedBufferData);
-    PHI_LOAD_PROC_HELPER(glNamedBufferSubData);
-    PHI_LOAD_PROC_HELPER(glNamedFramebufferTexture);
-    PHI_LOAD_PROC_HELPER(glProgramUniform1fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform1i);
-    PHI_LOAD_PROC_HELPER(glProgramUniform2fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform3fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniform4fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix3fv);
-    PHI_LOAD_PROC_HELPER(glProgramUniformMatrix4fv);
-    PHI_LOAD_PROC_HELPER(glShaderSource);
-    PHI_LOAD_PROC_HELPER(glTexImage2D);
-    PHI_LOAD_PROC_HELPER(glTexSubImage2D);
-#undef PHI_LOAD_PROC_HELPER
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 
-    renderer = make_unique<phi::ForwardRenderer>(width, height);
+    device = make_unique<phi::Device>((phi::ProcLoader *) glfwGetProcAddress,
+                                      width, height);
+    renderer = make_unique<phi::DeferredRenderer>(*device.get(), w, h);
     camera = make_unique<phi::FreeLookCamera>();
-    debug = make_unique<phi::DebugDrawer>(*renderer.get());
+    debug = make_unique<phi::DebugDrawer>(*device.get());
     scene = make_unique<phi::FlatScene>();
     scene->SetCamera(camera.get());
 }
@@ -218,13 +161,13 @@ int main() {
 
     torus->SetScale({4, 4, 4});
 
-    auto red_material = make_unique<phi::BasicMaterial>();
+    auto red_material = make_unique<phi::PhongMaterial>();
     red_material->SetDiffuse({1, 0, 0, 1});
-    auto pink_material = make_unique<phi::BasicMaterial>();
+    auto pink_material = make_unique<phi::PhongMaterial>();
     pink_material->SetDiffuse({0.6, 0.2, 0.4, 1});
-    auto blue_material = make_unique<phi::BasicMaterial>();
+    auto blue_material = make_unique<phi::PhongMaterial>();
     blue_material->SetDiffuse({0.2, 0.2, 0.3, 1});
-    auto violet_material = make_unique<phi::BasicMaterial>();
+    auto violet_material = make_unique<phi::PhongMaterial>();
     violet_material->SetDiffuse({0.4, 0., 0.6, 1});
 
     box->SetMaterial(red_material.get());
@@ -236,10 +179,11 @@ int main() {
     app.scene->AddEntity(plane_v.get());
     app.scene->AddEntity(box.get());
     app.scene->AddEntity(torus.get());
-    app.camera->Move({0,16,60});
+    app.camera->Move({0,16,20});
+    app.camera->RotateX(40);
 
     auto sun = make_unique<phi::DirLight>();
-    sun->SetPosition({0,3,10});
+    sun->SetPosition({10,15,-10});
     sun->SetColor({1,1,1});
     sun->SetShadowCasting(true);
 
@@ -263,15 +207,6 @@ int main() {
     const float R = 20.0f;
     const float T = 0.1f;
 
-    phi::Texture2D texture(200, 200, phi::TextureFormat::RGBA_8888);
-    std::vector<uint8_t> data(4*200*200);
-    for (uint32_t i = 0; i < data.size(); i += 4) {
-        data[i + 0] = rand() % 255;
-        data[i + 1] = rand() % 255;
-        data[i + 2] = rand() % 255;
-        data[i + 3] = 255;
-    }
-    texture.Write(0, 0, 0, 200, 200, data.data());
     bool running = true;
     while (running) {
         if (glfwWindowShouldClose(app.window)) {
@@ -284,7 +219,6 @@ int main() {
         red_bulb->SetPosition(box->GetPosition());
         app.Render();
         app.Swap();
-
     }
     glfwDestroyWindow(app.window);
     return 0;

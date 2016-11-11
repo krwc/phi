@@ -27,6 +27,13 @@ public:
     virtual const phi::Camera *GetCamera() const {
         return m_camera;
     }
+    virtual const std::vector<phi::DirLight *> &GetDirLights() {
+        return m_dir_lights;
+    }
+    virtual const std::vector<phi::PointLight *> &GetPointLights() {
+        return m_point_lights;
+    }
+
     virtual const phi::AABB &GetAABB() const;
 };
 

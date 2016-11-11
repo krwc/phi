@@ -4,6 +4,7 @@
 
 #include "DataBinding.h"
 
+#include "device/Primitive.h"
 #include "device/Prototypes.h"
 
 #include "math/Math.h"
@@ -12,16 +13,6 @@ namespace phi {
 class Material;
 class Layout;
 class Buffer;
-class PointLight;
-class DirLight;
-
-enum class Primitive {
-    Triangles = GL_TRIANGLES,
-    Points = GL_POINTS,
-    Lines = GL_LINES,
-    LineStrip = GL_LINE_STRIP,
-    Invalid = GL_NONE
-};
 
 struct DrawCall {
     phi::Primitive primitive;
@@ -32,8 +23,6 @@ struct DrawCall {
     const phi::Buffer *ibo;
     std::vector<phi::ProgramConstant> program_constants;
     std::vector<phi::TextureBinding> texture_bindings;
-    std::vector<phi::PointLight *> point_lights;
-    std::vector<phi::DirLight *> dir_lights;
     /* Number of primitives to draw. */
     int count;
     /* Byte offset in buffer where geometry starts. */
