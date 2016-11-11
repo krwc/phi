@@ -16,4 +16,3 @@ enum class Primitive {
 } // namespace phi
 
 #endif
-
