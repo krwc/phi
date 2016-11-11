@@ -83,10 +83,10 @@ void LightPass::Run() {
                                 phi::BufferHint::Static, quad, sizeof(quad));
 
     m_device.BindProgram(m_program);
-    m_device.BindTexture(0, *m_config->tex_position);
-    m_device.BindTexture(1, *m_config->tex_normal);
-    m_device.BindTexture(2, *m_config->tex_diffuse);
-    m_device.BindTexture(3, *m_config->tex_shadow);
+    m_device.BindTexture(0, *m_config->texture_position);
+    m_device.BindTexture(1, *m_config->texture_normal);
+    m_device.BindTexture(2, *m_config->texture_diffuse);
+    m_device.BindTexture(3, *m_config->texture_shadow);
 
     m_device.BindSampler(0, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
     m_device.BindSampler(1, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
