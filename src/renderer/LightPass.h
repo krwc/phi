@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "math/Math.h"
-#include "device/Shader.h"
+#include "device/Program.h"
 
 #include "RenderPass.h"
 
@@ -11,24 +11,32 @@ namespace phi {
 class Texture2D;
 class DirLight;
 class PointLight;
+class Camera;
+class Device;
 
 class LightPass : public RenderPass {
-    phi::Program m_program;
-
 public:
     struct Config {
         glm::mat4 shadow_matrix;
-        const phi::Texture2D *shadow_map;
-        const phi::Texture2D *depth_map;
-        const phi::Texture2D *diffuse_map;
-        const phi::Texture2D *specular_map;
+        const phi::Texture2D *texture_shadow;
+        const phi::Texture2D *texture_position;
+        const phi::Texture2D *texture_normal;
+        const phi::Texture2D *texture_diffuse;
         const std::vector<phi::DirLight *> *dir_lights;
         const std::vector<phi::PointLight *> *point_lights;
+        const phi::Camera *camera;
     };
 
-    LightPass() {}
-    void Setup(const phi::LightPass::Config &config) {}
-    void Run() {}
+    LightPass(phi::Device &device);
+    void Setup(const phi::LightPass::Config &config);
+    void Run();
+
+private:
+    phi::Device &m_device;
+    phi::Program m_program;
+    const LightPass::Config *m_config;
+
+    void SetupLights();
 };
 
 } // namespace phi

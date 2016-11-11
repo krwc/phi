@@ -14,9 +14,9 @@
 #include "scene/FreeLookCamera.h"
 #include "scene/Light.h"
 
-#include "renderer/ForwardRenderer.h"
+#include "renderer/DeferredRenderer.h"
 #include "renderer/DebugDrawer.h"
-#include "renderer/materials/BasicMaterial.h"
+#include "renderer/materials/PhongMaterial.h"
 
 using namespace std;
 using namespace glm;
@@ -62,12 +62,12 @@ Application::Application(int w, int h, const string &title = "Phi Renderer")
         throw runtime_error("Cannot create GLFW window");
     }
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+//    glfwSwapInterval(1);
     PHI_LOG(TRACE, "Initialized window (`%s`)", title.c_str());
 
     device = make_unique<phi::Device>((phi::ProcLoader *) glfwGetProcAddress,
                                       width, height);
-    renderer = make_unique<phi::ForwardRenderer>(*device.get());
+    renderer = make_unique<phi::DeferredRenderer>(*device.get(), w, h);
     camera = make_unique<phi::FreeLookCamera>();
     debug = make_unique<phi::DebugDrawer>(*device.get());
     scene = make_unique<phi::FlatScene>();
@@ -162,13 +162,13 @@ int main() {
 
     torus->SetScale({4, 4, 4});
 
-    auto red_material = make_unique<phi::BasicMaterial>();
+    auto red_material = make_unique<phi::PhongMaterial>();
     red_material->SetDiffuse({1, 0, 0, 1});
-    auto pink_material = make_unique<phi::BasicMaterial>();
+    auto pink_material = make_unique<phi::PhongMaterial>();
     pink_material->SetDiffuse({0.6, 0.2, 0.4, 1});
-    auto blue_material = make_unique<phi::BasicMaterial>();
+    auto blue_material = make_unique<phi::PhongMaterial>();
     blue_material->SetDiffuse({0.2, 0.2, 0.3, 1});
-    auto violet_material = make_unique<phi::BasicMaterial>();
+    auto violet_material = make_unique<phi::PhongMaterial>();
     violet_material->SetDiffuse({0.4, 0., 0.6, 1});
 
     box->SetMaterial(red_material.get());
@@ -180,10 +180,11 @@ int main() {
     app.scene->AddEntity(plane_v.get());
     app.scene->AddEntity(box.get());
     app.scene->AddEntity(torus.get());
-    app.camera->Move({0,16,60});
+    app.camera->Move({0,16,20});
+    app.camera->RotateX(40);
 
     auto sun = make_unique<phi::DirLight>();
-    sun->SetPosition({0,3,10});
+    sun->SetPosition({10,15,-10});
     sun->SetColor({1,1,1});
     sun->SetShadowCasting(true);
 

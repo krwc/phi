@@ -51,6 +51,7 @@ void Shader::Compile() {
         compilation_log.resize(log_length - 1, '\0');
         CheckedCall(phi::glGetShaderInfoLog, m_id, log_length - 1, &log_length,
                     &compilation_log[0]);
+
         throw invalid_argument(compilation_log);
     }
 }

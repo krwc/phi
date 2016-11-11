@@ -2,9 +2,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-
-#include "renderer/materials/BasicMaterial.h"
-
 #include "Logging.h"
 #include "MeshImporter.h"
 

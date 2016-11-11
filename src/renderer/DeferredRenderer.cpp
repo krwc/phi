@@ -9,10 +9,15 @@
 #include "device/Device.h"
 #include "device/Shader.h"
 
+#include "utils/Timer.h"
+
 namespace phi {
 
 DeferredRenderer::DeferredRenderer(phi::Device &device, int w, int h)
-        : m_device(device), m_shadow_casters(), m_shadow_pass(*this, 1024) {
+        : m_device(device),
+          m_shadow_casters(),
+          m_light_pass(device),
+          m_shadow_pass(*this, 2048) {
     Resize(w, h);
 }
 
@@ -20,25 +25,34 @@ void DeferredRenderer::BindGlobals(phi::Program &program,
                                    const glm::mat4 &proj,
                                    const glm::mat4 &view,
                                    const glm::mat4 &model) {
-    if (!program.FindConstant("g_ProjViewModelMatrix")) {
+    if (program.FindConstant("g_ProjViewModelMatrix")) {
         program.SetConstant("g_ProjViewModelMatrix", proj * view * model);
     }
-    if (!program.FindConstant("g_ViewModelMatrix")) {
+    if (program.FindConstant("g_ViewModelMatrix")) {
         program.SetConstant("g_ViewModelMatrix", view * model);
     }
-    if (!program.FindConstant("g_NormalMatrix")) {
+    if (program.FindConstant("g_NormalMatrix")) {
         program.SetConstant("g_NormalMatrix",
                             glm::mat3(glm::transpose(glm::inverse(model))));
     }
-    if (!program.FindConstant("g_ModelMatrix")) {
+    if (program.FindConstant("g_ModelMatrix")) {
         program.SetConstant("g_ModelMatrix", model);
     }
 }
 
+#define PERF_STATS 0
+
 void DeferredRenderer::Render(phi::Scene &scene) {
+#ifdef PERF_STATS
+    static phi::Timer T;
+    static unsigned counter;
+    T.Begin();
+#endif
+
     phi::DrawCallQueue Q{};
     scene.Render(&Q);
     const auto &draw_calls = Q.GetDrawCalls();
+    const auto camera = scene.GetCamera();
     for (const phi::DirLight *light : scene.GetDirLights()) {
         if (light->IsCastingShadows()) {
             m_shadow_casters.push_back(light);
@@ -49,7 +63,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
     m_device.ClearDepth();
     m_device.ClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     for (const phi::DrawCall &draw_call : draw_calls) {
-        Execute(draw_call, *scene.GetCamera());
+        Execute(draw_call, *camera);
     }
     m_device.SetFrameBuffer(phi::DefaultFrameBuffer::Instance());
     m_shadow_pass.SetLight(*m_shadow_casters[0]);
@@ -60,16 +74,33 @@ void DeferredRenderer::Render(phi::Scene &scene) {
     {
         phi::LightPass::Config config{};
         config.shadow_matrix = m_shadow_pass.GetShadowMatrix();
-        config.shadow_map = &m_shadow_pass.GetShadowMap();
-        config.depth_map = m_depth.get();
-        config.diffuse_map = m_diffuse.get();
-        config.specular_map = m_diffuse.get();
+        config.texture_shadow = &m_shadow_pass.GetShadowMap();
+        config.texture_normal = m_normal.get();
+        config.texture_diffuse = m_diffuse.get();
+        config.texture_position = m_position.get();
         config.point_lights = &scene.GetPointLights();
         config.dir_lights = &scene.GetDirLights();
+        config.camera = camera;
         m_light_pass.Setup(config);
+        m_device.SetZWrite(false);
+        glDisable(GL_DEPTH_TEST);
         m_light_pass.Run();
+        glEnable(GL_DEPTH_TEST);
+        m_device.SetZWrite(true);
     }
     m_shadow_casters = {};
+
+#ifdef PERF_STATS
+    glFinish();
+    T.End();
+    ++counter;
+    if (counter % 300 == 0) {
+        auto dt = T.ElapsedTimeUs<float>() / 1000;
+        auto avg = T.AvgUs<float>() / 1000;
+        auto max = T.MaxUs<float>() / 1000;
+        printf("dt=%.4fms, avg=%.4fms, max=%.4fms\n", dt, avg, max);
+    }
+#endif
 }
 
 void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
@@ -101,6 +132,8 @@ void DeferredRenderer::Resize(int w, int h) {
     m_gbuffer = std::make_unique<phi::FrameBuffer>(w, h);
     m_depth = std::make_unique<phi::Texture2D>(w, h,
                                                phi::TextureFormat::DEPTH_24);
+    m_position = std::make_unique<phi::Texture2D>(w, h,
+                                                  phi::TextureFormat::RGBA_32F);
     m_normal = std::make_unique<phi::Texture2D>(w, h,
                                                 phi::TextureFormat::RGBA_16F);
     m_specular = std::make_unique<phi::Texture2D>(w, h,
@@ -108,8 +141,9 @@ void DeferredRenderer::Resize(int w, int h) {
     m_diffuse = std::make_unique<phi::Texture2D>(w, h,
                                                  phi::TextureFormat::RGBA_16F);
     m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 0, m_normal.get() });
-    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 1, m_diffuse.get() });
-    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 2, m_specular.get() });
+    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 1, m_position.get() });
+    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 2, m_diffuse.get() });
+    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 3, m_specular.get() });
     m_gbuffer->SetDepthAttachment(phi::DepthAttachment{ m_depth.get() });
     assert(m_gbuffer->IsReady());
 }

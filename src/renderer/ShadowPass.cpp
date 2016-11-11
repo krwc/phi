@@ -6,32 +6,11 @@
 
 #include "math/Rect2D.h"
 
+#include "io/File.h"
+
 #include "DebugDrawer.h"
 
 namespace phi {
-
-namespace {
-const char *depth_vertex_shader = R"(
-#version 430
-layout(location=0) in vec4 in_position;
-uniform mat4 g_ProjViewModelMatrix;
-
-void main() {
-    gl_Position = g_ProjViewModelMatrix * in_position;
-}
-)";
-
-const char *depth_fragment_shader = R"(
-#version 430
-
-void main() {
-    // This is basically a noop (look at glspec for details).
-    // Added just for clarity.
-    gl_FragDepth = gl_FragCoord.z;
-}
-)";
-
-}
 
 ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
                                       uint32_t resolution)
@@ -44,8 +23,12 @@ ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
     m_fbo.SetDepthAttachment(phi::DepthAttachment{ &m_depth });
     assert(m_fbo.IsReady());
     // FIXME: use program cache.
-    m_depth_program.SetSource(phi::ShaderType::Vertex, depth_vertex_shader);
-    m_depth_program.SetSource(phi::ShaderType::Fragment, depth_fragment_shader);
+    m_depth_program.SetSource(
+            phi::ShaderType::Vertex,
+            phi::io::FileContents("assets/shaders/ShadowPass.vs").c_str());
+    m_depth_program.SetSource(
+            phi::ShaderType::Fragment,
+            phi::io::FileContents("assets/shaders/ShadowPass.fs").c_str());
     m_depth_program.Link();
 }
 

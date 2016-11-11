@@ -5,7 +5,7 @@
 
 #include "math/Math.h"
 
-#include "device/Shader.h"
+#include "device/Program.h"
 
 #include "renderer/Material.h"
 

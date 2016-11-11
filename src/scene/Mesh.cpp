@@ -10,8 +10,8 @@ using namespace std;
 namespace {
 
 const Layout SimpleMeshLayout = {
-    { "in_position", offsetof(SimpleMesh::Vertex, position), sizeof(SimpleMesh::Vertex), Type::Float },
-    { "in_normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float }
+    { "in_Position", offsetof(SimpleMesh::Vertex, position), sizeof(SimpleMesh::Vertex), Type::Float },
+    { "in_Normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float }
 };
 
 } // namespace

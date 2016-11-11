@@ -22,6 +22,7 @@ class DeferredRenderer final : public Renderer {
     phi::Device &m_device;
     std::unique_ptr<phi::FrameBuffer> m_gbuffer;
     std::unique_ptr<phi::Texture2D> m_depth;
+    std::unique_ptr<phi::Texture2D> m_position;
     std::unique_ptr<phi::Texture2D> m_normal;
     std::unique_ptr<phi::Texture2D> m_diffuse;
     std::unique_ptr<phi::Texture2D> m_specular;
