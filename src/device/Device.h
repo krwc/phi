@@ -46,12 +46,65 @@ public:
      */
     void Draw(phi::Primitive, int start, int count);
 
-    void BindProgram(const phi::Program &program);
-    void BindVbo(const phi::Buffer &buffer);
-    void BindIbo(const phi::Buffer &buffer);
-    void BindLayout(const phi::Layout &layout);
-    void BindTexture(int texture_unit, const phi::Texture &texture);
-    void BindSampler(int texture_unit, const phi::Sampler &sampler);
+    /**
+     * Binds @p program to the device context.
+     *
+     * Note: @p program might be nullptr, which tells the device to unbind
+     *       currently bound program.
+     *
+     * @param program   Pointer to the program to be bound, or nullptr.
+     */
+    void BindProgram(const phi::Program *program);
+
+    /**
+     * Binds vertex buffer @p buffer to the device context.
+     *
+     * Note: @p buffer might be nullptr, which tells the device to unbind
+     *       currently bound vertex buffer.
+     *
+     * @param buffer    Pointer to the buffer to be bound, or nullptr.
+     */
+    void BindVbo(const phi::Buffer *buffer);
+
+    /**
+     * Binds indexx buffer @p buffer to the device context.
+     *
+     * Note: @p buffer might be nullptr, which tells the device to unbind
+     *       currently bound index buffer.
+     *
+     * @param buffer    Pointer to the buffer to be bound, or nullptr.
+     */
+    void BindIbo(const phi::Buffer *buffer);
+
+    /**
+     * Sets vertex buffer layout for use by the future @ref Device::Draw calls.
+     *
+     * Note: @p layout might be nullptr, which tells the device to reset
+     *       currently set layout.
+     *
+     * @param layout    Pointer to the layout to be bound, or nullptr.
+     */
+    void BindLayout(const phi::Layout *layout);
+
+    /**
+     * Binds texture to a given texture unit.
+     *
+     * Note: @p texture MUST NOT be nullptr.
+     *
+     * @param texture_unit  Texture unit to which texture will be bound.
+     * @param texture       Texture to be bound.
+     */
+    void BindTexture(int texture_unit, const phi::Texture *texture);
+
+    /**
+     * Binds texture sampler to a given texture unit.
+     *
+     * Note: @p sampler MUST NOT be nullptr.
+     *
+     * @param texture_unit  Texture unit to which texture will be bound.
+     * @param sampler       Sampler to be bound.
+     */
+    void BindSampler(int texture_unit, const phi::Sampler *sampler);
 
     /**
      * Sets current viewport. It works equivalently to @ref glViewport.
@@ -64,10 +117,10 @@ public:
     void SetScissor(const phi::Rect2D &scissor);
 
     /**
-     * Sets current render target to a FrameBuffer. To return to a default
-     * framebuffer one one can set @p target to DefaultFrameBuffer::Instance().
+     * Sets current render target. If the @p target is nullptr, the default
+     * FrameBuffer will be bound.
      */
-    void SetFrameBuffer(phi::FrameBuffer &target);
+    void BindFrameBuffer(phi::FrameBuffer *target);
 
     /**
      * @returns Current viewport

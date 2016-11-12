@@ -127,33 +127,46 @@ void Device::Draw(phi::Primitive type, int start, int count) {
     }
 }
 
-void Device::BindProgram(const phi::Program &program) {
-    if (m_state.program == &program) {
+void Device::BindProgram(const phi::Program *program) {
+    if (m_state.program == program) {
         return;
+    } else if (!program) {
+        CheckedCall(phi::glUseProgram, GL_NONE);
+    } else {
+        CheckedCall(phi::glUseProgram, program->GetId());
     }
-    CheckedCall(phi::glUseProgram, program.GetId());
-    m_state.program = &program;
+    m_state.program = program;
 }
 
-void Device::BindVbo(const phi::Buffer &buffer) {
-    if (m_state.vbo == &buffer) {
+void Device::BindVbo(const phi::Buffer *buffer) {
+    if (m_state.vbo == buffer) {
         return;
+    } else if (!buffer) {
+        CheckedCall(phi::glBindBuffer, GL_ARRAY_BUFFER, GL_NONE);
+    } else {
+        assert(buffer->GetType() == BufferType::Vertex);
+        CheckedCall(phi::glBindBuffer, GL_ARRAY_BUFFER, buffer->GetId());
     }
-    assert(buffer.GetType() == BufferType::Vertex);
-    CheckedCall(phi::glBindBuffer, GL_ARRAY_BUFFER, buffer.GetId());
-    m_state.vbo = &buffer;
+    m_state.vbo = buffer;
 }
 
-void Device::BindIbo(const phi::Buffer &buffer) {
-    if (m_state.ibo == &buffer) {
+void Device::BindIbo(const phi::Buffer *buffer) {
+    if (m_state.ibo == buffer) {
         return;
+    } else if (!buffer) {
+        CheckedCall(phi::glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+    } else {
+        assert(buffer->GetType() == BufferType::Index);
+        CheckedCall(phi::glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, buffer->GetId());
     }
-    assert(buffer.GetType() == BufferType::Index);
-    CheckedCall(phi::glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, buffer.GetId());
-    m_state.ibo = &buffer;
+    m_state.ibo = buffer;
 }
 
-void Device::BindLayout(const phi::Layout &layout) {
+void Device::BindLayout(const phi::Layout *layout) {
+    if (!layout) {
+        CheckedCall(phi::glBindVertexArray, GL_NONE);
+        return;
+    }
     // TODO: New OpenGL API can actually simplify this and allow for
     // optimizations
     assert(m_state.vbo && "VBO must be bound before layout");
@@ -166,7 +179,7 @@ void Device::BindLayout(const phi::Layout &layout) {
     }
     m_state.arrays.clear();
 
-    for (const auto &entry : layout.GetEntries()) {
+    for (const auto &entry : layout->GetEntries()) {
         auto info = m_state.program->FindAttribute(entry.name);
         if (!info) {
             continue;
@@ -180,21 +193,23 @@ void Device::BindLayout(const phi::Layout &layout) {
     }
 }
 
-void Device::BindTexture(int texture_unit, const phi::Texture &texture) {
-    if (m_state.textures[texture_unit] == &texture) {
+void Device::BindTexture(int texture_unit, const phi::Texture *texture) {
+    assert(texture);
+    if (m_state.textures[texture_unit] == texture) {
         return;
     }
     CheckedCall(glActiveTexture, GL_TEXTURE0 + texture_unit);
-    CheckedCall(phi::glBindTexture, (GLenum) texture.GetType(), texture.GetId());
-    m_state.textures[texture_unit] = &texture;
+    CheckedCall(phi::glBindTexture, (GLenum) texture->GetType(), texture->GetId());
+    m_state.textures[texture_unit] = texture;
 }
 
-void Device::BindSampler(int texture_unit, const phi::Sampler &sampler) {
-    if (m_state.samplers[texture_unit] == &sampler) {
+void Device::BindSampler(int texture_unit, const phi::Sampler *sampler) {
+    assert(sampler);
+    if (m_state.samplers[texture_unit] == sampler) {
         return;
     }
-    CheckedCall(phi::glBindSampler, texture_unit, sampler.GetId());
-    m_state.samplers[texture_unit] = &sampler;
+    CheckedCall(phi::glBindSampler, texture_unit, sampler->GetId());
+    m_state.samplers[texture_unit] = sampler;
 }
 
 void Device::SetViewport(const phi::Rect2D &viewport) {
@@ -207,12 +222,15 @@ void Device::SetScissor(const phi::Rect2D &scissor) {
     glScissor(scissor.x, scissor.y, scissor.w, scissor.h);
 }
 
-void Device::SetFrameBuffer(phi::FrameBuffer &target) {
-    if (m_state.fbo == &target) {
+void Device::BindFrameBuffer(phi::FrameBuffer *target) {
+    if (m_state.fbo == target) {
         return;
+    } else if (!target) {
+        CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, GL_NONE);
+    } else {
+        CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, target->GetId());
     }
-    CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, target.GetId());
-    m_state.fbo = &target;
+    m_state.fbo = target;
 }
 
 const phi::Rect2D &Device::GetViewport() const {
