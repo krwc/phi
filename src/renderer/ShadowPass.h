@@ -3,8 +3,10 @@
 #include <memory>
 #include <vector>
 
+#include "device/Device.h"
 #include "device/FrameBuffer.h"
 #include "device/Program.h"
+#include "device/Sampler.h"
 #include "device/Texture.h"
 
 #include "scene/Light.h"
@@ -36,40 +38,16 @@ class ShadowPass : public ShadowPassBase<LightType> {
 template <>
 class ShadowPass<phi::DirLight>
         : public phi::ShadowPassBase<phi::DirLight> {
-    uint32_t m_resolution;
-    std::vector<phi::DrawCall> m_drawcalls;
-    mutable bool m_needs_update;
-    mutable phi::OrthoCamera m_light_camera;
-    phi::DirLight m_light;
-    phi::AABB m_aabb;
-    phi::Renderer &m_renderer;
-
-    phi::FrameBuffer m_fbo;
-    phi::Program m_depth_program;
-    phi::Texture2D m_depth;
-
-    void RecomputeLightFrustum() const;
-
 public:
-    ShadowPass(phi::Renderer &renderer, uint32_t resolution);
+    struct Config {
+        const phi::AABB *aabb;
+        const phi::DirLight *light;
+        const std::vector<phi::DrawCall> *draw_calls;
+    };
 
-    /**
-     * @param light Directional light for which shadow map shall be computed.
-     */
-    void SetLight(const phi::DirLight &light);
-
-    /**
-     * @param drawcalls Drawcalls of objects that should be rendered to a shadow
-     *                  map.
-     */
-    void SetDrawCalls(const std::vector<phi::DrawCall> &drawcalls);
-
-    /**
-     * @param aabb  AABB of objects being drawn. Used to compute light frustum.
-     */
-    void SetObjectsAABB(const phi::AABB &aabb);
-
-    virtual void Run();
+    ShadowPass(phi::Device &device, uint32_t resolution);
+    void Setup(const phi::ShadowPass<phi::DirLight>::Config &config);
+    void Run();
 
     virtual const phi::Texture2D &GetShadowMap() const {
         return m_depth;
@@ -78,6 +56,18 @@ public:
     glm::mat4 GetShadowMatrix() const;
 
     virtual const phi::Camera &GetLightCamera() const;
+
+private:
+    phi::Device &m_device;
+    phi::OrthoCamera m_light_camera;
+
+    uint32_t m_resolution;
+    phi::FrameBuffer m_fbo;
+    phi::Program m_depth_program;
+    phi::Texture2D m_depth;
+    const ShadowPass<phi::DirLight>::Config *m_config;
+
+    void RecomputeLightFrustum();
 };
 
 } // namespace phi

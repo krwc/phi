@@ -74,9 +74,9 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
         MakeVertex(AABB::Vertex::MinMaxMin), MakeVertex(AABB::Vertex::MinMaxMax),
     };
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
-    m_device.BindProgram(m_debug_program);
-    m_device.BindVbo(m_vbo);
-    m_device.BindLayout(debug_layout);
+    m_device.BindProgram(&m_debug_program);
+    m_device.BindVbo(&m_vbo);
+    m_device.BindLayout(&debug_layout);
     m_debug_program.SetConstant("ProjViewModelMatrix",
                                 view.GetProjMatrix() * view.GetViewMatrix());
     m_debug_program.SetConstant("Color", glm::vec4(color, 1.0f));
@@ -85,11 +85,11 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
 
 void DebugDrawer::DrawTexture(const Texture2D &texture, int x, int y, int w, int h) {
     m_vbo.UpdateData(quad, sizeof(quad));
-    m_device.BindProgram(m_quad_program);
-    m_device.BindVbo(m_vbo);
-    m_device.BindLayout(quad_layout);
-    m_device.BindTexture(0, texture);
-    m_device.BindSampler(0, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
+    m_device.BindProgram(&m_quad_program);
+    m_device.BindVbo(&m_vbo);
+    m_device.BindLayout(&quad_layout);
+    m_device.BindTexture(0, &texture);
+    m_device.BindSampler(0, &phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
     auto viewport = m_device.GetViewport();
     auto scissor = m_device.GetScissor();
     m_device.SetViewport({ x, y, w, h });

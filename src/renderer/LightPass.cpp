@@ -82,16 +82,16 @@ void LightPass::Run() {
     static phi::Buffer quad_vbo(phi::BufferType::Vertex,
                                 phi::BufferHint::Static, quad, sizeof(quad));
 
-    m_device.BindProgram(m_program);
-    m_device.BindTexture(0, *m_config->texture_position);
-    m_device.BindTexture(1, *m_config->texture_normal);
-    m_device.BindTexture(2, *m_config->texture_diffuse);
-    m_device.BindTexture(3, *m_config->texture_shadow);
+    m_device.BindProgram(&m_program);
+    m_device.BindTexture(0, m_config->texture_position);
+    m_device.BindTexture(1, m_config->texture_normal);
+    m_device.BindTexture(2, m_config->texture_diffuse);
+    m_device.BindTexture(3, m_config->texture_shadow);
 
-    m_device.BindSampler(0, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
-    m_device.BindSampler(1, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
-    m_device.BindSampler(2, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
-    m_device.BindSampler(3, phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
+    m_device.BindSampler(0, &phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
+    m_device.BindSampler(1, &phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
+    m_device.BindSampler(2, &phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
+    m_device.BindSampler(3, &phi::Sampler::Nearest2D(phi::WrapMode::Clamp));
 
     m_program.SetConstant("g_TexPosition", (int) 0);
     m_program.SetConstant("g_TexNormal", (int) 1);
@@ -99,8 +99,8 @@ void LightPass::Run() {
     m_program.SetConstant("g_TexShadow", (int) 3);
     m_program.SetConstant("g_ShadowMatrix", m_config->shadow_matrix);
     SetupLights();
-    m_device.BindVbo(quad_vbo);
-    m_device.BindLayout(quad_layout);
+    m_device.BindVbo(&quad_vbo);
+    m_device.BindLayout(&quad_layout);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 }
 

@@ -48,20 +48,20 @@ void BlurPass::Run() {
                                 phi::BufferHint::Static, quad, sizeof(quad));
     const glm::vec2 blur_x = glm::vec2(m_radius, 0) * (1.0f / m_width);
     const glm::vec2 blur_y = glm::vec2(0, m_radius) * (1.0f / m_height);
-    m_device.BindProgram(m_program);
-    m_device.BindVbo(quad_vbo);
-    m_device.BindLayout(quad_layout);
-    m_device.BindSampler(0, phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
+    m_device.BindProgram(&m_program);
+    m_device.BindVbo(&quad_vbo);
+    m_device.BindLayout(&quad_layout);
+    m_device.BindSampler(0, &phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
 
     m_program.SetConstant("InvSize",
                           glm::vec2(1.0f / m_width, 1.0f / m_height));
-    m_device.SetFrameBuffer(m_fbo1);
-    m_device.BindTexture(0, m_texture);
+    m_device.BindFrameBuffer(&m_fbo1);
+    m_device.BindTexture(0, &m_texture);
     m_program.SetConstant("Step", blur_x);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 
-    m_device.SetFrameBuffer(m_fbo2);
-    m_device.BindTexture(0, m_tmp);
+    m_device.BindFrameBuffer(&m_fbo2);
+    m_device.BindTexture(0, &m_tmp);
     m_program.SetConstant("Step", blur_y);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 }

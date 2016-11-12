@@ -17,7 +17,7 @@ DeferredRenderer::DeferredRenderer(phi::Device &device, int w, int h)
         : m_device(device),
           m_shadow_casters(),
           m_light_pass(device),
-          m_shadow_pass(*this, 2048) {
+          m_shadow_pass(device, 2048) {
     Resize(w, h);
 }
 
@@ -40,7 +40,7 @@ void DeferredRenderer::BindGlobals(phi::Program &program,
     }
 }
 
-#undef PERF_STATS
+#define PERF_STATS
 
 void DeferredRenderer::Render(phi::Scene &scene) {
 #ifdef PERF_STATS
@@ -59,17 +59,22 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         }
     }
 
-    m_device.SetFrameBuffer(*m_gbuffer.get());
+    m_device.BindFrameBuffer(m_gbuffer.get());
     m_device.ClearDepth();
     m_device.ClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     for (const phi::DrawCall &draw_call : draw_calls) {
         Execute(draw_call, *camera);
     }
-    m_device.SetFrameBuffer(phi::DefaultFrameBuffer::Instance());
-    m_shadow_pass.SetLight(*m_shadow_casters[0]);
-    m_shadow_pass.SetDrawCalls(draw_calls);
-    m_shadow_pass.SetObjectsAABB(scene.GetAABB());
-    m_shadow_pass.Run();
+
+    {
+        phi::ShadowPass<phi::DirLight>::Config config{};
+        config.aabb = &scene.GetAABB();
+        config.light = m_shadow_casters[0];
+        config.draw_calls = &draw_calls;
+        m_shadow_pass.Setup(config);
+        m_shadow_pass.Run();
+    }
+    m_device.BindFrameBuffer(nullptr);
 
     {
         phi::LightPass::Config config{};
@@ -105,7 +110,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
 
 void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
                                const phi::Camera &camera) {
-    m_device.BindProgram(*draw_call.program);
+    m_device.BindProgram(draw_call.program);
     BindGlobals(*draw_call.program, camera.GetProjMatrix(),
                 camera.GetViewMatrix(), draw_call.transform);
     for (const phi::ProgramConstant &constant : draw_call.program_constants) {
@@ -115,13 +120,13 @@ void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
     for (const phi::TextureBinding &binding : draw_call.texture_bindings) {
         assert(binding.sampler);
         assert(binding.texture);
-        m_device.BindTexture(texture_unit, *binding.texture);
-        m_device.BindSampler(texture_unit, *binding.sampler);
+        m_device.BindTexture(texture_unit, binding.texture);
+        m_device.BindSampler(texture_unit, binding.sampler);
         draw_call.program->SetConstant(binding.name, texture_unit++);
     }
-    m_device.BindVbo(*draw_call.vbo);
-    m_device.BindLayout(*draw_call.layout);
-    m_device.BindIbo(*draw_call.ibo);
+    m_device.BindVbo(draw_call.vbo);
+    m_device.BindLayout(draw_call.layout);
+    m_device.BindIbo(draw_call.ibo);
     m_device.Draw(draw_call.primitive, draw_call.offset, draw_call.count);
 }
 

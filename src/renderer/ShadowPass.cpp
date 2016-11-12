@@ -1,8 +1,4 @@
 #include "ShadowPass.h"
-#include "Renderer.h"
-
-#include "device/Device.h"
-#include "device/Sampler.h"
 
 #include "math/Rect2D.h"
 
@@ -12,11 +8,9 @@
 
 namespace phi {
 
-ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
-                                      uint32_t resolution)
-        : m_resolution(resolution),
-          m_needs_update(true),
-          m_renderer(renderer),
+ShadowPass<phi::DirLight>::ShadowPass(phi::Device &device, uint32_t resolution)
+        : m_device(device),
+          m_resolution(resolution),
           m_fbo(resolution, resolution),
           m_depth_program(),
           m_depth(resolution, resolution, phi::TextureFormat::DEPTH_24) {
@@ -32,14 +26,14 @@ ShadowPass<phi::DirLight>::ShadowPass(phi::Renderer &renderer,
     m_depth_program.Link();
 }
 
-void ShadowPass<phi::DirLight>::RecomputeLightFrustum() const {
-    glm::vec3 light_direction = -glm::normalize(m_light.GetPosition());
+void ShadowPass<phi::DirLight>::RecomputeLightFrustum() {
+    glm::vec3 light_direction = -glm::normalize(m_config->light->GetPosition());
     glm::mat4 light_view =
             glm::lookAtRH({ 0, 0, 0 }, light_direction, { 0, 1, 0 });
     // Note: this is a very rough approximation of the light frustum that does
     // not take into account actual camera view, but at least it is computed
     // dynamically.
-    phi::AABB lightspace_aabb = light_view * m_aabb;
+    phi::AABB lightspace_aabb = light_view * (*m_config->aabb);
     glm::vec3 aabb_min = lightspace_aabb.GetMin();
     glm::vec3 aabb_max = lightspace_aabb.GetMax();
     // Achtung: heavy magic. Why the hell do I need to do this? What is wrong
@@ -51,61 +45,40 @@ void ShadowPass<phi::DirLight>::RecomputeLightFrustum() const {
     m_light_camera = phi::OrthoCamera(light_view, aabb_min, aabb_max);
 }
 
-void ShadowPass<phi::DirLight>::SetLight(const phi::DirLight &light) {
-    m_needs_update = true;
-    m_light = light;
-}
-
-void ShadowPass<phi::DirLight>::SetDrawCalls(
-        const std::vector<phi::DrawCall> &drawcalls) {
-    m_needs_update = true;
-    m_drawcalls.clear();
-    m_drawcalls.reserve(drawcalls.size());
-    for (const phi::DrawCall &drawcall : drawcalls) {
-        phi::DrawCall shadow_drawcall{};
-        shadow_drawcall.primitive = drawcall.primitive;
-        shadow_drawcall.transform = drawcall.transform;
-        shadow_drawcall.program = &m_depth_program;
-        shadow_drawcall.layout = drawcall.layout;
-        shadow_drawcall.vbo = drawcall.vbo;
-        shadow_drawcall.ibo = drawcall.ibo;
-        shadow_drawcall.program_constants = {};
-        shadow_drawcall.texture_bindings = {};
-        shadow_drawcall.count = drawcall.count;
-        shadow_drawcall.offset = drawcall.offset;
-        m_drawcalls.push_back(shadow_drawcall);
-    }
-}
-
-void ShadowPass<phi::DirLight>::SetObjectsAABB(const phi::AABB &aabb) {
-    m_needs_update = true;
-    m_aabb = aabb;
+void ShadowPass<phi::DirLight>::Setup(
+        const phi::ShadowPass<phi::DirLight>::Config &config) {
+    m_config = &config;
+    RecomputeLightFrustum();
 }
 
 void ShadowPass<phi::DirLight>::Run() {
+    assert(m_config);
     const phi::Camera &light_camera = GetLightCamera();
+    phi::Rect2D viewport = m_device.GetViewport();
+    phi::Rect2D scissor = m_device.GetScissor();
     const phi::Rect2D shadowmap_rect{ 0, 0, (int) m_resolution, (int) m_resolution };
-    phi::Device &device = m_renderer.GetDevice();
-    phi::Rect2D viewport = device.GetViewport();
-    phi::Rect2D scissor = device.GetScissor();
 
-    device.SetFrameBuffer(m_fbo);
-    device.SetViewport(shadowmap_rect);
-    device.SetScissor(shadowmap_rect);
-    device.ClearDepth();
-    for (const phi::DrawCall &drawcall : m_drawcalls) {
-        m_renderer.Execute(drawcall, light_camera);
+    m_device.BindFrameBuffer(&m_fbo);
+    m_device.SetViewport(shadowmap_rect);
+    m_device.SetScissor(shadowmap_rect);
+    m_device.ClearDepth();
+    m_device.BindProgram(&m_depth_program);
+    glm::mat4 proj_view =
+            light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
+
+    for (const phi::DrawCall &draw_call : *m_config->draw_calls) {
+        m_device.BindVbo(draw_call.vbo);
+        m_device.BindLayout(draw_call.layout);
+        m_device.BindIbo(draw_call.ibo);
+        m_depth_program.SetConstant("ProjViewModelMatrix",
+                                    proj_view * draw_call.transform);
+        m_device.Draw(draw_call.primitive, draw_call.offset, draw_call.count);
     }
-    device.SetViewport(viewport);
-    device.SetScissor(scissor);
-    device.SetFrameBuffer(DefaultFrameBuffer::Instance());
+    m_device.SetViewport(viewport);
+    m_device.SetScissor(scissor);
 }
 
 const phi::Camera &ShadowPass<phi::DirLight>::GetLightCamera() const {
-    if (m_needs_update) {
-        m_needs_update = false;
-        RecomputeLightFrustum();
-    }
     return m_light_camera;
 }
 
