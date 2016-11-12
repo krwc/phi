@@ -27,6 +27,7 @@ class Device {
 
     struct State {
         bool zwrite;
+        bool ztest;
         std::vector<int> arrays;
         std::array<const phi::Texture *, 16u> textures;
         std::array<const phi::Sampler *, 16u> samplers;
@@ -156,6 +157,11 @@ public:
      * Gets current state of depth writing.
      */
     bool GetDepthWrite() const;
+
+    /**
+     * Gets current state of depth testing.
+     */
+    bool GetDepthTest() const;
 };
 
 } // namespace phi

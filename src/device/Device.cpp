@@ -106,6 +106,7 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
 
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     SetDepthTest(true);
+    SetDepthWrite(true);
     glEnable(GL_SCISSOR_TEST);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
@@ -114,7 +115,6 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
     glCullFace(GL_BACK);
     SetViewport({ 0, 0, viewport_width, viewport_height });
     SetScissor({ 0, 0, viewport_width, viewport_height });
-    SetDepthWrite(true);
 }
 
 void Device::Draw(phi::Primitive type, int start, int count) {
@@ -261,10 +261,15 @@ void Device::SetDepthTest(bool enabled) {
     } else {
         glDisable(GL_DEPTH_TEST);
     }
+    m_state.ztest = enabled;
 }
 
 bool Device::GetDepthWrite() const {
     return m_state.zwrite;
+}
+
+bool Device::GetDepthTest() const {
+    return m_state.ztest;
 }
 
 } // namespace phi
