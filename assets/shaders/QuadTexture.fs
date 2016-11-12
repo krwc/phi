@@ -5,5 +5,5 @@ uniform sampler2D Image;
 in vec2 UV;
 
 void main() {
-    out_FragColor = texelFetch(Image, ivec2(UV), 0);
+    out_FragColor = texture(Image, UV);
 }
