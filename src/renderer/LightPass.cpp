@@ -26,7 +26,7 @@ LightPass::LightPass(phi::Device &device) : m_device(device), m_program(), m_con
             phi::io::FileContents("assets/shaders/Quad.vs").c_str());
     m_program.SetSource(
             phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/Lightpass.fs").c_str());
+            phi::io::FileContents("assets/shaders/LightPass.fs").c_str());
     m_program.Link();
 }
 
