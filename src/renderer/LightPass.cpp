@@ -81,7 +81,7 @@ void LightPass::SetupLights() {
 void LightPass::Run() {
     static phi::Buffer quad_vbo(phi::BufferType::Vertex,
                                 phi::BufferHint::Static, quad, sizeof(quad));
-
+    const float texel_size = 1.0f / m_config->texture_shadow->GetWidth();
     m_device.BindProgram(&m_program);
     m_device.BindTexture(0, m_config->texture_position);
     m_device.BindTexture(1, m_config->texture_normal);
@@ -98,6 +98,7 @@ void LightPass::Run() {
     m_program.SetConstant("g_TexDiffuse", (int) 2);
     m_program.SetConstant("g_TexShadow", (int) 3);
     m_program.SetConstant("g_ShadowMatrix", m_config->shadow_matrix);
+    m_program.SetConstant("g_DepthTexelSize", texel_size);
     SetupLights();
     m_device.BindVbo(&quad_vbo);
     m_device.BindLayout(&quad_layout);

@@ -54,7 +54,7 @@ layout(location=0) out vec4 FragColor;
 
 uniform LightInfo g_LightInfo;
 uniform mat4 g_ShadowMatrix;
-uniform float g_DepthTexelSize = 1.0f/1024;
+uniform float g_DepthTexelSize = 1.0f/2048;
 uniform sampler2D g_TexShadow;
 uniform sampler2D g_TexPosition;
 uniform sampler2D g_TexDiffuse;
@@ -76,15 +76,15 @@ uniform sampler2D g_TexNormal;
     return I / (Size * Size);
 
 float PCF3x3(in float CurrentDepth, in vec2 ProjCoords, in vec2 Offset) {
-    PCF_IMPL(1.0f, 3.0f)
+    PCF_IMPL(2.0f, 3.0f)
 }
 
 float PCF5x5(in float CurrentDepth, in vec2 ProjCoords, in vec2 Offset) {
-    PCF_IMPL(1.3f, 5.0f)
+    PCF_IMPL(2.5f, 5.0f)
 }
 
 float PCF9x9(in float CurrentDepth, in vec2 ProjCoords, in vec2 Offset) {
-    PCF_IMPL(1.5f, 9.0f)
+    PCF_IMPL(2.5f, 9.0f)
 }
 
 float ShadowIntensity(in vec4 Coord) {
