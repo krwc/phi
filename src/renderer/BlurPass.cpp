@@ -14,22 +14,24 @@ const glm::vec2 quad[] = { { -1, -1 }, { 1, -1 }, { -1, 1 },
                            { -1, 1 },  { 1, -1 }, { 1, 1 } };
 }
 
-BlurPass::BlurPass(phi::BlurPass::Kernel kernel,
-                   phi::Device &device,
-                   phi::Texture2D &texture)
+BlurPass::BlurPass(phi::Device &device, const phi::BlurPass::Config &config)
         : m_device(device),
-          m_texture(texture),
-          m_width(texture.GetWidth()),
-          m_height(texture.GetHeight()),
-          m_radius(1.0f),
+          m_texture(config.texture),
+          m_width(m_texture->GetWidth()),
+          m_height(m_texture->GetHeight()),
           m_fbo1(m_width, m_height),
           m_fbo2(m_width, m_height),
-          m_tmp(m_width, m_height, texture.GetFormat()) {
+          m_tmp(m_width, m_height, m_texture->GetFormat()),
+          m_blur_x(),
+          m_blur_y(),
+          m_program() {
     m_fbo1.SetColorAttachment(phi::ColorAttachment{ 0, &m_tmp });
-    m_fbo2.SetColorAttachment(phi::ColorAttachment{ 0, &texture });
+    m_fbo2.SetColorAttachment(phi::ColorAttachment{ 0, m_texture });
     assert(m_fbo1.IsReady());
     assert(m_fbo2.IsReady());
-    assert(kernel == phi::BlurPass::Kernel::Gauss9x9);
+    m_inv_size = glm::vec2(1.0f / m_width, 1.0f / m_height);
+    SetRadius(config.radius);
+
     m_program.SetSource(
             phi::ShaderType::Vertex,
             phi::io::FileContents("assets/shaders/Quad.vs").c_str());
@@ -40,29 +42,27 @@ BlurPass::BlurPass(phi::BlurPass::Kernel kernel,
 }
 
 void BlurPass::SetRadius(float radius) {
-    m_radius = radius;
+    m_blur_x = glm::vec2(radius, 0) * m_inv_size.x;
+    m_blur_y = glm::vec2(0, radius) * m_inv_size.y;
 }
 
 void BlurPass::Run() {
     static phi::Buffer quad_vbo(phi::BufferType::Vertex,
                                 phi::BufferHint::Static, quad, sizeof(quad));
-    const glm::vec2 blur_x = glm::vec2(m_radius, 0) * (1.0f / m_width);
-    const glm::vec2 blur_y = glm::vec2(0, m_radius) * (1.0f / m_height);
     m_device.BindProgram(&m_program);
     m_device.BindVbo(&quad_vbo);
     m_device.BindLayout(&quad_layout);
     m_device.BindSampler(0, &phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
 
-    m_program.SetConstant("InvSize",
-                          glm::vec2(1.0f / m_width, 1.0f / m_height));
+    m_program.SetConstant("InvSize", m_inv_size);
     m_device.BindFrameBuffer(&m_fbo1);
-    m_device.BindTexture(0, &m_texture);
-    m_program.SetConstant("Step", blur_x);
+    m_device.BindTexture(0, m_texture);
+    m_program.SetConstant("Step", m_blur_x);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 
     m_device.BindFrameBuffer(&m_fbo2);
     m_device.BindTexture(0, &m_tmp);
-    m_program.SetConstant("Step", blur_y);
+    m_program.SetConstant("Step", m_blur_y);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 }
 
