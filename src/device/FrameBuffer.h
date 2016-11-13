@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "Prototypes.h"
+#include "Resource.h"
 #include "Texture.h"
 
 namespace phi {
@@ -19,7 +20,7 @@ struct DepthAttachment {
     phi::Texture *depth;
 };
 
-class FrameBuffer {
+class FrameBuffer : public Resource {
     void Destroy();
 
     GLuint m_id;
@@ -44,46 +45,6 @@ public:
 
     virtual GLuint GetId() const {
         return m_id;
-    }
-};
-
-// XXX: Stop right there. You see this code? It is bad, and you can tell why
-// instantly.
-//
-//   ...   You feel like you cannot stand it.
-//      ... You feel dizzy by just looking...
-//
-//   ... You slowly prepare yourself to enter insert mode
-//
-// ... few hours later ...
-//
-// FUCK YEAH, you did the right thing, you refactored this piece of crap
-// and now you're the master of the day! World's grateful for your work,
-// beautiful teenage girls are falling themselves into your arms... they're
-// moaning for more changes like that in the codebase...
-//
-// You have reached... you have reached a completion! Damn! Such a good
-// feeling. You can now remove this comment.
-class DefaultFrameBuffer : public phi::FrameBuffer {
-    DefaultFrameBuffer() : phi::FrameBuffer(1, 1) {}
-
-public:
-    static DefaultFrameBuffer &Instance();
-
-    virtual void SetColorAttachment(const phi::ColorAttachment &) {
-        throw std::logic_error("Cannot modify default render target");
-    }
-
-    virtual void SetDepthAttachment(const phi::DepthAttachment &) {
-        throw std::logic_error("Cannot modify default render target");
-    }
-
-    virtual bool IsReady() const {
-        return true;
-    }
-
-    virtual GLuint GetId() const {
-        return GL_NONE;
     }
 };
 

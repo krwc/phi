@@ -22,6 +22,7 @@ public:
         const phi::Texture2D *texture_position;
         const phi::Texture2D *texture_normal;
         const phi::Texture2D *texture_diffuse;
+        const phi::Texture2D *texture_ao;
         const std::vector<phi::DirLight *> *dir_lights;
         const std::vector<phi::PointLight *> *point_lights;
         const phi::Camera *camera;

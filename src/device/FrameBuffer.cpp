@@ -8,11 +8,6 @@
 namespace phi {
 using namespace std;
 
-phi::DefaultFrameBuffer &DefaultFrameBuffer::Instance() {
-    static phi::DefaultFrameBuffer target;
-    return target;
-}
-
 void FrameBuffer::Destroy() {
     if (m_id) {
         CheckedCall(phi::glDeleteFramebuffers, 1, &m_id);

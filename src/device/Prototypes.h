@@ -29,6 +29,7 @@ extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
 extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
 extern PFNGLBINDSAMPLERPROC glBindSampler;
 extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
+extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameterf;
 extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 extern PFNGLCREATESHADERPROC glCreateShader;

@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "Renderer.h"
 #include "LightPass.h"
+#include "Renderer.h"
 #include "ShadowPass.h"
 
 #include "math/Math.h"
