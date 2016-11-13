@@ -1,5 +1,6 @@
 #include "DeferredRenderer.h"
 #include "DataBinding.h"
+#include "DebugDrawer.h"
 #include "DrawCall.h"
 #include "DrawCallQueue.h"
 
@@ -31,16 +32,24 @@ void DeferredRenderer::BindGlobals(phi::Program &program,
     if (program.FindConstant("g_ViewModelMatrix")) {
         program.SetConstant("g_ViewModelMatrix", view * model);
     }
-    if (program.FindConstant("g_NormalMatrix")) {
-        program.SetConstant("g_NormalMatrix",
-                            glm::mat3(glm::transpose(glm::inverse(model))));
+    if (program.FindConstant("g_InvModelMatrix")) {
+        program.SetConstant("g_InvModelMatrix", glm::inverse(model));
+    }
+    if (program.FindConstant("g_InvViewMatrix")) {
+        program.SetConstant("g_InvViewMatrix", glm::inverse(view));
+    }
+    if (program.FindConstant("g_InvViewModelMatrix")) {
+        program.SetConstant("g_InvViewModelMatrix", glm::inverse(view * model));
     }
     if (program.FindConstant("g_ModelMatrix")) {
         program.SetConstant("g_ModelMatrix", model);
     }
+    if (program.FindConstant("g_ViewMatrix")) {
+        program.SetConstant("g_ViewMatrix", view);
+    }
 }
 
-#define PERF_STATS
+#undef PERF_STATS
 
 void DeferredRenderer::Render(phi::Scene &scene) {
 #ifdef PERF_STATS
@@ -65,7 +74,6 @@ void DeferredRenderer::Render(phi::Scene &scene) {
     for (const phi::DrawCall &draw_call : draw_calls) {
         Execute(draw_call, *camera);
     }
-
     {
         phi::ShadowPass<phi::DirLight>::Config config{};
         config.aabb = &scene.GetAABB();
@@ -75,7 +83,6 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_shadow_pass.Run();
     }
     m_device.BindFrameBuffer(nullptr);
-
     {
         phi::LightPass::Config config{};
         config.shadow_matrix = m_shadow_pass.GetShadowMatrix();

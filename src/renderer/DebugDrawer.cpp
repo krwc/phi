@@ -1,4 +1,5 @@
 #include "DebugDrawer.h"
+#include "Common.h"
 #include "DrawCall.h"
 #include "Renderer.h"
 
@@ -19,10 +20,7 @@ using namespace glm;
 
 namespace {
 
-const phi::Layout quad_layout{{  "in_Position", 0u, sizeof(glm::vec2), Type::Float }};
 const phi::Layout debug_layout{{ "in_Position", 0u, sizeof(glm::vec4), Type::Float }};
-const glm::vec2 quad[] = { { -1, -1 }, { 1, -1 }, { -1, 1 },
-                           { -1, 1 },  { 1, -1 }, { 1, 1 } };
 
 } // namespace
 
@@ -84,12 +82,11 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
 }
 
 void DebugDrawer::DrawTexture(const Texture2D &texture, int x, int y, int w, int h) {
-    m_vbo.UpdateData(quad, sizeof(quad));
     m_device.BindProgram(&m_quad_program);
-    m_device.BindVbo(&m_vbo);
-    m_device.BindLayout(&quad_layout);
+    m_device.BindVbo(&Common::QuadVbo());
+    m_device.BindLayout(&Common::QuadLayout());
     m_device.BindTexture(0, &texture);
-    m_device.BindSampler(0, &phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
+    m_device.BindSampler(0, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D());
     auto viewport = m_device.GetViewport();
     auto scissor = m_device.GetScissor();
     m_device.SetViewport({ x, y, w, h });

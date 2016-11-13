@@ -1,4 +1,5 @@
 #include "BlurPass.h"
+#include "Common.h"
 
 #include "device/Layout.h"
 #include "device/Buffer.h"
@@ -7,12 +8,6 @@
 #include "io/File.h"
 
 namespace phi {
-namespace {
-const phi::Layout quad_layout{{ "in_Position", 0u, sizeof(glm::vec2), phi::Type::Float }};
-
-const glm::vec2 quad[] = { { -1, -1 }, { 1, -1 }, { -1, 1 },
-                           { -1, 1 },  { 1, -1 }, { 1, 1 } };
-}
 
 BlurPass::BlurPass(phi::Device &device, const phi::BlurPass::Config &config)
         : m_device(device),
@@ -47,12 +42,10 @@ void BlurPass::SetRadius(float radius) {
 }
 
 void BlurPass::Run() {
-    static phi::Buffer quad_vbo(phi::BufferType::Vertex,
-                                phi::BufferHint::Static, quad, sizeof(quad));
     m_device.BindProgram(&m_program);
-    m_device.BindVbo(&quad_vbo);
-    m_device.BindLayout(&quad_layout);
-    m_device.BindSampler(0, &phi::Sampler::Bilinear2D(phi::WrapMode::Clamp));
+    m_device.BindVbo(&Common::QuadVbo());
+    m_device.BindLayout(&Common::QuadLayout());
+    m_device.BindSampler(0, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D());
 
     m_program.SetConstant("InvSize", m_inv_size);
     m_device.BindFrameBuffer(&m_fbo1);

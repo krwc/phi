@@ -4,8 +4,6 @@
 
 #include "io/File.h"
 
-#include "DebugDrawer.h"
-
 namespace phi {
 
 ShadowPass<phi::DirLight>::ShadowPass(phi::Device &device, uint32_t resolution)
