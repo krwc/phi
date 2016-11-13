@@ -43,6 +43,7 @@ void LoadProcedures(phi::ProcLoader *loader) {
     PHI_LOAD_PROC(glDeleteSamplers);
     PHI_LOAD_PROC(glBindSampler);
     PHI_LOAD_PROC(glSamplerParameteri);
+    PHI_LOAD_PROC(glSamplerParameterf);
     PHI_LOAD_PROC(glCreateFramebuffers);
     PHI_LOAD_PROC(glCreateProgram);
     PHI_LOAD_PROC(glCreateShader);

@@ -5,63 +5,35 @@
 
 namespace phi {
 
-Sampler::Sampler(GLenum min_filter,
-                 GLenum mag_filter,
-                 phi::WrapMode mode,
-                 phi::TextureType type)
-        : m_id(GL_NONE) {
+Sampler::Sampler(const phi::Sampler::Config2D &config) : m_id(GL_NONE) {
     CheckedCall(phi::glCreateSamplers, 1, &m_id);
-    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MIN_FILTER, min_filter);
-    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MAG_FILTER, mag_filter);
-    if (type == phi::TextureType::Texture2D) {
-        CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_S, (GLenum) mode);
-        CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_T, (GLenum) mode);
-    } else {
-        throw std::runtime_error("Invalid texture type");
+    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MIN_FILTER,
+                (GLenum) config.min_filter);
+    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MAG_FILTER,
+                (GLenum) config.min_filter);
+    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_S,
+                (GLenum) config.wrap_u);
+    CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_T,
+                (GLenum) config.wrap_v);
+
+    // Shadow sampler specific parameters
+    if (config.compare_mode != phi::CompareMode::None) {
+        CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_COMPARE_MODE,
+                    (GLenum) config.compare_mode);
+        CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_COMPARE_FUNC,
+                    (GLenum) config.compare_func);
     }
+    if (config.anisotropy > 1.0f) {
+        CheckedCall(phi::glSamplerParameterf, m_id, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                    config.anisotropy);
+    }
+    PHI_LOG(TRACE, "Created sampler object (ID=%u)", m_id);
 }
 
 Sampler::~Sampler() {
     CheckedCall(phi::glDeleteSamplers, 1, &m_id);
+    PHI_LOG(TRACE, "Deleted sampler object (ID=%u)", m_id);
 }
 
-const phi::Sampler &Sampler::Nearest2D(phi::WrapMode mode) {
-    static phi::Sampler clamping =
-            Sampler(GL_NEAREST, GL_NEAREST, WrapMode::Clamp,
-                    TextureType::Texture2D);
-    static phi::Sampler repeating =
-            Sampler(GL_NEAREST, GL_NEAREST, WrapMode::Repeat,
-                    TextureType::Texture2D);
-    if (mode == WrapMode::Clamp) {
-        return clamping;
-    }
-    return repeating;
-}
-
-const phi::Sampler &Sampler::Bilinear2D(phi::WrapMode mode) {
-    static phi::Sampler clamping =
-            Sampler(GL_LINEAR, GL_LINEAR, WrapMode::Clamp,
-                    TextureType::Texture2D);
-    static phi::Sampler repeating =
-            Sampler(GL_LINEAR, GL_LINEAR, WrapMode::Repeat,
-                    TextureType::Texture2D);
-    if (mode == WrapMode::Clamp) {
-        return clamping;
-    }
-    return repeating;
-}
-
-const phi::Sampler &Sampler::Trilinear2D(phi::WrapMode mode) {
-    static phi::Sampler clamping =
-            Sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, WrapMode::Clamp,
-                    TextureType::Texture2D);
-    static phi::Sampler repeating =
-            Sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, WrapMode::Repeat,
-                    TextureType::Texture2D);
-    if (mode == WrapMode::Clamp) {
-        return clamping;
-    }
-    return repeating;
-}
 
 } // namespace phi
