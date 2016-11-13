@@ -82,6 +82,8 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_shadow_pass.Setup(config);
         m_shadow_pass.Run();
     }
+//    m_ssao_pass->SetCamera(*camera);
+//    m_ssao_pass->Run();
     m_device.BindFrameBuffer(nullptr);
     {
         phi::LightPass::Config config{};
@@ -90,6 +92,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         config.texture_normal = m_normal.get();
         config.texture_diffuse = m_diffuse.get();
         config.texture_position = m_position.get();
+        //config.texture_ao = &m_ssao_pass->GetAoTexture();
         config.point_lights = &scene.GetPointLights();
         config.dir_lights = &scene.GetDirLights();
         config.camera = camera;
@@ -158,6 +161,13 @@ void DeferredRenderer::Resize(int w, int h) {
     m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 3, m_specular.get() });
     m_gbuffer->SetDepthAttachment(phi::DepthAttachment{ m_depth.get() });
     assert(m_gbuffer->IsReady());
+
+    /*phi::SsaoPass::Config config{};
+    config.fbo_width = w / 2;
+    config.fbo_height = h / 2;
+    config.position = m_position.get();
+    config.normal = m_normal.get();
+    m_ssao_pass = std::make_unique<phi::SsaoPass>(m_device, config);*/
 }
 
 } // namespace phi
