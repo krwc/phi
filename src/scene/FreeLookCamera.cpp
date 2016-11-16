@@ -67,7 +67,7 @@ const mat4 &FreeLookCamera::GetViewMatrix() const {
 const mat4 &FreeLookCamera::GetProjMatrix() const {
     if (m_needs_proj_update) {
         m_needs_proj_update = false;
-        m_proj = perspective(m_fov, m_aspect_ratio, m_near, m_far);
+        m_proj = perspective(glm::radians(m_fov), m_aspect_ratio, m_near, m_far);
     }
     return m_proj;
 }
