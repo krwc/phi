@@ -6,7 +6,7 @@
 #include "LightPass.h"
 #include "Renderer.h"
 #include "ShadowPass.h"
-//#include "SsaoPass.h"
+#include "SsaoPass.h"
 
 #include "math/Math.h"
 
@@ -28,7 +28,7 @@ class DeferredRenderer final : public Renderer {
     std::unique_ptr<phi::Texture2D> m_diffuse;
     std::unique_ptr<phi::Texture2D> m_specular;
     std::vector<const phi::DirLight *> m_shadow_casters;
-  //  std::unique_ptr<phi::SsaoPass> m_ssao_pass;
+    std::unique_ptr<phi::SsaoPass> m_ssao_pass;
     phi::LightPass m_light_pass;
     phi::ShadowPass<phi::DirLight> m_shadow_pass;
 

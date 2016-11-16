@@ -1,8 +1,8 @@
 #version 430
 layout(location = 0) out vec4 out_Normal;
-layout(location = 1) out vec4 out_Position;
-layout(location = 2) out vec4 out_Diffuse;
-layout(location = 3) out vec4 out_Specular;
+layout(location = 1) out vec4 out_Diffuse;
+layout(location = 2) out vec4 out_Specular;
+//layout(location = 3) out vec4 out_Position;
 uniform vec4 Diffuse;
 uniform vec4 Specular;
 
@@ -11,7 +11,7 @@ in vec4 Position;
 
 void main() {
     out_Normal = vec4(Normal, 1);
-    out_Position = Position;
     out_Diffuse = Diffuse;
     out_Specular = Specular;
+//    out_Position = Position;
 }

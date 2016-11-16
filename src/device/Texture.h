@@ -11,6 +11,7 @@ enum class TextureFormat {
     R_32F = GL_R32F,
     RG_16F = GL_RG16F,
     RG_32F = GL_RG32F,
+    RGB_16F = GL_RGB16F,
     RGB_888 = GL_RGB8,
     RGBA_8888 = GL_RGBA8,
     RGBA_16F = GL_RGBA16F,

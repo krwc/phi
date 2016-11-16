@@ -21,6 +21,7 @@ namespace {
 } while (0)
 
 void LoadProcedures(phi::ProcLoader *loader) {
+    PHI_LOAD_PROC(glColorMaski);
     PHI_LOAD_PROC(glBlendFuncSeparate);
     PHI_LOAD_PROC(glBlendEquationSeparate);
     PHI_LOAD_PROC(glAttachShader);

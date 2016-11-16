@@ -82,22 +82,26 @@ void LightPass::SetupLights() {
 void LightPass::Run() {
     const float texel_size = 1.0f / m_config->texture_shadow->GetWidth();
     m_device.BindProgram(&m_program);
-    m_device.BindTexture(0, m_config->texture_position);
+    m_device.BindTexture(0, m_config->texture_depth);
     m_device.BindTexture(1, m_config->texture_normal);
     m_device.BindTexture(2, m_config->texture_diffuse);
     m_device.BindTexture(3, m_config->texture_shadow);
+    m_device.BindTexture(4, m_config->texture_ao);
 
     m_device.BindSampler(0, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
     m_device.BindSampler(1, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
     m_device.BindSampler(2, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
     m_device.BindSampler(3, &phi::Samplers<phi::WrapMode::ClampToEdge>::Shadow2D());
+    m_device.BindSampler(4, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D());
 
     glm::mat4 inv_view = glm::inverse(m_config->camera->GetViewMatrix());
-    m_program.SetConstant("g_TexPosition", static_cast<int>(0));
+    m_program.SetConstant("g_TexDepth", static_cast<int>(0));
     m_program.SetConstant("g_TexNormal", static_cast<int>(1));
     m_program.SetConstant("g_TexDiffuse", static_cast<int>(2));
     m_program.SetConstant("g_TexShadow", static_cast<int>(3));
+    m_program.SetConstant("g_TexAo", static_cast<int>(4));
     m_program.SetConstant("g_ShadowMatrix", m_config->shadow_matrix * inv_view);
+    m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config->camera->GetProjMatrix()));
     m_program.SetConstant("g_DepthTexelSize", texel_size);
     SetupLights();
     m_device.BindVbo(&Common::QuadVbo());
