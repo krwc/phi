@@ -3,20 +3,20 @@
 #include <string>
 
 // This MUST be included before GLFW headers.
-#include "device/Device.h"
+#include "engine/device/Device.h"
 
 #include <GLFW/glfw3.h>
 
-#include "utils/Logging.h"
-#include "utils/MeshImporter.h"
+#include "engine/utils/Logging.h"
+#include "engine/utils/MeshImporter.h"
 
-#include "scene/FlatScene.h"
-#include "scene/FreeLookCamera.h"
-#include "scene/Light.h"
+#include "engine/scene/FlatScene.h"
+#include "engine/scene/FreeLookCamera.h"
+#include "engine/scene/Light.h"
 
-#include "renderer/DeferredRenderer.h"
-#include "renderer/DebugDrawer.h"
-#include "renderer/materials/PhongMaterial.h"
+#include "engine/renderer/DeferredRenderer.h"
+#include "engine/renderer/DebugDrawer.h"
+#include "engine/renderer/materials/PhongMaterial.h"
 
 using namespace std;
 using namespace glm;
