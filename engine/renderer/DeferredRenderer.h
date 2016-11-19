@@ -38,7 +38,7 @@ class DeferredRenderer final : public Renderer {
                      const glm::mat4 &model);
 
 public:
-    DeferredRenderer(phi::Device &device, int w, int h);
+    DeferredRenderer(phi::Device &device);
 
     virtual void Render(phi::Scene &scene);
     virtual void Execute(const phi::DrawCall &call, const phi::Camera &camera);

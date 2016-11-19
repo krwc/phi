@@ -14,12 +14,13 @@
 
 namespace phi {
 
-DeferredRenderer::DeferredRenderer(phi::Device &device, int w, int h)
+DeferredRenderer::DeferredRenderer(phi::Device &device)
         : m_device(device),
           m_shadow_casters(),
           m_light_pass(device),
           m_shadow_pass(device, 2048) {
-    Resize(w, h);
+    const auto &viewport = device.GetViewport();
+    Resize(viewport.w, viewport.h);
 }
 
 void DeferredRenderer::BindGlobals(phi::Program &program,
@@ -105,7 +106,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_device.SetDepthWrite(true);
     }
     static phi::DebugDrawer debug(m_device);
-//    debug.DrawTexture(m_ssao_pass->GetAoTexture(), 0, 0, 200, 200);
+    //debug.DrawTexture(m_ssao_pass->GetAoTexture(), 0, 0, 200, 200);
     m_shadow_casters = {};
 
 #ifdef PERF_STATS
@@ -166,8 +167,8 @@ void DeferredRenderer::Resize(int w, int h) {
     assert(m_gbuffer->IsReady());
 
     phi::SsaoPass::Config config{};
-    config.fbo_width = w;
-    config.fbo_height = h;
+    config.fbo_width = w / 2;
+    config.fbo_height = h / 2;
     config.position = m_position.get();
     config.normal = m_normal.get();
     config.depth = m_depth.get();
