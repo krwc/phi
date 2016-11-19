@@ -1,7 +1,14 @@
-#include <memory>
-#include <stdexcept>
-#include <string>
+#include <QApplication>
+#include "MainWindow.h"
 
+int main(int argc, char **argv) {
+    QApplication app(argc, argv);
+    phi::editor::MainWindow w;
+    w.show();
+    return app.exec();
+}
+
+#if 0
 // This MUST be included before GLFW headers.
 #include "engine/device/Device.h"
 
@@ -240,3 +247,4 @@ int main() {
     glfwDestroyWindow(app.window);
     return 0;
 }
+#endif
