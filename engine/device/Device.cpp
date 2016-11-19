@@ -15,12 +15,14 @@ namespace phi {
 namespace {
 
 #define PHI_QUOTE(word) #word
-#define PHI_LOAD_PROC(name) do { \
-    phi::name = (decltype(phi::name)) (loader(PHI_QUOTE(name))); \
-    assert(phi::name != nullptr); \
-} while (0)
+#define PHI_LOAD_PROC(name)                                         \
+    do {                                                            \
+        phi::name = (decltype(phi::name))(loader(PHI_QUOTE(name))); \
+        assert(phi::name != nullptr);                               \
+        PHI_LOG(INFO, "Loaded procedure '%s'", PHI_QUOTE(name));    \
+    } while (0)
 
-void LoadProcedures(phi::ProcLoader *loader) {
+void LoadProcedures(const phi::ProcLoader &loader) {
     PHI_LOAD_PROC(glColorMaski);
     PHI_LOAD_PROC(glBlendFuncSeparate);
     PHI_LOAD_PROC(glBlendEquationSeparate);
@@ -102,7 +104,9 @@ int NumAttributeComponents(GLenum type) {
 
 } // namespace
 
-Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
+Device::Device(const phi::ProcLoader &loader,
+               int viewport_width,
+               int viewport_height)
         : m_vao(GL_NONE), m_state() {
     LoadProcedures(loader);
 
@@ -117,6 +121,10 @@ Device::Device(phi::ProcLoader *loader, int viewport_width, int viewport_height)
     glCullFace(GL_BACK);
     SetViewport({ 0, 0, viewport_width, viewport_height });
     SetScissor({ 0, 0, viewport_width, viewport_height });
+}
+
+void Device::SetDefaultFrameBuffer(GLuint default_fbo) {
+    m_state.default_fbo = default_fbo;
 }
 
 void Device::Draw(phi::Primitive type, int start, int count) {
@@ -225,10 +233,8 @@ void Device::SetScissor(const phi::Rect2D &scissor) {
 }
 
 void Device::BindFrameBuffer(phi::FrameBuffer *target) {
-    if (m_state.fbo == target) {
-        return;
-    } else if (!target) {
-        CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, GL_NONE);
+    if (!target) {
+        CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, m_state.default_fbo);
     } else {
         CheckedCall(phi::glBindFramebuffer, GL_FRAMEBUFFER, target->GetId());
     }

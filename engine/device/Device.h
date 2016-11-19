@@ -1,7 +1,8 @@
 #ifndef PHI_DEVICE_DEVICE_H
 #define PHI_DEVICE_DEVICE_H
-#include <vector>
 #include <array>
+#include <functional>
+#include <vector>
 
 #include "math/Math.h"
 #include "math/Rect2D.h"
@@ -18,7 +19,9 @@ class Sampler;
 class FrameBuffer;
 
 // Callback used to initialize OpenGL procedures
-typedef void *ProcLoader(const char *name);
+struct ProcLoader {
+    virtual void *operator()(const char *name) const = 0;
+};
 
 class Device {
     phi::Rect2D m_scissor;
@@ -31,6 +34,7 @@ class Device {
         std::vector<int> arrays;
         std::array<const phi::Texture *, 16u> textures;
         std::array<const phi::Sampler *, 16u> samplers;
+        GLuint default_fbo;
         const phi::Program *program;
         const phi::FrameBuffer *fbo;
         const phi::Buffer *vbo;
@@ -38,9 +42,12 @@ class Device {
     } m_state;
 
 public:
-    Device(phi::ProcLoader *loader,
+    Device(const phi::ProcLoader &loader,
            int viewport_width,
            int viewport_height);
+
+#warning "FIXME: this is an ugly hack"
+    void SetDefaultFrameBuffer(GLuint index);
 
     /**
      * Draws geometry from currently bound buffers.
