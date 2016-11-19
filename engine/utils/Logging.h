@@ -10,7 +10,7 @@ namespace phi {
 enum LogLevel { TRACE, INFO, DEBUG, WARNING, ERROR };
 
 static const char *RootdirRelativeFilename(const char *filename) {
-    static const char SRC_PREFIX[] = { 's', 'r', 'c', '/', '\0' };
+    static const char SRC_PREFIX[] = { 'p', 'h', 'i', '/', '\0' };
     static const long SRC_PREFIX_LEN = sizeof(SRC_PREFIX) - 1;
     const size_t flen = strlen(filename);
     for (const char *ch = filename; ch && *ch; ++ch) {
