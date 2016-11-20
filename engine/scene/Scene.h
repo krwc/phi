@@ -5,6 +5,7 @@ namespace phi {
 class DrawCallQueue;
 class Camera;
 class AABB;
+struct Ray;
 class Entity;
 class PointLight;
 class DirLight;
@@ -22,6 +23,12 @@ public:
 
     virtual const std::vector<phi::DirLight *> &GetDirLights() = 0;
     virtual const std::vector<phi::PointLight *> &GetPointLights() = 0;
+
+    /**
+     * @returns Closest entity being hit in the scene or nullptr if
+     *          no entity were hit.
+     */
+    virtual phi::Entity *Pick(const phi::Ray &ray) = 0;
 };
 
 } // namespace phi

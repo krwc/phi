@@ -8,7 +8,7 @@
 namespace phi {
 using namespace std;
 
-unique_ptr<Mesh> MeshImporter::FromFile(const string &file) {
+unique_ptr<Mesh> MeshImporter::FromFile(const string &file, const string &name) {
     Assimp::Importer importer;
     auto scene = importer.ReadFile(file, aiProcess_Triangulate
                                                  | aiProcess_GenSmoothNormals);
@@ -26,7 +26,7 @@ unique_ptr<Mesh> MeshImporter::FromFile(const string &file) {
     auto mesh = scene->mMeshes[0];
     assert(mesh->HasPositions());
     assert(mesh->HasNormals());
-    auto result = make_unique<SimpleMesh>();
+    auto result = make_unique<SimpleMesh>(name);
 
     for (unsigned i = 0; i < mesh->mNumFaces; ++i) {
         auto face = mesh->mFaces[i];

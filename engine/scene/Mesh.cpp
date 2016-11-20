@@ -16,8 +16,8 @@ const Layout SimpleMeshLayout = {
 
 } // namespace
 
-SimpleMesh::SimpleMesh()
-        : m_dirty(true), m_material(nullptr), m_vertices() {}
+SimpleMesh::SimpleMesh(const std::string &name)
+        : m_dirty(true), m_material(nullptr), m_name(name), m_vertices() {}
 
 SimpleMesh::~SimpleMesh() {}
 
@@ -51,6 +51,18 @@ void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
 
 void SimpleMesh::SetMaterial(phi::Material *material) {
     m_material = material;
+}
+
+bool SimpleMesh::Hit(const phi::Ray &ray, double *out_t) const {
+    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+        const glm::vec4 v0 = GetTransform() * m_vertices[i + 0].position;
+        const glm::vec4 v1 = GetTransform() * m_vertices[i + 1].position;
+        const glm::vec4 v2 = GetTransform() * m_vertices[i + 2].position;
+        if (ray.Hits(v0, v1, v2, out_t)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SimpleMesh::Render(phi::DrawCall &draw) {

@@ -8,7 +8,8 @@
 namespace phi {
 
 struct MeshImporter {
-    static std::unique_ptr<phi::Mesh> FromFile(const std::string &file);
+    static std::unique_ptr<phi::Mesh>
+    FromFile(const std::string &file, const std::string &name = "unnamed mesh");
 };
 
 } // namespace phi

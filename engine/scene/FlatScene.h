@@ -5,6 +5,7 @@
 #include "Scene.h"
 
 #include "math/AABB.h"
+#include "math/Ray.h"
 
 namespace phi {
 
@@ -24,6 +25,8 @@ public:
     virtual void AddLight(phi::DirLight *);
     virtual void AddLight(phi::PointLight *);
     virtual void Render(phi::DrawCallQueue *);
+    virtual phi::Entity *Pick(const phi::Ray &ray);
+
     virtual const phi::Camera *GetCamera() const {
         return m_camera;
     }

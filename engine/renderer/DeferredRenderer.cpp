@@ -167,8 +167,8 @@ void DeferredRenderer::Resize(int w, int h) {
     assert(m_gbuffer->IsReady());
 
     phi::SsaoPass::Config config{};
-    config.fbo_width = w / 2;
-    config.fbo_height = h / 2;
+    config.fbo_width = w;
+    config.fbo_height = h;
     config.position = m_position.get();
     config.normal = m_normal.get();
     config.depth = m_depth.get();

@@ -6,6 +6,7 @@
 
 #include "math/AABB.h"
 #include "math/Math.h"
+#include "math/Ray.h"
 
 #include "Entity.h"
 
@@ -41,21 +42,27 @@ public:
         glm::vec3 normal;
     };
 
-    SimpleMesh();
+    SimpleMesh(const std::string &name);
     virtual ~SimpleMesh();
     virtual const phi::Layout *GetLayout() const;
     virtual phi::Material *GetMaterial() const;
     virtual phi::Buffer *GetVertexBuffer();
     virtual phi::AABB GetAABB() const;
+    virtual bool Hit(const phi::Ray &ray, double *out_t) const;
 
     virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
     virtual void Render(phi::DrawCall &);
 
+    virtual const std::string &GetName() const {
+        return m_name;
+    }
+
 private:
     bool m_dirty;
     phi::AABB m_box;
     phi::Material *m_material;
+    std::string m_name;
     std::unique_ptr<phi::Buffer> m_vbo;
     std::vector<Vertex> m_vertices;
 };
