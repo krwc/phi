@@ -28,13 +28,21 @@ unique_ptr<Mesh> MeshImporter::FromFile(const string &file, const string &name) 
     assert(mesh->HasNormals());
     auto result = make_unique<SimpleMesh>(name);
 
+    glm::vec3 center{0,0,0};
+    for (unsigned i = 0; i < mesh->mNumVertices; ++i) {
+        center.x += mesh->mVertices[i].x;
+        center.y += mesh->mVertices[i].y;
+        center.z += mesh->mVertices[i].z;
+    }
+    center /= mesh->mNumVertices;
+
     for (unsigned i = 0; i < mesh->mNumFaces; ++i) {
         auto face = mesh->mFaces[i];
         SimpleMesh::Vertex v;
         for (unsigned j = 0; j < face.mNumIndices; ++j) {
             v.position.w = 1.0f;
             for (unsigned k = 0; k < 3; ++k) {
-                v.position[k] = mesh->mVertices[face.mIndices[j]][k];
+                v.position[k] = mesh->mVertices[face.mIndices[j]][k] - center[k];
                 v.normal[k] = mesh->mNormals[face.mIndices[j]][k];
             }
             result->AppendVertex(v);
