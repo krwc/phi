@@ -1,9 +1,15 @@
 #include <QSurfaceFormat>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QSizePolicy>
 #include "PhiWidget.h"
 
 #include "engine/renderer/materials/PhongMaterial.h"
+#include "engine/renderer/DebugDrawer.h"
 
 #include "engine/utils/MeshImporter.h"
+
+#include "engine/math/Ray.h"
 
 namespace phi {
 namespace editor {
@@ -26,6 +32,8 @@ PhiWidget::PhiWidget(QWidget *widget)
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     setFormat(format);
+    setFocusPolicy(Qt::StrongFocus);
+    setMouseTracking(true);
 }
 
 void PhiWidget::initializeGL() {
@@ -35,12 +43,12 @@ void PhiWidget::initializeGL() {
                                              widget_size.height());
     m_renderer = std::make_unique<phi::DeferredRenderer>(*m_device.get());
 
-    static auto box = phi::MeshImporter::FromFile("assets/model/box.obj");
-    static auto plane_h = phi::MeshImporter::FromFile("assets/model/plane.obj");
-    static auto plane_v = phi::MeshImporter::FromFile("assets/model/plane.obj");
-    static auto wall_l = phi::MeshImporter::FromFile("assets/model/plane.obj");
-    static auto torus = phi::MeshImporter::FromFile("assets/model/torus.obj");
-    static auto bunny = phi::MeshImporter::FromFile("assets/model/bunny.obj");
+    static auto box = phi::MeshImporter::FromFile("assets/model/box.obj", "box");
+    static auto plane_h = phi::MeshImporter::FromFile("assets/model/plane.obj", "plane_h");
+    static auto plane_v = phi::MeshImporter::FromFile("assets/model/plane.obj", "plane_v");
+    static auto wall_l = phi::MeshImporter::FromFile("assets/model/plane.obj", "wall_l");
+    static auto torus = phi::MeshImporter::FromFile("assets/model/torus.obj", "torus");
+    static auto bunny = phi::MeshImporter::FromFile("assets/model/bunny.obj", "bunny");
 
     bunny->SetScale({80, 80, 80});
     bunny->SetPosition({16, -8, 0});
@@ -108,18 +116,71 @@ void PhiWidget::initializeGL() {
     m_scene->AddLight(sun.get());
     m_scene->AddLight(red_bulb.get());
     m_scene->AddLight(violet_bulb.get());
+
 }
 
+static phi::Entity *SELECTED_ENTITY;
 
 void PhiWidget::paintGL() {
     m_device->SetDefaultFrameBuffer(context()->defaultFramebufferObject());
+    handleInput();
     m_renderer->Render(*m_scene.get());
+    static phi::DebugDrawer debug(*m_device.get());
+    if (SELECTED_ENTITY) {
+        debug.DrawAABB(*m_camera.get(), SELECTED_ENTITY->GetAABB());
+    }
     update();
 }
 
 void PhiWidget::resizeGL(int w, int h) {
     m_renderer->Resize(w, h);
     m_camera->SetAspectRatio(float(w) / float(h));
+}
+
+void PhiWidget::keyPressEvent(QKeyEvent *event) {
+    m_pressed_keys.insert(event->key());
+}
+
+void PhiWidget::keyReleaseEvent(QKeyEvent *event) {
+    m_pressed_keys.remove(event->key());
+}
+
+void PhiWidget::mousePressEvent(QMouseEvent *event) {
+    // NDC
+    float x = 2.0f * (float(event->x()) / width()) - 1.0f;
+    float y = 1.0f - 2.0f * (float(event->y()) / height());
+    float z = -1.0f;
+    // View
+    glm::vec4 dir = glm::inverse(m_camera->GetProjMatrix()) * glm::vec4(x, y, z, 1.0f);
+    dir = glm::vec4(dir.x, dir.y, -1.0f, 0.0f);
+    // World
+    dir = glm::inverse(m_camera->GetViewMatrix()) * dir;
+
+    phi::Ray r;
+    r.origin = m_camera->GetPosition();
+    r.direction = glm::normalize(glm::vec3(dir));
+    SELECTED_ENTITY = m_scene->Pick(r);
+    emit EntityPicked(SELECTED_ENTITY);
+}
+
+void PhiWidget::handleInput() {
+    float accel = 1.0f;
+    if (m_pressed_keys.contains(Qt::Key_Shift)) {
+        accel = 4.0f;
+    }
+
+    if (m_pressed_keys.contains(Qt::Key_W)) {
+        m_camera->Move(accel * glm::vec3{ 0, 0, -0.1 });
+    }
+    if (m_pressed_keys.contains(Qt::Key_S)) {
+        m_camera->Move(accel * glm::vec3{ 0, 0, 0.1 });
+    }
+    if (m_pressed_keys.contains(Qt::Key_A)) {
+        m_camera->Move(accel * glm::vec3{ -0.1, 0, 0 });
+    }
+    if (m_pressed_keys.contains(Qt::Key_D)) {
+        m_camera->Move(accel * glm::vec3{ 0.1, 0, 0 });
+    }
 }
 
 } // namespace editor

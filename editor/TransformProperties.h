@@ -31,7 +31,7 @@ public slots:
     void OnEntitySelected(phi::Entity *);
 };
 
-}
-}
+} // namespace editor
+} // namespace phi
 
 #endif // PHI_EDITOR_TRANSFORM_PROPERTIES_H

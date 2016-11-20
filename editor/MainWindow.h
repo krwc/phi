@@ -1,21 +1,29 @@
 #ifndef PHI_EDITOR_MAIN_WINDOW_H
 #define PHI_EDITOR_MAIN_WINDOW_H
 #include <QMainWindow>
-#include <memory>
 
-#include "PhiWidget.h"
+namespace Ui {
+class MainWindow;
+}
 
 namespace phi {
-namespace editor {
+class Entity;
 
+namespace editor {
 class MainWindow : public QMainWindow {
-    std::unique_ptr<phi::editor::PhiWidget> m_phi_widget;
+    Q_OBJECT
+
+    Ui::MainWindow *ui;
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+
+private slots:
+    void OnEntityPicked(phi::Entity *);
 };
 
 } // namespace editor
 } // namespace phi
 
-#endif
+#endif // PHI_EDITOR_MAIN_WINDOW_H
