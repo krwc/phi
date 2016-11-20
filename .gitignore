@@ -1,2 +1,7 @@
 build/*
 !build/.gitignore
+PhiEngine.config
+PhiEngine.creator
+PhiEngine.creator.user
+PhiEngine.files
+PhiEngine.includes
