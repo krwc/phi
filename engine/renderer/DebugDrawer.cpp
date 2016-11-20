@@ -78,7 +78,7 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
     m_debug_program.SetConstant("ProjViewModelMatrix",
                                 view.GetProjMatrix() * view.GetViewMatrix());
     m_debug_program.SetConstant("Color", glm::vec4(color, 1.0f));
-    m_device.Draw(phi::Primitive::Lines, 0, 6);
+    m_device.Draw(phi::Primitive::Lines, 0, data.size());
 }
 
 void DebugDrawer::DrawTexture(const Texture2D &texture, int x, int y, int w, int h) {
