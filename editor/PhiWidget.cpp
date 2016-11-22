@@ -25,15 +25,20 @@ struct QtProcLoader : phi::ProcLoader {
 PhiWidget::PhiWidget(QWidget *widget)
         : QOpenGLWidget(widget),
           m_camera(std::make_unique<phi::FreeLookCamera>()),
-          m_scene(std::make_unique<phi::FlatScene>()) {
+          m_scene(std::make_unique<phi::FlatScene>()),
+          m_rotate(false) {
     m_scene->SetCamera(m_camera.get());
-    QSurfaceFormat format;
-    format.setVersion(4, 3);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    setFormat(format);
+    {
+        QSurfaceFormat format;
+        format.setVersion(4, 3);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+        format.setRenderableType(QSurfaceFormat::OpenGL);
+        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+        format.setSwapInterval(1);
+        QSurfaceFormat::setDefaultFormat(format);
+    }
+
     setFocusPolicy(Qt::StrongFocus);
-    setMouseTracking(true);
 }
 
 void PhiWidget::initializeGL() {
@@ -42,6 +47,7 @@ void PhiWidget::initializeGL() {
                                              widget_size.width(),
                                              widget_size.height());
     m_renderer = std::make_unique<phi::DeferredRenderer>(*m_device.get());
+    m_outline_pass = std::make_unique<phi::OutlinePass>(*m_renderer.get());
 
     static auto box = phi::MeshImporter::FromFile("assets/model/box.obj", "box");
     static auto plane_h = phi::MeshImporter::FromFile("assets/model/plane.obj", "plane_h");
@@ -125,16 +131,16 @@ void PhiWidget::paintGL() {
     m_device->SetDefaultFrameBuffer(context()->defaultFramebufferObject());
     handleInput();
     m_renderer->Render(*m_scene.get());
-    static phi::DebugDrawer debug(*m_device.get());
-    if (SELECTED_ENTITY) {
-        debug.DrawAABB(*m_camera.get(), SELECTED_ENTITY->GetAABB());
-    }
+    m_outline_pass->SetEntity(SELECTED_ENTITY);
+    m_outline_pass->SetCamera(m_camera.get());
+    m_outline_pass->Run();
     update();
 }
 
 void PhiWidget::resizeGL(int w, int h) {
     m_renderer->Resize(w, h);
     m_camera->SetAspectRatio(float(w) / float(h));
+    m_outline_pass = std::make_unique<phi::OutlinePass>(*m_renderer.get());
 }
 
 void PhiWidget::keyPressEvent(QKeyEvent *event) {
@@ -146,21 +152,46 @@ void PhiWidget::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void PhiWidget::mousePressEvent(QMouseEvent *event) {
-    // NDC
-    float x = 2.0f * (float(event->x()) / width()) - 1.0f;
-    float y = 1.0f - 2.0f * (float(event->y()) / height());
-    float z = -1.0f;
-    // View
-    glm::vec4 dir = glm::inverse(m_camera->GetProjMatrix()) * glm::vec4(x, y, z, 1.0f);
-    dir = glm::vec4(dir.x, dir.y, -1.0f, 0.0f);
-    // World
-    dir = glm::inverse(m_camera->GetViewMatrix()) * dir;
+    if (event->button() == Qt::LeftButton) {
+        // NDC
+        float x = 2.0f * (float(event->x()) / width()) - 1.0f;
+        float y = 1.0f - 2.0f * (float(event->y()) / height());
+        float z = -1.0f;
+        // View
+        glm::vec4 dir = glm::inverse(m_camera->GetProjMatrix()) * glm::vec4(x, y, z, 1.0f);
+        dir = glm::vec4(dir.x, dir.y, -1.0f, 0.0f);
+        // World
+        dir = glm::inverse(m_camera->GetViewMatrix()) * dir;
 
-    phi::Ray r;
-    r.origin = m_camera->GetPosition();
-    r.direction = glm::normalize(glm::vec3(dir));
-    SELECTED_ENTITY = m_scene->Pick(r);
-    emit EntityPicked(SELECTED_ENTITY);
+        phi::Ray r;
+        r.origin = m_camera->GetPosition();
+        r.direction = glm::normalize(glm::vec3(dir));
+        SELECTED_ENTITY = m_scene->Pick(r);
+        emit EntityPicked(SELECTED_ENTITY);
+    } else if (event->button() == Qt::RightButton) {
+        m_rotate = true;
+        m_mouse_position.x = event->x();
+        m_mouse_position.y = event->y();
+    }
+}
+
+void PhiWidget::mouseReleaseEvent(QMouseEvent *event) {
+    if (event->button() == Qt::RightButton) {
+        m_rotate = false;
+    }
+}
+
+void PhiWidget::mouseMoveEvent(QMouseEvent *event) {
+    if (m_rotate) {
+        int x = event->x();
+        int y = event->y();
+        int dx = m_mouse_position.x - x;
+        int dy = m_mouse_position.y - y;
+        m_camera->RotateX(-dy * 0.2);
+        m_camera->RotateY(-dx * 0.2);
+        m_mouse_position.x = x;
+        m_mouse_position.y = y;
+    }
 }
 
 void PhiWidget::handleInput() {

@@ -155,9 +155,9 @@ void main() {
 
     //    FragColor = vec4(mix(Color, vec3(1-Ao,0,0), 0.5), 1.0);
 //        FragColor = vec4(vec3(1 - Ao),1);
-//        FragColor = vec4(Color, 1);
+        FragColor = vec4(Color, 1);
 //        FragColor = P;
-         FragColor = vec4(min(Color, vec3(0)) + vec3(1 - Ao), 1);
+//         FragColor = vec4(min(Color, vec3(0)) + vec3(1 - Ao), 1);
         //        FragColor = P;
     }
 }
