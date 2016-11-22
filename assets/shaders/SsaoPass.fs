@@ -1,5 +1,4 @@
 #version 430
-#extension GL_ARB_shading_language_include : enable
 layout(location=0) out vec4 FragColor;
 
 uniform sampler2D g_TexNormal;
@@ -16,7 +15,7 @@ uniform vec2 g_ScreenSize;
 uniform mat4 g_ProjMatrix;
 uniform mat4 g_InvProjMatrix;
 uniform mat4 g_InvViewMatrix;
-uniform float g_Near = 0.1f;;
+uniform float g_Near = 0.1f;
 uniform float g_Far = 1000.0f;
 
 in vec2 UV;
