@@ -1,6 +1,5 @@
 include(FindPkgConfig)
 pkg_search_module(ASSIMP REQUIRED assimp)
-pkg_search_module(GLFW3 REQUIRED glfw3)
 pkg_search_module(GL REQUIRED gl)
 
 add_subdirectory(renderer)
