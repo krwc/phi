@@ -84,7 +84,8 @@ void OutlinePass::Run() {
     /* Now detect edges and render the outline. */
     device.BindFrameBuffer(nullptr);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD);
     device.BindProgram(&m_outline);
     m_outline.SetConstant("ProjViewModel", proj_view_model);
     m_outline.SetConstant("ObjectMask", static_cast<int>(0));
