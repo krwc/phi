@@ -54,15 +54,22 @@ void SimpleMesh::SetMaterial(phi::Material *material) {
 }
 
 bool SimpleMesh::Hit(const phi::Ray &ray, double *out_t) const {
+    double closest = std::numeric_limits<double>::max();
+    double current;
+    bool hit = false;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
         const glm::vec4 v0 = GetTransform() * m_vertices[i + 0].position;
         const glm::vec4 v1 = GetTransform() * m_vertices[i + 1].position;
         const glm::vec4 v2 = GetTransform() * m_vertices[i + 2].position;
-        if (ray.Hits(v0, v1, v2, out_t)) {
-            return true;
+        if (ray.Hits(v0, v1, v2, &current)) {
+            hit = true;
+            closest = glm::min(closest, current);
         }
     }
-    return false;
+    if (hit && out_t) {
+        *out_t = closest;
+    }
+    return hit;
 }
 
 void SimpleMesh::Render(phi::DrawCall &draw) {
