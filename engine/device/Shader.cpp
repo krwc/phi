@@ -52,6 +52,7 @@ void Shader::Compile() {
         CheckedCall(phi::glGetShaderInfoLog, m_id, log_length - 1, &log_length,
                     &compilation_log[0]);
 
+        PHI_LOG(ERROR, "Shader compilation failed:\n%s\n", m_source);
         throw invalid_argument(compilation_log);
     }
 }
