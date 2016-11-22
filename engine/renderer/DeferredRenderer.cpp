@@ -17,6 +17,7 @@ namespace phi {
 DeferredRenderer::DeferredRenderer(phi::Device &device)
         : m_device(device),
           m_shadow_casters(),
+          m_ssao_pass(device),
           m_light_pass(device),
           m_shadow_pass(device, 2048) {
     const auto &viewport = device.GetViewport();
@@ -83,8 +84,8 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_shadow_pass.Setup(config);
         m_shadow_pass.Run();
     }
-    m_ssao_pass->SetCamera(*camera);
-    m_ssao_pass->Run();
+    m_ssao_pass.SetCamera(*camera);
+    m_ssao_pass.Run();
     m_device.BindFrameBuffer(nullptr);
     {
         phi::LightPass::Config config{};
@@ -92,9 +93,8 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         config.texture_depth = m_depth.get();
         config.texture_shadow = &m_shadow_pass.GetShadowMap();
         config.texture_normal = m_normal.get();
-        config.texture_diffuse = m_diffuse.get();
-        config.texture_position = m_position.get();
-        config.texture_ao = &m_ssao_pass->GetAoTexture();
+        config.texture_diffuse = m_color.get();
+        config.texture_ao = &m_ssao_pass.GetAoTexture();
         config.point_lights = &scene.GetPointLights();
         config.dir_lights = &scene.GetDirLights();
         config.camera = camera;
@@ -151,28 +151,21 @@ void DeferredRenderer::Resize(int w, int h) {
     m_gbuffer = std::make_unique<phi::FrameBuffer>(w, h);
     m_depth = std::make_unique<phi::Texture2D>(w, h,
                                                phi::TextureFormat::DEPTH_24);
+    m_color = std::make_unique<phi::Texture2D>(w, h,
+                                               phi::TextureFormat::RGBA_16F);
     m_normal = std::make_unique<phi::Texture2D>(w, h,
                                                 phi::TextureFormat::RGBA_16F);
-    m_position = std::make_unique<phi::Texture2D>(w, h,
-                                                  phi::TextureFormat::RGBA_32F);
-    m_specular = std::make_unique<phi::Texture2D>(w, h,
-                                                  phi::TextureFormat::RGBA_16F);
-    m_diffuse = std::make_unique<phi::Texture2D>(w, h,
-                                                 phi::TextureFormat::RGBA_16F);
     m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 0, m_normal.get() });
-    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 1, m_diffuse.get() });
-    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 2, m_specular.get() });
-    //m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 3, m_position.get() });
+    m_gbuffer->SetColorAttachment(phi::ColorAttachment{ 1, m_color.get() });
     m_gbuffer->SetDepthAttachment(phi::DepthAttachment{ m_depth.get() });
     assert(m_gbuffer->IsReady());
 
     phi::SsaoPass::Config config{};
     config.fbo_width = w;
     config.fbo_height = h;
-    config.position = m_position.get();
     config.normal = m_normal.get();
     config.depth = m_depth.get();
-    m_ssao_pass = std::make_unique<phi::SsaoPass>(m_device, config);
+    m_ssao_pass.Setup(config);
 }
 
 } // namespace phi

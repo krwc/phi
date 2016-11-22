@@ -21,14 +21,15 @@ class DirLight;
 
 class DeferredRenderer final : public Renderer {
     phi::Device &m_device;
+
+    std::vector<const phi::DirLight *> m_shadow_casters;
     std::unique_ptr<phi::FrameBuffer> m_gbuffer;
     std::unique_ptr<phi::Texture2D> m_depth;
-    std::unique_ptr<phi::Texture2D> m_position;
+    std::unique_ptr<phi::Texture2D> m_color;
     std::unique_ptr<phi::Texture2D> m_normal;
-    std::unique_ptr<phi::Texture2D> m_diffuse;
-    std::unique_ptr<phi::Texture2D> m_specular;
-    std::vector<const phi::DirLight *> m_shadow_casters;
-    std::unique_ptr<phi::SsaoPass> m_ssao_pass;
+
+
+    phi::SsaoPass m_ssao_pass;
     phi::LightPass m_light_pass;
     phi::ShadowPass<phi::DirLight> m_shadow_pass;
 
@@ -48,6 +49,9 @@ public:
         return m_device;
     }
 
+    const phi::Texture *GetDepth() const {
+        return m_depth.get();
+    }
 };
 
 } // namespace phi

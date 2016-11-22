@@ -24,7 +24,8 @@ public:
         const phi::Texture2D *depth;
         const phi::Camera *camera;
     };
-    SsaoPass(phi::Device &device, const SsaoPass::Config &config);
+    SsaoPass(phi::Device &device);
+    void Setup(const phi::SsaoPass::Config &config);
     void Run();
     void SetCamera(const phi::Camera &camera);
 

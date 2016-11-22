@@ -46,21 +46,23 @@ void SsaoPass::InitFbo() {
     assert(m_fbo->IsReady());
 }
 
-SsaoPass::SsaoPass(phi::Device &device, const SsaoPass::Config &config)
-        : m_device(device), m_program(), m_config(config) {
+SsaoPass::SsaoPass(phi::Device &device)
+        : m_device(device), m_program() {
     InitNoiseTexture();
     InitProgram();
-    InitFbo();
+}
 
-    {
-        phi::BlurPass::Config config{};
-        config.kernel = phi::BlurPass::Kernel::Gauss9x9;
-        config.texture = m_ao_texture.get();
-        config.radius = 1.0f;
-        m_blur_pass = std::make_unique<phi::BlurPass>(device, config);
-    }
+void SsaoPass::Setup(const phi::SsaoPass::Config &config) {
+    m_config = config;
     m_screen_size =
             glm::vec2((float) config.fbo_width, (float) config.fbo_height);
+    InitFbo();
+
+    phi::BlurPass::Config blur_config{};
+    blur_config.kernel = phi::BlurPass::Kernel::Gauss9x9;
+    blur_config.texture = m_ao_texture.get();
+    blur_config.radius = 1.0f;
+    m_blur_pass = std::make_unique<phi::BlurPass>(m_device, blur_config);
 }
 
 void SsaoPass::SetCamera(const phi::Camera &camera) {
