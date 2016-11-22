@@ -1,4 +1,3 @@
-#include <QSurfaceFormat>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QSizePolicy>
@@ -32,14 +31,6 @@ PhiWidget::PhiWidget(QWidget *widget)
           m_selected_entity(nullptr),
           m_rotate(false) {
     m_scene->SetCamera(m_camera.get());
-    QSurfaceFormat format;
-    format.setVersion(4, 3);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setSwapInterval(1);
-    QSurfaceFormat::setDefaultFormat(format);
-
     setFocusPolicy(Qt::StrongFocus);
 }
 
