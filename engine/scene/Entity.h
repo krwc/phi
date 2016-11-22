@@ -23,7 +23,7 @@ public:
     /**
      * Tests whether @p ray hits this entity.
      *
-     * @param out_t Distance from the Ray#origin to the hit point.
+     * @param out_t Closest hit distance from the Ray#origin .
      * @return true on hit, false otherwise
      */
     virtual bool Hit(const phi::Ray &ray, double *out_t = nullptr) const = 0;

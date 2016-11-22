@@ -20,8 +20,8 @@ void main() {
             if (abs(GetMask(Base + ivec2(i, j)) - BaseMask) > 0) {
                 const float PixelDepth = texelFetch(SceneDepth, Base, 0).r;
                 // Outline behind will be more transculent
-                const float Alpha = PixelDepth < gl_FragCoord.z ? 0.9 : 0.0;
-                FragColor = vec4(OutlineColor, Alpha);
+                const float Intensity = PixelDepth < gl_FragCoord.z ? 0.1 : 1.0;
+                FragColor = vec4(Intensity * OutlineColor, Intensity);
                 return;
             }
         }
