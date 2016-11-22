@@ -32,8 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->transformProperties->setVisible(false);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
