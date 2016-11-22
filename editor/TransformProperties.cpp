@@ -60,13 +60,17 @@ void TransformProperties::OnTransformChanged(double) {
                          ui->scaleZ->value() });
 }
 
+void TransformProperties::UpdateRotationSliders() {
+    ui->rotX->setValue(ui->spinRotX->value() / 360.0 * ui->rotX->maximum());
+    ui->rotY->setValue(ui->spinRotY->value() / 360.0 * ui->rotY->maximum());
+    ui->rotZ->setValue(ui->spinRotZ->value() / 360.0 * ui->rotZ->maximum());
+}
+
 void TransformProperties::OnRotationEditFinished() {
     // Set to avoid rotation slider update causing rotation spinbox update
     // during value synchronization.
     m_supress_update = true;
-    ui->rotX->setValue(ui->spinRotX->value() / 360.0 * ui->rotX->maximum());
-    ui->rotY->setValue(ui->spinRotY->value() / 360.0 * ui->rotY->maximum());
-    ui->rotZ->setValue(ui->spinRotZ->value() / 360.0 * ui->rotZ->maximum());
+    UpdateRotationSliders();
     m_supress_update = false;
 }
 
@@ -85,6 +89,7 @@ void TransformProperties::OnEntitySelected(phi::Entity *entity) {
     ui->spinRotX->setValue(R.x);
     ui->spinRotY->setValue(R.y);
     ui->spinRotZ->setValue(R.z);
+    UpdateRotationSliders();
     ui->scaleX->setValue(S.x);
     ui->scaleY->setValue(S.y);
     ui->scaleZ->setValue(S.z);

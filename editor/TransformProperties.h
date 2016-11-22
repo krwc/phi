@@ -19,6 +19,8 @@ class TransformProperties : public QGroupBox {
 
     Ui::TransformProperties *ui;
 
+    void UpdateRotationSliders();
+
 public:
     explicit TransformProperties(QWidget *parent = 0);
     ~TransformProperties();
