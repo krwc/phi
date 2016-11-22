@@ -16,7 +16,7 @@ void SsaoPass::InitNoiseTexture() {
     std::mt19937 generator(std::random_device{}());
     std::uniform_real_distribution<float> d(0.0f, 1.0f);
     std::vector<glm::vec3> noise(NOISE_SIZE*NOISE_SIZE);
-    for (int i = 0; i < noise.size(); ++i) {
+    for (size_t i = 0; i < noise.size(); ++i) {
         noise[i].x = 2.0f * d(generator) - 1.0f;
         noise[i].y = 2.0f * d(generator) - 1.0f;
         noise[i].z = 0.0f;
