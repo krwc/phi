@@ -23,8 +23,8 @@ class PhiWidget : public QOpenGLWidget {
     std::unique_ptr<phi::DeferredRenderer> m_renderer;
     std::unique_ptr<phi::FreeLookCamera> m_camera;
     std::unique_ptr<phi::Scene> m_scene;
-
     std::unique_ptr<phi::OutlinePass> m_outline_pass;
+    phi::Entity *m_selected_entity;
 
     QSet<int> m_pressed_keys;
     // True if rotation via mouse movement should be performed.

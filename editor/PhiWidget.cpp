@@ -16,7 +16,10 @@ namespace editor {
 
 struct QtProcLoader : phi::ProcLoader {
     QOpenGLContext *context;
-    QtProcLoader(QOpenGLContext *context) : context(context) {}
+
+    QtProcLoader(QOpenGLContext *context)
+        : context(context) {}
+
     void *operator()(const char *name) const {
         return (void *) context->getProcAddress(name);
     }
@@ -26,17 +29,16 @@ PhiWidget::PhiWidget(QWidget *widget)
         : QOpenGLWidget(widget),
           m_camera(std::make_unique<phi::FreeLookCamera>()),
           m_scene(std::make_unique<phi::FlatScene>()),
+          m_selected_entity(nullptr),
           m_rotate(false) {
     m_scene->SetCamera(m_camera.get());
-    {
-        QSurfaceFormat format;
-        format.setVersion(4, 3);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-        format.setRenderableType(QSurfaceFormat::OpenGL);
-        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-        format.setSwapInterval(1);
-        QSurfaceFormat::setDefaultFormat(format);
-    }
+    QSurfaceFormat format;
+    format.setVersion(4, 3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setSwapInterval(1);
+    QSurfaceFormat::setDefaultFormat(format);
 
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -125,13 +127,11 @@ void PhiWidget::initializeGL() {
 
 }
 
-static phi::Entity *SELECTED_ENTITY;
-
 void PhiWidget::paintGL() {
     m_device->SetDefaultFrameBuffer(context()->defaultFramebufferObject());
     handleInput();
     m_renderer->Render(*m_scene.get());
-    m_outline_pass->SetEntity(SELECTED_ENTITY);
+    m_outline_pass->SetEntity(m_selected_entity);
     m_outline_pass->SetCamera(m_camera.get());
     m_outline_pass->Run();
     update();
@@ -166,8 +166,8 @@ void PhiWidget::mousePressEvent(QMouseEvent *event) {
         phi::Ray r;
         r.origin = m_camera->GetPosition();
         r.direction = glm::normalize(glm::vec3(dir));
-        SELECTED_ENTITY = m_scene->Pick(r);
-        emit EntityPicked(SELECTED_ENTITY);
+        m_selected_entity = m_scene->Pick(r);
+        emit EntityPicked(m_selected_entity);
     } else if (event->button() == Qt::RightButton) {
         m_rotate = true;
         m_mouse_position.x = event->x();
