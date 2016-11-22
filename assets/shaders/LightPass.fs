@@ -54,13 +54,16 @@ layout(location=0) out vec4 FragColor;
 
 uniform LightInfo g_LightInfo;
 uniform mat4 g_ShadowMatrix;
+uniform mat4 g_InvProjMatrix;
 uniform float g_DepthTexelSize = 1.0f/2048;
 uniform sampler2DShadow g_TexShadow;
-uniform sampler2D g_TexPosition;
+uniform sampler2D g_TexDepth;
 uniform sampler2D g_TexDiffuse;
 uniform sampler2D g_TexSpecular;
 uniform sampler2D g_TexNormal;
 uniform sampler2D g_TexAo;
+
+in vec2 UV;
 
 #define PCF_IMPL(R, Size)                                                 \
     float I = 0.0f;                                                       \
@@ -94,36 +97,67 @@ float ShadowIntensity(in vec4 Coord, in vec3 N, in vec3 L) {
     return PCF5x5(CurrentDepth, ProjCoords.xy, vec2(0, 0));
 }
 
-vec4 GetPosition(in ivec2 uv) {
-    return texelFetch(g_TexPosition, uv, 0);
+float LinearDepth(in vec2 uv) {
+    float z = texture(g_TexDepth, uv).r;
+    float g_Near = 0.1f;
+    float g_Far = 1000.0f;
+    return 2.0 * g_Near * g_Far / (g_Far + g_Near - z * (g_Far - g_Near));
 }
 
-vec4 GetNormal(in ivec2 uv) {
-    return texelFetch(g_TexNormal, uv, 0);
+
+vec4 GetPosition(in vec2 uv) {
+    float z = 2*texture(g_TexDepth, uv).r - 1;
+    float x = uv.x*2 - 1;
+    float y = uv.y*2 - 1;
+    vec4 P = vec4(x, y, z, 1.0f);
+    P = g_InvProjMatrix * P;
+    return P /= P.w;
 }
 
-vec4 GetDiffuse(in ivec2 uv) {
-    return texelFetch(g_TexDiffuse, uv, 0);
+vec4 GetNormal(vec2 uv) {
+    return texture(g_TexNormal, uv);
 }
 
-float GetAo(in ivec2 uv) {
-    return texelFetch(g_TexAo, uv, 0).r;
+vec4 GetDiffuse(vec2 uv) {
+    return texture(g_TexDiffuse, uv);
+}
+
+float GetAo(vec2 uv) {
+//    return texture(g_TexAo, uv).r;
+    const vec2 Offset = 1.0f / textureSize(g_TexAo, 0).xy;
+    float Result = 0.0f;
+    for (float i = -1.0; i <= 1.0; i += 1.0) {
+        for (float j = -1.0; j <= 1.0; j += 1.0) {
+            Result += texture(g_TexAo, uv + vec2(i, j)*Offset).r;
+        }
+    }
+    return Result / 4.0f;
 }
 
 void main() {
-    ivec2 Pixel = ivec2(gl_FragCoord.xy);
-    const float Ao = 1.0f;
-//    float Ao = GetAo(Pixel / 2);
+    vec2 Pixel = UV;//ivec2(gl_FragCoord.xy);
     vec4 N = GetNormal(Pixel);
-    vec4 P = GetPosition(Pixel);
-    vec4 DiffuseColor = GetDiffuse(Pixel);
-    vec3 DirLightI = ComputeDirLightIntensity(g_LightInfo, N.xyz);
-    vec3 PointLightI = ComputePointLightIntensity(g_LightInfo, N.xyz, P.xyz);
+    if (N == vec4(0,0,0,0)) {
+        FragColor = vec4(0.3,0.3,0.3,1);
+    } else {
+        float Ao = GetAo(Pixel);
+        vec4 P = GetPosition(UV);
+        vec4 DiffuseColor = GetDiffuse(Pixel);
+        vec3 DirLightI = ComputeDirLightIntensity(g_LightInfo, N.xyz);
+        vec3 PointLightI = ComputePointLightIntensity(g_LightInfo, N.xyz, P.xyz);
 
-    vec4 ShadowCoord = g_ShadowMatrix * P;
-    vec3 I = (1.0f - ShadowIntensity(g_ShadowMatrix * P, N.xyz, g_LightInfo.Dir[0].Direction)) * DirLightI
-             + PointLightI;
-    vec3 Color = clamp(Ao * I * DiffuseColor.xyz, 0, 1);
+        vec4 ShadowCoord = g_ShadowMatrix * P;
+        vec3 I = (1.0f - ShadowIntensity(g_ShadowMatrix * P, N.xyz,
+                                         g_LightInfo.Dir[0].Direction))
+                         * DirLightI
+                 + PointLightI;
+        vec3 Color = clamp((1-Ao) * I * DiffuseColor.xyz, 0, 1);
 
-    FragColor = vec4(Color, 1);
+    //    FragColor = vec4(mix(Color, vec3(1-Ao,0,0), 0.5), 1.0);
+//        FragColor = vec4(vec3(1 - Ao),1);
+        FragColor = vec4(Color, 1);
+//        FragColor = P;
+//         FragColor = vec4(min(Color, vec3(0)) + vec3(1 - Ao), 1);
+        //        FragColor = P;
+    }
 }
