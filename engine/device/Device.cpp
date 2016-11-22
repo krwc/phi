@@ -28,6 +28,7 @@ void LoadProcedures(const phi::ProcLoader &loader) {
     PHI_LOAD_PROC(glBlendEquationSeparate);
     PHI_LOAD_PROC(glAttachShader);
     PHI_LOAD_PROC(glBindTexture);
+    PHI_LOAD_PROC(glBlitNamedFramebuffer);
     PHI_LOAD_PROC(glCheckNamedFramebufferStatus);
     PHI_LOAD_PROC(glBindFramebuffer);
     PHI_LOAD_PROC(glNamedFramebufferDrawBuffers);
@@ -121,6 +122,13 @@ Device::Device(const phi::ProcLoader &loader,
     glCullFace(GL_BACK);
     SetViewport({ 0, 0, viewport_width, viewport_height });
     SetScissor({ 0, 0, viewport_width, viewport_height });
+}
+
+void Device::BlitDepthBuffer(const phi::FrameBuffer *src) {
+    const int w = src->GetWidth();
+    const int h = src->GetHeight();
+    CheckedCall(phi::glBlitNamedFramebuffer, src->GetId(), m_state.default_fbo,
+                0, 0, w, h, 0, 0, w, h, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
 
 void Device::SetDefaultFrameBuffer(GLuint default_fbo) {

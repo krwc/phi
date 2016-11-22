@@ -46,6 +46,13 @@ public:
            int viewport_width,
            int viewport_height);
 
+    /**
+     * Blits depth buffer from a specified @p src onto Default FrameBuffer.
+     *
+     * @param src   Source FrameBuffer.
+     */
+    void BlitDepthBuffer(const phi::FrameBuffer *src);
+
 #warning "FIXME: this is an ugly hack"
     void SetDefaultFrameBuffer(GLuint index);
 
