@@ -7,21 +7,16 @@
 namespace phi {
 using namespace std;
 
-namespace {
-
-const Layout SimpleMeshLayout = {
-    { "in_Position", offsetof(SimpleMesh::Vertex, position), sizeof(SimpleMesh::Vertex), Type::Float },
-    { "in_Normal"  , offsetof(SimpleMesh::Vertex, normal)  , sizeof(SimpleMesh::Vertex), Type::Float }
-};
-
-} // namespace
-
 SimpleMesh::SimpleMesh(const std::string &name)
         : m_dirty(true), m_material(nullptr), m_name(name), m_vertices() {}
 
 SimpleMesh::~SimpleMesh() {}
 
 const Layout *SimpleMesh::GetLayout() const {
+    static const Layout SimpleMeshLayout(sizeof(SimpleMesh::Vertex), {
+        { phi::Layout::Position, phi::Layout::Float4, offsetof(SimpleMesh::Vertex, position) },
+        { phi::Layout::Normal  , phi::Layout::Float3, offsetof(SimpleMesh::Vertex, normal)   }
+    });
     return &SimpleMeshLayout;
 }
 
@@ -81,7 +76,7 @@ void SimpleMesh::Render(phi::DrawCall &draw) {
     draw.primitive = Primitive::Triangles;
     draw.transform = GetTransform();
     draw.program = m_material->GetProgram();
-    draw.layout = &SimpleMeshLayout;
+    draw.layout = GetLayout();
     draw.vbo = GetVertexBuffer();
     draw.count = int(m_vertices.size());
     draw.offset = 0;

@@ -13,8 +13,9 @@ const phi::Buffer &Common::QuadVbo() {
 }
 
 const phi::Layout &Common::QuadLayout() {
-    static const phi::Layout layout{ { "in_Position", 0u, sizeof(glm::vec2),
-                                       Type::Float } };
+    static const phi::Layout layout(sizeof(glm::vec2), {
+        { phi::Layout::Position, phi::Layout::Float2, 0u }
+    });
     return layout;
 }
 

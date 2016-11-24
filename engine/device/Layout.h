@@ -5,49 +5,69 @@
 #include <vector>
 
 #include "Prototypes.h"
+#include "Resource.h"
 
 namespace phi {
 
-enum class Type {
-    Float = GL_FLOAT
-};
-
 /**
- * This structure is used by renderer to determine which shader input variable
- * this particular data entry shall be bound to. For example, let's consider
- * following GLSL shader:
- * @code:
- *  layout(location=0) in vec4 position;
- *  layout(location=1) in vec4 color;
+ * This class purpose is to connect vertex attributes to a specified shader program
+ * input variables.
+ *
+ * For example, let's analyze following GLSL code:
+ * @code
+ *  layout(location = POSITION) in vec4 Position;
+ *  layout(location = NORMAL) in vec3 Normal;
  *  ...
  *
- * Now, let's assume we have a Buffer object filled with vertex data:
- * @code:
- *  struct Vertex { vec4 position; vec4 color };
- * in this case we'd have to setup two LayoutEntry instances, in order to
- * bind data properly:
- * @code:
- *  {
- *      { "position", offsetof(Vertex, position), sizeof(Vertex), Type::Float },
- *      { "color"   , offsetof(Vertex, color)   , sizeof(Vertex), Type::Float }
- *  }
+ * Assume also that we're working with following vertex format structure:
+ * @code
+ *  struct Vertex {
+ *      glm:;vec3 random_data;
+ *      glm::vec4 position;
+ *      glm::vec3 normal;
+ *  };
+ *
+ * Now, we can specify our Vertex layout via this class instance:
+ * @code
+ *  const phi::Layout layout(sizeof(Vertex), {
+ *      { phi::Layout::Position, phi::Layout::Float4, offsetof(Vertex, position) },
+ *      { phi::Layout::Normal  , phi::Layout::Float3, offsetof(Vertex, normal) }
+ *  };
+ *
+ * And at this point, we are ready to rendering with VBO containing some Vertex
+ * instances in it.
+ *
+ * For more information refer to @ref phi::Device::BindLayout .
  */
-struct LayoutEntry {
-    std::string name;
-    int offset;
-    int stride;
-    Type type;
-};
-
-class Layout {
-    std::vector<LayoutEntry> m_layout;
-
+class Layout final : public Resource {
 public:
-    Layout(std::initializer_list<LayoutEntry> layout);
+    enum Type {
+        Float,
+        Float2,
+        Float3,
+        Float4
+    };
 
-    const std::vector<LayoutEntry> &GetEntries() const {
-        return m_layout;
-    }
+    /* NOTE: this should be keep up synchronized within assets/shaders/Layout.h */
+    enum Location {
+        Position = 0u,
+        Normal   = 1u
+    };
+
+    struct Entry {
+        Layout::Location location;
+        Layout::Type type;
+        unsigned offset;
+    };
+
+    Layout(size_t stride, std::initializer_list<Layout::Entry> layout);
+    virtual ~Layout();
+    GLuint GetId() const;
+    size_t GetStride() const;
+
+private:
+    GLuint m_id;
+    size_t m_stride;
 };
 
 } // namespace phi

@@ -1,5 +1,5 @@
-#version 430
-layout(location=0) in vec4 in_Position;
+#line 1 "Passthrough.h"
+layout(location=POSITION) in vec4 in_Position;
 uniform mat4 ProjViewModel;
 
 void main() {

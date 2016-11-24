@@ -1,5 +1,5 @@
-#version 430
-layout(location=0) in vec2 in_Position;
+#line 1 "Quad.vs"
+layout(location=POSITION) in vec2 in_Position;
 out vec2 UV;
 
 void main() {
