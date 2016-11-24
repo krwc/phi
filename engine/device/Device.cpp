@@ -32,11 +32,14 @@ void LoadProcedures(const phi::ProcLoader &loader) {
     PHI_LOAD_PROC(glCheckNamedFramebufferStatus);
     PHI_LOAD_PROC(glBindFramebuffer);
     PHI_LOAD_PROC(glNamedFramebufferDrawBuffers);
+    PHI_LOAD_PROC(glBindVertexBuffer);
     PHI_LOAD_PROC(glCreateVertexArrays);
+    PHI_LOAD_PROC(glDeleteVertexArrays);
+    PHI_LOAD_PROC(glVertexArrayAttribFormat);
+    PHI_LOAD_PROC(glVertexArrayAttribBinding);
     PHI_LOAD_PROC(glBindVertexArray);
-    PHI_LOAD_PROC(glEnableVertexAttribArray);
+    PHI_LOAD_PROC(glEnableVertexArrayAttrib);
     PHI_LOAD_PROC(glDisableVertexAttribArray);
-    PHI_LOAD_PROC(glVertexAttribPointer);
     PHI_LOAD_PROC(glBindBuffer);
     PHI_LOAD_PROC(glDrawArrays);
     PHI_LOAD_PROC(glDrawElements);
@@ -159,11 +162,11 @@ void Device::BindProgram(const phi::Program *program) {
 void Device::BindVbo(const phi::Buffer *buffer) {
     if (m_state.vbo == buffer) {
         return;
-    } else if (!buffer) {
-        CheckedCall(phi::glBindBuffer, GL_ARRAY_BUFFER, GL_NONE);
-    } else {
+    } else if (buffer) {
         assert(buffer->GetType() == BufferType::Vertex);
-        CheckedCall(phi::glBindBuffer, GL_ARRAY_BUFFER, buffer->GetId());
+        assert(m_state.layout);
+        CheckedCall(phi::glBindVertexBuffer, 0u, buffer->GetId(), 0,
+                    m_state.layout->GetStride());
     }
     m_state.vbo = buffer;
 }
@@ -181,34 +184,15 @@ void Device::BindIbo(const phi::Buffer *buffer) {
 }
 
 void Device::BindLayout(const phi::Layout *layout) {
-    if (!layout) {
-        CheckedCall(phi::glBindVertexArray, GL_NONE);
+    if (m_state.layout == layout) {
         return;
     }
-    // TODO: New OpenGL API can actually simplify this and allow for
-    // optimizations
-    assert(m_state.vbo && "VBO must be bound before layout");
-    assert(m_state.program && "Program must be bound before layout");
-    CheckedCall(phi::glBindVertexArray, m_vao);
-    /* Clear enabled attributes state, to prepare for rendering data of
-     * different layout */
-    for (int enabled_array : m_state.arrays) {
-        CheckedCall(phi::glDisableVertexAttribArray, enabled_array);
+    if (!layout) {
+        CheckedCall(phi::glBindVertexArray, GL_NONE);
+    } else if (layout != m_state.layout) {
+        CheckedCall(phi::glBindVertexArray, layout->GetId());
     }
-    m_state.arrays.clear();
-
-    for (const auto &entry : layout->GetEntries()) {
-        auto info = m_state.program->FindAttribute(entry.name);
-        if (!info) {
-            continue;
-        }
-
-        m_state.arrays.push_back(info->location);
-        CheckedCall(phi::glEnableVertexAttribArray, info->location);
-        CheckedCall(phi::glVertexAttribPointer, info->location,
-                    NumAttributeComponents(info->type), (GLenum) entry.type,
-                    GL_FALSE, entry.stride, (void *) (intptr_t) entry.offset);
-    }
+    m_state.layout = layout;
 }
 
 void Device::BindTexture(int texture_unit, const phi::Texture *texture) {

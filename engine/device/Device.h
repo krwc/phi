@@ -31,10 +31,10 @@ class Device {
     struct State {
         bool zwrite;
         bool ztest;
-        std::vector<int> arrays;
         std::array<const phi::Texture *, 16u> textures;
         std::array<const phi::Sampler *, 16u> samplers;
         GLuint default_fbo;
+        const phi::Layout *layout;
         const phi::Program *program;
         const phi::FrameBuffer *fbo;
         const phi::Buffer *vbo;
@@ -72,7 +72,8 @@ public:
     void BindProgram(const phi::Program *program);
 
     /**
-     * Binds vertex buffer @p buffer to the device context.
+     * Binds vertex buffer @p buffer to the device context using currently
+     * bound layout.
      *
      * Note: @p buffer might be nullptr, which tells the device to unbind
      *       currently bound vertex buffer.
@@ -92,7 +93,8 @@ public:
     void BindIbo(const phi::Buffer *buffer);
 
     /**
-     * Sets vertex buffer layout for use by the future @ref Device::Draw calls.
+     * Sets layout to use by vertex buffers. It must be set before any @ref BindVbo,
+     * is called.
      *
      * Note: @p layout might be nullptr, which tells the device to reset
      *       currently set layout.
