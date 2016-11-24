@@ -1,6 +1,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QSizePolicy>
+#include <QCursor>
 #include "PhiWidget.h"
 
 #include "engine/renderer/materials/PhongMaterial.h"
@@ -119,6 +120,7 @@ void PhiWidget::initializeGL() {
 }
 
 void PhiWidget::paintGL() {
+    m_timer.Begin();
     m_device->SetDefaultFrameBuffer(context()->defaultFramebufferObject());
     handleInput();
     m_renderer->Render(*m_scene.get());
@@ -126,6 +128,8 @@ void PhiWidget::paintGL() {
     m_outline_pass->SetCamera(m_camera.get());
     m_outline_pass->Run();
     update();
+    m_timer.End();
+    m_dt = m_timer.ElapsedTimeUs<double>() / 1000.0;
 }
 
 void PhiWidget::resizeGL(int w, int h) {
@@ -161,8 +165,6 @@ void PhiWidget::mousePressEvent(QMouseEvent *event) {
         emit EntityPicked(m_selected_entity);
     } else if (event->button() == Qt::RightButton) {
         m_rotate = true;
-        m_mouse_position.x = event->x();
-        m_mouse_position.y = event->y();
     }
 }
 
@@ -172,23 +174,14 @@ void PhiWidget::mouseReleaseEvent(QMouseEvent *event) {
     }
 }
 
-void PhiWidget::mouseMoveEvent(QMouseEvent *event) {
-    if (m_rotate) {
-        int x = event->x();
-        int y = event->y();
-        int dx = m_mouse_position.x - x;
-        int dy = m_mouse_position.y - y;
-        m_camera->RotateX(-dy * 0.2);
-        m_camera->RotateY(-dx * 0.2);
-        m_mouse_position.x = x;
-        m_mouse_position.y = y;
-    }
+void PhiWidget::mouseMoveEvent(QMouseEvent *) {
 }
 
 void PhiWidget::handleInput() {
-    float accel = 1.0f;
+    const double c = m_dt / 16.0;
+    float accel = c;
     if (m_pressed_keys.contains(Qt::Key_Shift)) {
-        accel = 4.0f;
+        accel *= 4.0f;
     }
 
     if (m_pressed_keys.contains(Qt::Key_W)) {
@@ -203,6 +196,19 @@ void PhiWidget::handleInput() {
     if (m_pressed_keys.contains(Qt::Key_D)) {
         m_camera->Move(accel * glm::vec3{ 0.1, 0, 0 });
     }
+
+    auto cursor = QCursor::pos();
+    int x = cursor.x();
+    int y = cursor.y();
+    if (m_rotate) {
+        int dx = m_mouse_position.x - x;
+        int dy = m_mouse_position.y - y;
+        // FIXME: this doesn't work well with rotations somehow
+        m_camera->RotateX(-dy * 0.2);
+        m_camera->RotateY(-dx * 0.2);
+    }
+    m_mouse_position.x = x;
+    m_mouse_position.y = y;
 }
 
 } // namespace editor
