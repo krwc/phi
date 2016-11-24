@@ -1,4 +1,4 @@
-#version 430
+#line 1 "LightPass.fs"
 #define NUM_MAX_DIR_LIGHTS      8
 #define NUM_MAX_POINT_LIGHTS    8
 

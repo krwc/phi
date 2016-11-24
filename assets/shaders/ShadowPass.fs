@@ -1,4 +1,4 @@
-#version 430
+#line 1 "ShadowPass.fs"
 
 void main() {
 }

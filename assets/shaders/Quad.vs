@@ -1,4 +1,4 @@
-#version 430
+#line 1 "Quad.vs"
 layout(location=0) in vec2 in_Position;
 out vec2 UV;
 

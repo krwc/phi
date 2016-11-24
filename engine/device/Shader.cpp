@@ -1,5 +1,9 @@
 #include "Shader.h"
 #include "Utils.h"
+
+#include "io/File.h"
+
+#include <vector>
 #include <stdexcept>
 
 namespace phi {
@@ -39,9 +43,25 @@ Shader::~Shader() noexcept {
 }
 
 void Shader::Compile() {
-    GLint length = (GLint) strlen(m_source);
-    CheckedCall(phi::glShaderSource, m_id, 1, (const GLchar **) (&m_source),
-                &length);
+    // One should define more global headers to include automatically if needed.
+    static const char *global_headers[] = {
+        "assets/shaders/Layout.h"
+    };
+    std::vector<std::string> source_strings;
+    for (const char *header : global_headers) {
+        source_strings.push_back(phi::io::FileContents(header));
+    }
+    std::vector<const GLchar *> sources;
+    std::vector<GLint> lengths;
+    for (const std::string &source : source_strings) {
+        sources.push_back(source.c_str());
+        lengths.push_back(source.length());
+    }
+    sources.push_back(m_source);
+    lengths.push_back(strlen(m_source));
+
+    CheckedCall(phi::glShaderSource, m_id, sources.size(), sources.data(),
+                lengths.data());
     int status, log_length;
     CheckedCall(phi::glCompileShader, m_id);
     CheckedCall(phi::glGetShaderiv, m_id, GL_COMPILE_STATUS, &status);

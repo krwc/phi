@@ -6,7 +6,7 @@
 namespace phi {
 namespace {
 const char *prepass_contour_shader = R"(
-    #version 430
+    #line 1 "OutlineContourShader"
     layout(location=0) out vec4 FragColor;
 
     void main() {
@@ -67,8 +67,8 @@ void OutlinePass::Run() {
     device.ClearColor(0, 0, 0, 0);
 
     device.BindProgram(&m_prepass);
-    device.BindVbo(draw_call.vbo);
     device.BindLayout(draw_call.layout);
+    device.BindVbo(draw_call.vbo);
     device.BindIbo(draw_call.ibo);
 
     device.BindTexture(0, m_mask.get());

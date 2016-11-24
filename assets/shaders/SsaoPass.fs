@@ -1,4 +1,4 @@
-#version 430
+#line 1 "SsaoPass.fs"
 layout(location=0) out vec4 FragColor;
 
 uniform sampler2D g_TexNormal;
