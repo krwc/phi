@@ -104,8 +104,8 @@ void LightPass::Run() {
     m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config->camera->GetProjMatrix()));
     m_program.SetConstant("g_DepthTexelSize", texel_size);
     SetupLights();
-    m_device.BindVbo(&Common::QuadVbo());
     m_device.BindLayout(&Common::QuadLayout());
+    m_device.BindVbo(&Common::QuadVbo());
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
 }
 

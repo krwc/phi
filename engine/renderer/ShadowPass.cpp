@@ -65,8 +65,8 @@ void ShadowPass<phi::DirLight>::Run() {
             light_camera.GetProjMatrix() * light_camera.GetViewMatrix();
 
     for (const phi::DrawCall &draw_call : *m_config->draw_calls) {
-        m_device.BindVbo(draw_call.vbo);
         m_device.BindLayout(draw_call.layout);
+        m_device.BindVbo(draw_call.vbo);
         m_device.BindIbo(draw_call.ibo);
         m_depth_program.SetConstant("ProjViewModelMatrix",
                                     proj_view * draw_call.transform);

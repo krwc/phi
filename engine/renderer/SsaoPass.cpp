@@ -85,8 +85,8 @@ void SsaoPass::Run() {
     m_program.SetConstant("g_TexDepth", static_cast<int>(2));
     //m_program.SetConstant("g_TexPosition", static_cast<int>(3));
 
-    m_device.BindVbo(&Common::QuadVbo());
     m_device.BindLayout(&Common::QuadLayout());
+    m_device.BindVbo(&Common::QuadVbo());
     m_device.BindTexture(0, m_config.normal);
     m_device.BindTexture(1, m_noise.get());
     m_device.BindTexture(2, m_config.depth);

@@ -18,11 +18,12 @@
 namespace phi {
 using namespace glm;
 
-namespace {
-
-const phi::Layout debug_layout{{ "in_Position", 0u, sizeof(glm::vec4), Type::Float }};
-
-} // namespace
+static const phi::Layout *DebugLayout() {
+    static const phi::Layout layout(sizeof(glm::vec4), {
+        { phi::Layout::Position, phi::Layout::Float4, 0u }
+    });
+    return &layout;
+}
 
 DebugDrawer::DebugDrawer(phi::Device &device)
         : m_device(device),
@@ -74,7 +75,7 @@ void DebugDrawer::DrawAABB(const phi::Camera &view,
     m_vbo.UpdateData(data.data(), sizeof(data) * sizeof(vec4));
     m_device.BindProgram(&m_debug_program);
     m_device.BindVbo(&m_vbo);
-    m_device.BindLayout(&debug_layout);
+    m_device.BindLayout(DebugLayout());
     m_debug_program.SetConstant("ProjViewModelMatrix",
                                 view.GetProjMatrix() * view.GetViewMatrix());
     m_debug_program.SetConstant("Color", glm::vec4(color, 1.0f));

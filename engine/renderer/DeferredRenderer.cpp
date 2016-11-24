@@ -138,8 +138,8 @@ void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
         m_device.BindSampler(texture_unit, binding.sampler);
         draw_call.program->SetConstant(binding.name, texture_unit++);
     }
-    m_device.BindVbo(draw_call.vbo);
     m_device.BindLayout(draw_call.layout);
+    m_device.BindVbo(draw_call.vbo);
     m_device.BindIbo(draw_call.ibo);
     m_device.Draw(draw_call.primitive, draw_call.offset, draw_call.count);
 }
