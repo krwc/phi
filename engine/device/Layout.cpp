@@ -1,6 +1,8 @@
 #include "Layout.h"
 #include "Utils.h"
 
+#include "utils/Logging.h"
+
 #include <cassert>
 #include <stdexcept>
 
@@ -32,10 +34,12 @@ Layout::Layout(size_t stride, initializer_list<Layout::Entry> layout)
                     entry.offset);
         CheckedCall(phi::glVertexArrayAttribBinding, m_id, entry.location, 0u);
     }
+    PHI_LOG(TRACE, "Created Vertex Layout object (ID=%u)", m_id);
 }
 
 Layout::~Layout() {
     CheckedCall(phi::glDeleteVertexArrays, 1, &m_id);
+    PHI_LOG(TRACE, "Deleted Vertex Layout object (ID=%u)", m_id);
 }
 
 GLuint Layout::GetId() const {
