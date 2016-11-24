@@ -13,6 +13,8 @@
 #include "engine/renderer/DeferredRenderer.h"
 #include "engine/renderer/OutlinePass.h"
 
+#include "engine/utils/Timer.h"
+
 namespace phi {
 namespace editor {
 
@@ -25,6 +27,8 @@ class PhiWidget : public QOpenGLWidget {
     std::unique_ptr<phi::Scene> m_scene;
     std::unique_ptr<phi::OutlinePass> m_outline_pass;
     phi::Entity *m_selected_entity;
+    phi::Timer m_timer;
+    double m_dt;
 
     QSet<int> m_pressed_keys;
     // True if rotation via mouse movement should be performed.
