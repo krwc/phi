@@ -13,7 +13,6 @@ RendererProperties::~RendererProperties() {
     delete ui;
 }
 
-/** Predefined constants that actually make sense. */
 const float MAX_SSAO_RADIUS     = 3.0f;
 const float MAX_SSAO_POWER      = 8.0f;
 const float MAX_SSAO_BIAS       = 0.2f;
