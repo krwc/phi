@@ -89,23 +89,6 @@ void LoadProcedures(const phi::ProcLoader &loader) {
 #undef PHI_LOAD_PROC
 #undef PHI_QUOTE
 
-int NumAttributeComponents(GLenum type) {
-    switch (type) {
-    case GL_INT:
-    case GL_BOOL:
-    case GL_FLOAT:
-        return 1;
-    case GL_FLOAT_VEC2:
-        return 2;
-    case GL_FLOAT_VEC3:
-        return 3;
-    case GL_FLOAT_VEC4:
-        return 4;
-    default:
-        throw std::invalid_argument("Not yet implemented");
-    }
-}
-
 } // namespace
 
 Device::Device(const phi::ProcLoader &loader,

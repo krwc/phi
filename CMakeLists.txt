@@ -7,7 +7,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic -O3")
 set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wextra -Wpedantic -ggdb -Og")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_BUILD_TYPE Debug)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 

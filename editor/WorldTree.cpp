@@ -32,9 +32,11 @@ void WorldTree::Rebuild() {
     }
     size_t lightIndex = 0u;
     for (const auto& light : scene.GetDirLights()) {
+        (void) light;
         AddElement(tr("Light%1").arg(lightIndex++), "DirectionalLight");
     }
     for (const auto& light : scene.GetPointLights()) {
+        (void) light;
         AddElement(tr("Light%1").arg(lightIndex++), "PointLight");
     }
 

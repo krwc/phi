@@ -47,8 +47,8 @@ public:
 private:
     phi::Device &m_device;
     phi::Program m_program;
-    ShadowFiltering m_shadow_filtering;
     const LightPass::Config *m_config;
+    ShadowFiltering m_shadow_filtering;
 
     void SetupLights();
 };
