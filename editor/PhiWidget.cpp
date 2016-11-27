@@ -14,35 +14,8 @@
 namespace phi {
 namespace editor {
 
-struct QtProcLoader : phi::ProcLoader {
-    QOpenGLContext *context;
-
-    QtProcLoader(QOpenGLContext *context)
-        : context(context) {}
-
-    void *operator()(const char *name) const {
-        return (void *) context->getProcAddress(name);
-    }
-};
-
-PhiWidget::PhiWidget(QWidget *widget)
-        : QOpenGLWidget(widget),
-          m_camera(std::make_unique<phi::FreeLookCamera>()),
-          m_scene(std::make_unique<phi::FlatScene>()),
-          m_selected_entity(nullptr),
-          m_rotate(false) {
-    m_scene->SetCamera(m_camera.get());
-    setFocusPolicy(Qt::StrongFocus);
-}
-
-void PhiWidget::initializeGL() {
-    const QSize widget_size = size();
-    m_device = std::make_unique<phi::Device>(QtProcLoader(this->context()),
-                                             widget_size.width(),
-                                             widget_size.height());
-    m_renderer = std::make_unique<phi::DeferredRenderer>(*m_device.get());
-    m_outline_pass = std::make_unique<phi::OutlinePass>(*m_renderer.get());
-
+// TODO: Remove this after some scene serialization is done.
+static void SetupSampleScene(phi::Scene &scene) {
     static auto box = phi::MeshImporter::FromFile("assets/model/box.obj", "box");
     static auto plane_h = phi::MeshImporter::FromFile("assets/model/plane.obj", "plane_h");
     static auto plane_v = phi::MeshImporter::FromFile("assets/model/plane.obj", "plane_v");
@@ -86,14 +59,12 @@ void PhiWidget::initializeGL() {
     torus->SetMaterial(violet_material.get());
     bunny->SetMaterial(bunny_material.get());
 
-    m_scene->AddEntity(plane_h.get());
-    m_scene->AddEntity(plane_v.get());
-    m_scene->AddEntity(box.get());
-    m_scene->AddEntity(torus.get());
-    m_scene->AddEntity(bunny.get());
-    m_scene->AddEntity(wall_l.get());
-    m_camera->Move({0,16,20});
-    m_camera->RotateX(40);
+    scene.AddEntity(plane_h.get());
+    scene.AddEntity(plane_v.get());
+    scene.AddEntity(box.get());
+    scene.AddEntity(torus.get());
+    scene.AddEntity(bunny.get());
+    scene.AddEntity(wall_l.get());
 
     static auto sun = std::make_unique<phi::DirLight>();
     sun->SetPosition({10,15,-10});
@@ -113,17 +84,36 @@ void PhiWidget::initializeGL() {
     violet_bulb->SetLinearAttenuation(0.05);
     violet_bulb->SetQuadraticAttenuation(0.001);
 
-    m_scene->AddLight(sun.get());
-    m_scene->AddLight(red_bulb.get());
-    m_scene->AddLight(violet_bulb.get());
+    scene.AddLight(sun.get());
+    scene.AddLight(red_bulb.get());
+    scene.AddLight(violet_bulb.get());
+}
 
+PhiWidget::PhiWidget(QWidget *widget)
+        : QOpenGLWidget(widget),
+          m_camera(std::make_unique<phi::FreeLookCamera>()),
+          m_selected_entity(nullptr),
+          m_rotate(false) {
+    setFocusPolicy(Qt::StrongFocus);
+}
+
+void PhiWidget::initializeGL() {
+    const QSize widget_size = size();
+    m_context = std::make_unique<phi::editor::RenderingContext>(
+            context(), context()->surface(), widget_size.width(), widget_size.height());
+
+    m_context->GetScene().SetCamera(m_camera.get());
+    SetupSampleScene(m_context->GetScene());
+    m_camera->Move({0,16,20});
+    m_camera->RotateX(40);
+
+    emit RenderingContextInitialized(m_context.get());
 }
 
 void PhiWidget::paintGL() {
     m_timer.Begin();
-    m_device->SetDefaultFrameBuffer(context()->defaultFramebufferObject());
     handleInput();
-    m_renderer->Render(*m_scene.get());
+    m_context->RenderFrame();
     m_outline_pass->SetEntity(m_selected_entity);
     m_outline_pass->SetCamera(m_camera.get());
     m_outline_pass->Run();
@@ -133,9 +123,9 @@ void PhiWidget::paintGL() {
 }
 
 void PhiWidget::resizeGL(int w, int h) {
-    m_renderer->Resize(w, h);
+    m_context->GetDeferredRenderer().Resize(w, h);
     m_camera->SetAspectRatio(float(w) / float(h));
-    m_outline_pass = std::make_unique<phi::OutlinePass>(*m_renderer.get());
+    m_outline_pass = std::make_unique<phi::OutlinePass>(m_context->GetDeferredRenderer());
 }
 
 void PhiWidget::keyPressEvent(QKeyEvent *event) {
@@ -161,7 +151,7 @@ void PhiWidget::mousePressEvent(QMouseEvent *event) {
         phi::Ray r;
         r.origin = m_camera->GetPosition();
         r.direction = glm::normalize(glm::vec3(dir));
-        m_selected_entity = m_scene->Pick(r);
+        m_selected_entity = m_context->GetScene().Pick(r);
         emit EntityPicked(m_selected_entity);
     } else if (event->button() == Qt::RightButton) {
         m_rotate = true;
@@ -200,13 +190,15 @@ void PhiWidget::handleInput() {
     auto cursor = QCursor::pos();
     int x = cursor.x();
     int y = cursor.y();
+    int dx = m_mouse_position.x - x;
+    int dy = m_mouse_position.y - y;
+
     if (m_rotate) {
-        int dx = m_mouse_position.x - x;
-        int dy = m_mouse_position.y - y;
         // FIXME: this doesn't work well with rotations somehow
         m_camera->RotateX(-dy * 0.2);
         m_camera->RotateY(-dx * 0.2);
     }
+
     m_mouse_position.x = x;
     m_mouse_position.y = y;
 }

@@ -28,7 +28,6 @@ class DeferredRenderer final : public Renderer {
     std::unique_ptr<phi::Texture2D> m_color;
     std::unique_ptr<phi::Texture2D> m_normal;
 
-
     phi::SsaoPass m_ssao_pass;
     phi::LightPass m_light_pass;
     phi::ShadowPass<phi::DirLight> m_shadow_pass;
@@ -51,6 +50,14 @@ public:
 
     const phi::Texture *GetDepth() const {
         return m_depth.get();
+    }
+
+    phi::SsaoPass *GetSsaoPass() {
+        return &m_ssao_pass;
+    }
+
+    phi::LightPass *GetLightPass() {
+        return &m_light_pass;
     }
 };
 

@@ -33,6 +33,29 @@ public:
         return *m_ao_texture.get();
     }
 
+    /** Sets sampling radius around a pixel. */
+    void SetRadius(float radius);
+    /** Sets strength of the effect */
+    void SetPower(float power);
+    /** Sets angle bias. The larger the bias is, the smaller the sampling angle is. */
+    void SetBias(float bias);
+    /** Sets strength of the effect linearly. */
+    void SetStrength(float strength);
+
+    /** Returns current sampling radius. */
+    float GetRadius() const {
+        return m_properties.radius;
+    }
+    float GetPower() const {
+        return m_properties.power;
+    }
+    float GetBias() const {
+        return m_properties.bias;
+    }
+    float GetStrength() const {
+        return m_properties.strength;
+    }
+
 private:
     phi::Device &m_device;
     phi::Program m_program;
@@ -42,6 +65,13 @@ private:
     std::unique_ptr<phi::Texture2D> m_ao_texture;
     glm::vec2 m_screen_size;
     SsaoPass::Config m_config;
+
+    struct {
+        float radius;
+        float power;
+        float bias;
+        float strength;
+    } m_properties;
 
     void InitNoiseTexture();
     void InitProgram();

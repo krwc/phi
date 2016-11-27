@@ -21,8 +21,9 @@ public:
     virtual const phi::Camera *GetCamera() const = 0;
     virtual const phi::AABB &GetAABB() const = 0;
 
-    virtual const std::vector<phi::DirLight *> &GetDirLights() = 0;
-    virtual const std::vector<phi::PointLight *> &GetPointLights() = 0;
+    virtual const std::vector<phi::Entity *> &GetEntities() const = 0;
+    virtual const std::vector<phi::DirLight *> &GetDirLights() const = 0;
+    virtual const std::vector<phi::PointLight *> &GetPointLights() const = 0;
 
     /**
      * @returns Closest entity being hit in the scene or nullptr if

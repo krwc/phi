@@ -50,6 +50,12 @@ SsaoPass::SsaoPass(phi::Device &device)
         : m_device(device), m_program() {
     InitNoiseTexture();
     InitProgram();
+
+    /* Default values, known to be working for general scene */
+    SetRadius(0.316f);
+    SetPower(2.7792f);
+    SetBias(0.052f);
+    SetStrength(1.2);
 }
 
 void SsaoPass::Setup(const phi::SsaoPass::Config &config) {
@@ -76,6 +82,11 @@ void SsaoPass::Run() {
     m_device.BindFrameBuffer(m_fbo.get());
     m_device.SetViewport({ 0, 0, m_config.fbo_width, m_config.fbo_height });
     m_device.BindProgram(&m_program);
+    m_program.SetConstant("g_Radius", m_properties.radius);
+    m_program.SetConstant("g_Power", m_properties.power);
+    m_program.SetConstant("g_Bias", m_properties.bias);
+    m_program.SetConstant("g_Strength", m_properties.strength);
+
     m_program.SetConstant("g_ScreenSize", m_screen_size);
     m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
     m_program.SetConstant("g_ProjMatrix", m_config.camera->GetProjMatrix());
@@ -83,27 +94,38 @@ void SsaoPass::Run() {
     m_program.SetConstant("g_TexNormal", static_cast<int>(0));
     m_program.SetConstant("g_TexNoise", static_cast<int>(1));
     m_program.SetConstant("g_TexDepth", static_cast<int>(2));
-    //m_program.SetConstant("g_TexPosition", static_cast<int>(3));
 
     m_device.BindLayout(&Common::QuadLayout());
     m_device.BindVbo(&Common::QuadVbo());
     m_device.BindTexture(0, m_config.normal);
     m_device.BindTexture(1, m_noise.get());
     m_device.BindTexture(2, m_config.depth);
-    //m_device.BindTexture(3, m_config.position);
 
     m_device.BindSampler(0, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
     m_device.BindSampler(1, &phi::Samplers<phi::WrapMode::Repeat>::Nearest2D());
     m_device.BindSampler(2, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
-    //m_device.BindSampler(3, &phi::Samplers<phi::WrapMode::ClampToEdge>::Nearest2D());
     m_device.SetDepthWrite(false);
     m_device.SetDepthTest(false);
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
-//    m_blur_pass->Run();
-//    m_blur_pass->Run();
     m_device.SetDepthWrite(depth_write);
     m_device.SetDepthTest(depth_test);
     m_device.SetViewport(viewport);
+}
+
+void SsaoPass::SetRadius(float radius) {
+    m_properties.radius = radius;
+}
+
+void SsaoPass::SetPower(float power) {
+    m_properties.power = power;
+}
+
+void SsaoPass::SetBias(float bias) {
+    m_properties.bias = bias;
+}
+
+void SsaoPass::SetStrength(float strength) {
+    m_properties.strength = strength;
 }
 
 } // namespace phi

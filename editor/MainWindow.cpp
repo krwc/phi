@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     style.setColor(QPalette::WindowText, QColor("#c6c6c6"));
     style.setColor(QPalette::Base, QColor("#1e2227"));
     style.setColor(QPalette::Text, QColor("#c6c6c6"));
-    style.setColor(QPalette::Button, QColor("#182631"));
+    style.setColor(QPalette::Button, QColor("#272c33"));
     style.setColor(QPalette::ButtonText, QColor("#d0d0d0"));
     style.setColor(QPalette::Highlight, QColor("#4f8186"));
     style.setColor(QPalette::HighlightedText, QColor("#f0f0f0"));
@@ -27,6 +27,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(ui->phiWidget, &phi::editor::PhiWidget::EntityPicked, this,
                      &phi::editor::MainWindow::OnEntityPicked);
+
+    QObject::connect(ui->phiWidget,
+                     &phi::editor::PhiWidget::RenderingContextInitialized,
+                     ui->worldTree,
+                     &phi::editor::WorldTree::OnRenderingContextInitialized);
+    QObject::connect(ui->phiWidget,
+                     &phi::editor::PhiWidget::RenderingContextInitialized,
+                     ui->rendererProperties,
+                     &phi::editor::RendererProperties::OnRenderingContextInitialized);
 
     // By default no object is selected.
     ui->transformProperties->setVisible(false);

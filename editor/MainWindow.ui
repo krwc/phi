@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1001</width>
-    <height>664</height>
+    <width>994</width>
+    <height>666</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Phi Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
      <widget class="phi::editor::PhiWidget" name="phiWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -27,23 +27,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1001</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>Fi&amp;le</string>
-    </property>
-    <addaction name="actionQuit"/>
-   </widget>
-   <addaction name="menuFile"/>
-  </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="propertyWidget">
    <property name="sizePolicy">
@@ -54,8 +37,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>116</width>
-     <height>247</height>
+     <width>296</width>
+     <height>369</height>
     </size>
    </property>
    <attribute name="dockWidgetArea">
@@ -64,60 +47,63 @@
    <widget class="QWidget" name="propertyDockContents">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QTreeWidget" name="treeWidget">
+      <widget class="QTabWidget" name="tabWidget">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <column>
-        <property name="text">
-         <string>Scene</string>
-        </property>
-       </column>
-       <item>
-        <property name="text">
-         <string>Foo</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Bar</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Baz</string>
-         </property>
-        </item>
-       </item>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>View</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="phi::editor::WorldTree" name="worldTree" native="true"/>
+         </item>
+         <item>
+          <widget class="phi::editor::TransformProperties" name="transformProperties">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Transform</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="rendererTab">
+        <attribute name="title">
+         <string>Renderer</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="phi::editor::RendererProperties" name="rendererProperties" native="true"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
-     </item>
-     <item>
-      <widget class="phi::editor::TransformProperties" name="transformProperties">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Transform</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </widget>
@@ -138,6 +124,18 @@
    <class>phi::editor::TransformProperties</class>
    <extends>QGroupBox</extends>
    <header location="global">TransformProperties.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>phi::editor::RendererProperties</class>
+   <extends>QWidget</extends>
+   <header location="global">RendererProperties.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>phi::editor::WorldTree</class>
+   <extends>QWidget</extends>
+   <header location="global">WorldTree.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
