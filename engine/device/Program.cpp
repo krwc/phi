@@ -16,7 +16,6 @@ Program &Program::operator=(Program &&other) {
         Destroy();
         m_id = other.m_id;
         m_constants = move(other.m_constants);
-        m_attributes = move(other.m_attributes);
         m_shaders = move(other.m_shaders);
         other.m_id = 0;
     }
@@ -28,7 +27,7 @@ Program::Program(Program &&other) : m_id(GL_NONE) {
 }
 
 Program::Program()
-        : m_id(CheckedCall(phi::glCreateProgram)), m_constants(), m_attributes() {
+        : m_id(CheckedCall(phi::glCreateProgram)), m_constants() {
     PHI_LOG(TRACE, "Program: created (ID=%u)", m_id);
 }
 
@@ -38,12 +37,6 @@ Program::~Program() {
 
 const Program::ParamInfo *Program::FindConstant(const string &name) const try {
     return &m_constants.at(name);
-} catch (out_of_range &) {
-    return nullptr;
-}
-
-const Program::ParamInfo *Program::FindAttribute(const string &name) const try {
-    return &m_attributes.at(name);
 } catch (out_of_range &) {
     return nullptr;
 }
@@ -148,47 +141,6 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
     return result;
 }
 
-const char *TypeString(GLenum type) {
-    switch (type) {
-    case GL_INT:
-        return "GL_INT";
-    case GL_FLOAT:
-        return "GL_FLOAT";
-    case GL_FLOAT_VEC2:
-        return "GL_FLOAT_VEC2";
-    case GL_FLOAT_VEC3:
-        return "GL_FLOAT_VEC3";
-    case GL_FLOAT_VEC4:
-        return "GL_FLOAT_VEC4";
-    default:
-        return "(unknown)";
-    }
-}
-
-map<string, Program::ParamInfo> DiscoverProgramAttributes(GLuint bind) {
-    map<string, Program::ParamInfo> result;
-    GLint num_attribs = 0;
-    GLint max_name_length = 0;
-    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTES, &num_attribs);
-    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
-                 &max_name_length);
-    for (int id = 0; id < num_attribs; ++id) {
-        vector<char> buffer(max_name_length);
-        GLint length;
-        GLint size;
-        GLenum type;
-        CheckedCall(phi::glGetActiveAttrib, bind, id, max_name_length, &length,
-                    &size, &type, &buffer[0]);
-        string name(buffer.begin(), buffer.begin() + length);
-        PHI_LOG(TRACE, "Shader: found attribute '%s' [type = %s]", name.c_str(),
-                TypeString(type));
-        result[name].type = type;
-        result[name].location =
-                CheckedCall(phi::glGetAttribLocation, bind, name.c_str());
-    }
-    return result;
-}
-
 } // namespace
 
 void Program::Link() {
@@ -213,7 +165,6 @@ void Program::Link() {
         throw logic_error("Cannot link program");
     }
     m_constants = DiscoverProgramConstants(m_id);
-    m_attributes = DiscoverProgramAttributes(m_id);
     PHI_LOG(TRACE, "Program: linked program (ID=%u)", m_id);
 }
 

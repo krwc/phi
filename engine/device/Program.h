@@ -53,13 +53,10 @@ public:
     }
 
     const ParamInfo *FindConstant(const std::string &name) const;
-    const ParamInfo *FindAttribute(const std::string &name) const;
-
 private:
     GLuint m_id;
 
     std::map<std::string, struct ParamInfo> m_constants;
-    std::map<std::string, struct ParamInfo> m_attributes;
     std::vector<Shader> m_shaders;
 
     void SetConstant(GLint location, GLenum type, const void *value);
