@@ -52,6 +52,10 @@ public:
     const phi::Texture *GetDepth() const {
         return m_depth.get();
     }
+
+    phi::SsaoPass *GetSsaoPass() {
+        return &m_ssao_pass;
+    }
 };
 
 } // namespace phi

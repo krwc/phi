@@ -91,19 +91,11 @@ float PCF9x9(in float CurrentDepth, in vec2 ProjCoords, in vec2 Offset) {
 }
 
 float ShadowIntensity(in vec4 Coord, in vec3 N, in vec3 L) {
-    const float Bias = max(0.002*abs(dot(N, L)), 0.005);
+    const float Bias = max(0.002 * abs(dot(N, L)), 0.004);
     const vec3 ProjCoords = 0.5 * Coord.xyz / Coord.w + 0.5;
     const float CurrentDepth = ProjCoords.z - Bias;
     return PCF5x5(CurrentDepth, ProjCoords.xy, vec2(0, 0));
 }
-
-float LinearDepth(in vec2 uv) {
-    float z = texture(g_TexDepth, uv).r;
-    float g_Near = 0.1f;
-    float g_Far = 1000.0f;
-    return 2.0 * g_Near * g_Far / (g_Far + g_Near - z * (g_Far - g_Near));
-}
-
 
 vec4 GetPosition(in vec2 uv) {
     float z = 2*texture(g_TexDepth, uv).r - 1;
@@ -123,26 +115,27 @@ vec4 GetDiffuse(vec2 uv) {
 }
 
 float GetAo(vec2 uv) {
-//    return texture(g_TexAo, uv).r;
     const vec2 Offset = 1.0f / textureSize(g_TexAo, 0).xy;
     float Result = 0.0f;
-    for (float i = -1.0; i <= 1.0; i += 1.0) {
-        for (float j = -1.0; j <= 1.0; j += 1.0) {
+    for (float i = -0.5; i <= 0.5; i += 1.0) {
+        for (float j = -0.5; j <= 0.5; j += 1.0) {
             Result += texture(g_TexAo, uv + vec2(i, j)*Offset).r;
         }
     }
     return Result / 4.0f;
 }
 
+#undef DEBUG_SSAO
+
 void main() {
-    vec2 Pixel = UV;//ivec2(gl_FragCoord.xy);
-    vec4 N = GetNormal(Pixel);
+    vec4 N = GetNormal(UV);
     if (N == vec4(0,0,0,0)) {
+        // NOTE: Fix this with sky color.
         FragColor = vec4(0.3,0.3,0.3,1);
     } else {
-        float Ao = GetAo(Pixel);
+        float Ao = GetAo(UV);
         vec4 P = GetPosition(UV);
-        vec4 DiffuseColor = GetDiffuse(Pixel);
+        vec4 DiffuseColor = GetDiffuse(UV);
         vec3 DirLightI = ComputeDirLightIntensity(g_LightInfo, N.xyz);
         vec3 PointLightI = ComputePointLightIntensity(g_LightInfo, N.xyz, P.xyz);
 
@@ -151,13 +144,13 @@ void main() {
                                          g_LightInfo.Dir[0].Direction))
                          * DirLightI
                  + PointLightI;
+
         vec3 Color = clamp((1-Ao) * I * DiffuseColor.xyz, 0, 1);
 
-    //    FragColor = vec4(mix(Color, vec3(1-Ao,0,0), 0.5), 1.0);
-//        FragColor = vec4(vec3(1 - Ao),1);
+#if defined(DEBUG_SSAO)
+        FragColor = vec4(min(Color, vec3(0)) + vec3(1 - Ao), 1);
+#else
         FragColor = vec4(Color, 1);
-//        FragColor = P;
-//         FragColor = vec4(min(Color, vec3(0)) + vec3(1 - Ao), 1);
-        //        FragColor = P;
+#endif
     }
 }

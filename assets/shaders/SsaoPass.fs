@@ -6,17 +6,15 @@ uniform sampler2D g_TexNoise;
 uniform sampler2D g_TexDepth;
 uniform sampler2D g_TexPosition;
 
-uniform float g_Radius = 1.5f;
-uniform float g_Power = 1.0f;
+uniform float g_Radius = 0.9f;
+uniform float g_Power = 1.5f;
 uniform float g_Bias = 0.05f;
+uniform int g_NumSamples = 32;
 
 uniform float g_InvNoiseSize;
 uniform vec2 g_ScreenSize;
 uniform mat4 g_ProjMatrix;
 uniform mat4 g_InvProjMatrix;
-uniform mat4 g_InvViewMatrix;
-uniform float g_Near = 0.1f;
-uniform float g_Far = 1000.0f;
 
 in vec2 UV;
 
@@ -168,6 +166,9 @@ vec4 GetPosition(in vec2 uv) {
     return P /= P.w;
 }
 
+#define ANGLE_FIX
+#define LOG_FIX
+
 void main() {
     const vec3 N = GetNormal(UV);
     const vec4 P = GetPosition(UV);
@@ -177,10 +178,22 @@ void main() {
     mat3 TBN = mat3(T, B, N);
 
     float Ao = 0.0f;
-    const int NUM_SAMPLES = 64;
-    for (int i = 0; i < NUM_SAMPLES; ++i) {
-        vec3 Sample = TBN * HemisphereSamples[i];
-        Sample = Sample * g_Radius + P.xyz;
+
+    const int SAMPLES = min(128, g_NumSamples);
+    int MULTIPLIER = 1;
+    if (SAMPLES <= 32) {
+        MULTIPLIER = 2;
+    } else if (SAMPLES <= 16) {
+        MULTIPLIER = 4;
+    }
+
+    for (int i = 0; i < SAMPLES; ++i) {
+        vec3 Sample = TBN * HemisphereSamples[MULTIPLIER*i];
+        if (abs(dot(N, Sample)) <= g_Bias) {
+            continue;
+        }
+
+        Sample = Sample * g_Radius * log(exp(1) + abs(P.z)) + P.xyz;
 
         vec4 Offset = vec4(Sample, 1.);
         Offset = g_ProjMatrix * Offset;
@@ -189,9 +202,9 @@ void main() {
 
         float SampleDepth = GetPosition(Offset.xy).z;
         float RangeCheck = abs(P.z - SampleDepth) < g_Radius ? 1.0f : 0.0f;
-        Ao += RangeCheck * (Sample.z + g_Bias < SampleDepth ? 1.0 : 0.0);
+        Ao += RangeCheck * (Sample.z < SampleDepth ? 1.0 : 0.0);
     }
-    Ao /= NUM_SAMPLES;
+    Ao /= g_NumSamples;
 
     FragColor = vec4(clamp(1 - pow(1-Ao, g_Power), 0, 1));
 }

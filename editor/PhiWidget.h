@@ -1,18 +1,13 @@
 #ifndef PHI_EDITOR_PHI_WIDGET_H
 #define PHI_EDITOR_PHI_WIDGET_H
-#include "engine/device/Device.h"
+#include "RenderingContext.h"
 
 #include <QOpenGLWidget>
-#include <QOpenGLContext>
 #include <QSet>
 #include <memory>
 
-#include "engine/scene/FreeLookCamera.h"
-#include "engine/scene/FlatScene.h"
-
-#include "engine/renderer/DeferredRenderer.h"
 #include "engine/renderer/OutlinePass.h"
-
+#include "engine/scene/FreeLookCamera.h"
 #include "engine/utils/Timer.h"
 
 namespace phi {
@@ -21,10 +16,8 @@ namespace editor {
 class PhiWidget : public QOpenGLWidget {
     Q_OBJECT
 
-    std::unique_ptr<phi::Device> m_device;
-    std::unique_ptr<phi::DeferredRenderer> m_renderer;
+    std::unique_ptr<phi::editor::RenderingContext> m_context;
     std::unique_ptr<phi::FreeLookCamera> m_camera;
-    std::unique_ptr<phi::Scene> m_scene;
     std::unique_ptr<phi::OutlinePass> m_outline_pass;
     phi::Entity *m_selected_entity;
     phi::Timer m_timer;
@@ -42,6 +35,7 @@ class PhiWidget : public QOpenGLWidget {
 
 signals:
     void EntityPicked(phi::Entity *);
+    void RenderingContextInitialized(phi::editor::RenderingContext *);
 
 public:
     explicit PhiWidget(QWidget *parent = nullptr);

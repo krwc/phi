@@ -76,7 +76,8 @@ void DeferredRenderer::Render(phi::Scene &scene) {
     for (const phi::DrawCall &draw_call : draw_calls) {
         Execute(draw_call, *camera);
     }
-    {
+
+    if (m_shadow_casters.size()) {
         phi::ShadowPass<phi::DirLight>::Config config{};
         config.aabb = &scene.GetAABB();
         config.light = m_shadow_casters[0];
@@ -84,6 +85,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_shadow_pass.Setup(config);
         m_shadow_pass.Run();
     }
+
     m_ssao_pass.SetCamera(*camera);
     m_ssao_pass.Run();
     m_device.BindFrameBuffer(nullptr);
@@ -105,8 +107,6 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         m_device.SetDepthTest(true);
         m_device.SetDepthWrite(true);
     }
-    static phi::DebugDrawer debug(m_device);
-    //debug.DrawTexture(m_ssao_pass->GetAoTexture(), 0, 0, 200, 200);
     m_shadow_casters = {};
 
 #ifdef PERF_STATS

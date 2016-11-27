@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setRenderableType(QSurfaceFormat::OpenGL);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setSwapInterval(1);
+    format.setSwapInterval(0);
     QSurfaceFormat::setDefaultFormat(format);
 
     phi::editor::MainWindow w;
