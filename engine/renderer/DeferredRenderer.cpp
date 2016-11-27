@@ -136,7 +136,7 @@ void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
         assert(binding.texture);
         m_device.BindTexture(texture_unit, binding.texture);
         m_device.BindSampler(texture_unit, binding.sampler);
-        draw_call.program->SetConstant(binding.name, texture_unit++);
+        draw_call.program->SetConstant(binding.name, static_cast<int>(texture_unit++));
     }
     m_device.BindLayout(draw_call.layout);
     m_device.BindVbo(draw_call.vbo);
