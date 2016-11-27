@@ -35,9 +35,11 @@ Program::~Program() {
     Destroy();
 }
 
-const Program::ParamInfo *Program::FindConstant(const string &name) const try {
-    return &m_constants.at(name);
-} catch (out_of_range &) {
+const Program::ParamInfo *Program::FindConstant(const string &name) const {
+    const auto &&it = m_constants.find(name);
+    if (it != m_constants.end()) {
+        return &it->second;
+    }
     return nullptr;
 }
 
