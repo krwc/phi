@@ -67,6 +67,9 @@ void LoadProcedures(const phi::ProcLoader &loader) {
     PHI_LOAD_PROC(glGetAttribLocation);
     PHI_LOAD_PROC(glGetIntegerv);
     PHI_LOAD_PROC(glGetProgramInfoLog);
+    PHI_LOAD_PROC(glGetProgramInterfaceiv);
+    PHI_LOAD_PROC(glGetProgramResourceiv);
+    PHI_LOAD_PROC(glGetProgramResourceName);
     PHI_LOAD_PROC(glGetProgramiv);
     PHI_LOAD_PROC(glGetShaderInfoLog);
     PHI_LOAD_PROC(glGetShaderiv);

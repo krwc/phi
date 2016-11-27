@@ -97,46 +97,40 @@ namespace {
 
 map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
     map<string, Program::ParamInfo> result{};
-    GLint num_uniforms = 0;
-    GLint max_name_length = 0;
-    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_UNIFORMS, &num_uniforms);
-    CheckedCall(phi::glGetProgramiv, bind, GL_ACTIVE_UNIFORM_MAX_LENGTH,
-                 &max_name_length);
+    int num_active_uniforms = 0;
+    phi::glGetProgramInterfaceiv(bind, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
+    enum {
+        PROPERTY_BLOCK_INDEX = 0,
+        PROPERTY_NAME_LENGTH = 1,
+        PROPERTY_LOCATION = 2,
+        PROPERTY_TYPE = 3
+    };
+    const GLenum properties[4] = {
+        GL_BLOCK_INDEX,
+        GL_NAME_LENGTH,
+        GL_LOCATION,
+        GL_TYPE
+    };
 
-    for (int id = 0; id < num_uniforms; ++id) {
-        vector<char> buffer(max_name_length);
-        GLint length;
-        GLenum type;
-        GLint size;
-        CheckedCall(phi::glGetActiveUniform, bind, id, max_name_length, &length,
-                     &size, &type, &buffer[0]);
-        string name(buffer.begin(), buffer.begin() + length);
+    for (int index = 0; index < num_active_uniforms; ++index) {
+        GLint results[4];
+        phi::glGetProgramResourceiv(bind, GL_UNIFORM, index, 4, properties, 4, nullptr,
+                                    results);
 
-        result[name].type = type;
-        result[name].location =
-                CheckedCall(phi::glGetUniformLocation, bind, name.c_str());
-        PHI_LOG(TRACE, "Shader: found constant (ID=%d) '%s'",
-                result[name].location, name.c_str());
-        // Ugly, hacky workaround for a bug in intel drivers (I presume),
-        // which is unable to find entries in array that have index > 0
-        if (name.rfind("[0]") == name.length() - 3) {
-            string arr_name = name.substr(0, name.length() - 3);
-            // UINT16_MAX is an arbitrary choice, but it should be enough.
-            for (int i = 1; i < UINT16_MAX; ++i) {
-                string name = arr_name + "[" + to_string(i) + "]";
-                GLint location =
-                        CheckedCall(phi::glGetUniformLocation, bind, name.c_str());
-                if (location >= 0) {
-                    result[name].type = type;
-                    result[name].location = location;
-                    PHI_LOG(TRACE, "Shader: found constant (%d) '%s'",
-                            result[name].location, name.c_str());
-                } else {
-                    // No more locations
-                    break;
-                }
-            }
+        /* Ignore uniforms located in Uniform Blocks */
+        if (results[PROPERTY_BLOCK_INDEX] != -1) {
+            continue;
         }
+
+        std::string uniform_name(results[PROPERTY_NAME_LENGTH] - 1, '\0');
+        phi::glGetProgramResourceName(bind, GL_UNIFORM, index, results[PROPERTY_NAME_LENGTH],
+                                      nullptr, &uniform_name[0]);
+        result[uniform_name] = Program::ParamInfo {
+            (GLenum) results[PROPERTY_TYPE],
+            (GLint) results[PROPERTY_LOCATION]
+        };
+
+        PHI_LOG(TRACE, "Program: found constant %s", uniform_name.c_str());
     }
     return result;
 }
