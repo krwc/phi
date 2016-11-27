@@ -22,8 +22,8 @@ public slots:
     void OnRenderingContextInitialized(phi::editor::RenderingContext *);
 
 private slots:
-    void OnSsaoDoubleModified(double);
     void OnSsaoIntModified(int);
+    void OnShadowModified(int);
 
 private:
     Ui::RendererProperties *ui;

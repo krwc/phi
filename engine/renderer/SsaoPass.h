@@ -39,8 +39,8 @@ public:
     void SetPower(float power);
     /** Sets angle bias. The larger the bias is, the smaller the sampling angle is. */
     void SetBias(float bias);
-    /** Sets number of samples. */
-    void SetNumSamples(int samples);
+    /** Sets strength of the effect linearly. */
+    void SetStrength(float strength);
 
     /** Returns current sampling radius. */
     float GetRadius() const {
@@ -52,8 +52,8 @@ public:
     float GetBias() const {
         return m_properties.bias;
     }
-    int GetNumSamples() const {
-        return m_properties.num_samples;
+    float GetStrength() const {
+        return m_properties.strength;
     }
 
 private:
@@ -70,7 +70,7 @@ private:
         float radius;
         float power;
         float bias;
-        int num_samples;
+        float strength;
     } m_properties;
 
     void InitNoiseTexture();

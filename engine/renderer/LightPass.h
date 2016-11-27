@@ -29,13 +29,25 @@ public:
         const phi::Camera *camera;
     };
 
+    enum ShadowFiltering {
+        PCF_3x3 = 0,
+        PCF_5x5 = 1,
+        PCF_9x9 = 2
+    };
+
     LightPass(phi::Device &device);
     void Setup(const phi::LightPass::Config &config);
     void Run();
 
+    /** Sets shadow filtering type */
+    void SetShadowFiltering(ShadowFiltering filtering);
+    /** Gets currently set shadow filtering type */
+    ShadowFiltering GetShadowFiltering() const;
+
 private:
     phi::Device &m_device;
     phi::Program m_program;
+    ShadowFiltering m_shadow_filtering;
     const LightPass::Config *m_config;
 
     void SetupLights();

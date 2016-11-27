@@ -55,6 +55,7 @@ layout(location=0) out vec4 FragColor;
 uniform LightInfo g_LightInfo;
 uniform mat4 g_ShadowMatrix;
 uniform mat4 g_InvProjMatrix;
+uniform int g_ShadowFiltering;
 uniform float g_DepthTexelSize = 1.0f/2048;
 uniform sampler2DShadow g_TexShadow;
 uniform sampler2D g_TexDepth;
@@ -64,6 +65,10 @@ uniform sampler2D g_TexNormal;
 uniform sampler2D g_TexAo;
 
 in vec2 UV;
+
+#define SHADOW_FILTERING_PCF3x3 0
+#define SHADOW_FILTERING_PCF5x5 1
+#define SHADOW_FILTERING_PCF9x9 2
 
 #define PCF_IMPL(R, Size)                                                 \
     float I = 0.0f;                                                       \
@@ -94,7 +99,14 @@ float ShadowIntensity(in vec4 Coord, in vec3 N, in vec3 L) {
     const float Bias = max(0.002 * abs(dot(N, L)), 0.004);
     const vec3 ProjCoords = 0.5 * Coord.xyz / Coord.w + 0.5;
     const float CurrentDepth = ProjCoords.z - Bias;
-    return PCF5x5(CurrentDepth, ProjCoords.xy, vec2(0, 0));
+
+    if (g_ShadowFiltering == SHADOW_FILTERING_PCF3x3) {
+        return PCF3x3(CurrentDepth, ProjCoords.xy, vec2(0, 0));
+    } else if (g_ShadowFiltering == SHADOW_FILTERING_PCF5x5) {
+        return PCF5x5(CurrentDepth, ProjCoords.xy, vec2(0, 0));
+    } else if (g_ShadowFiltering == SHADOW_FILTERING_PCF9x9) {
+        return PCF9x9(CurrentDepth, ProjCoords.xy, vec2(0, 0));
+    }
 }
 
 vec4 GetPosition(in vec2 uv) {

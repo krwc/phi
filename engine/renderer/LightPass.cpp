@@ -14,7 +14,11 @@
 
 namespace phi {
 
-LightPass::LightPass(phi::Device &device) : m_device(device), m_program(), m_config() {
+LightPass::LightPass(phi::Device &device)
+        : m_device(device),
+          m_program(),
+          m_config(),
+          m_shadow_filtering(LightPass::PCF_5x5) {
     m_program.SetSource(
             phi::ShaderType::Vertex,
             phi::io::FileContents("assets/shaders/Quad.vs").c_str());
@@ -103,10 +107,19 @@ void LightPass::Run() {
     m_program.SetConstant("g_ShadowMatrix", m_config->shadow_matrix * inv_view);
     m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config->camera->GetProjMatrix()));
     m_program.SetConstant("g_DepthTexelSize", texel_size);
+    m_program.SetConstant("g_ShadowFiltering", static_cast<int>(m_shadow_filtering));
     SetupLights();
     m_device.BindLayout(&Common::QuadLayout());
     m_device.BindVbo(&Common::QuadVbo());
     m_device.Draw(phi::Primitive::Triangles, 0, 6);
+}
+
+void LightPass::SetShadowFiltering(phi::LightPass::ShadowFiltering filtering) {
+    m_shadow_filtering = filtering;
+}
+
+phi::LightPass::ShadowFiltering LightPass::GetShadowFiltering() const {
+    return m_shadow_filtering;
 }
 
 } // namespace phi

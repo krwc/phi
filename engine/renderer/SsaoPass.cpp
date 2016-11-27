@@ -52,10 +52,10 @@ SsaoPass::SsaoPass(phi::Device &device)
     InitProgram();
 
     /* Default values, known to be working for general scene */
-    SetRadius(0.45f);
-    SetPower(1.5f);
-    SetBias(0.05f);
-    SetNumSamples(32);
+    SetRadius(0.316f);
+    SetPower(2.7792f);
+    SetBias(0.052f);
+    SetStrength(1.2);
 }
 
 void SsaoPass::Setup(const phi::SsaoPass::Config &config) {
@@ -85,7 +85,7 @@ void SsaoPass::Run() {
     m_program.SetConstant("g_Radius", m_properties.radius);
     m_program.SetConstant("g_Power", m_properties.power);
     m_program.SetConstant("g_Bias", m_properties.bias);
-    m_program.SetConstant("g_NumSamples", m_properties.num_samples);
+    m_program.SetConstant("g_Strength", m_properties.strength);
 
     m_program.SetConstant("g_ScreenSize", m_screen_size);
     m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
@@ -124,8 +124,8 @@ void SsaoPass::SetBias(float bias) {
     m_properties.bias = bias;
 }
 
-void SsaoPass::SetNumSamples(int samples) {
-    m_properties.num_samples = samples;
+void SsaoPass::SetStrength(float strength) {
+    m_properties.strength = strength;
 }
 
 } // namespace phi
