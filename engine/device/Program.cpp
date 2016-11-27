@@ -93,12 +93,10 @@ void Program::SetSource(ShaderType type, const char *source) {
     }
 }
 
-namespace {
-
-map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
-    map<string, Program::ParamInfo> result{};
+void Program::DiscoverConstants() {
+    m_constants.clear();
     int num_active_uniforms = 0;
-    phi::glGetProgramInterfaceiv(bind, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
+    phi::glGetProgramInterfaceiv(m_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_active_uniforms);
     enum {
         PROPERTY_BLOCK_INDEX = 0,
         PROPERTY_NAME_LENGTH = 1,
@@ -114,7 +112,7 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
 
     for (int index = 0; index < num_active_uniforms; ++index) {
         GLint results[4];
-        phi::glGetProgramResourceiv(bind, GL_UNIFORM, index, 4, properties, 4, nullptr,
+        phi::glGetProgramResourceiv(m_id, GL_UNIFORM, index, 4, properties, 4, nullptr,
                                     results);
 
         /* Ignore uniforms located in Uniform Blocks */
@@ -123,19 +121,16 @@ map<string, Program::ParamInfo> DiscoverProgramConstants(GLuint bind) {
         }
 
         std::string uniform_name(results[PROPERTY_NAME_LENGTH] - 1, '\0');
-        phi::glGetProgramResourceName(bind, GL_UNIFORM, index, results[PROPERTY_NAME_LENGTH],
+        phi::glGetProgramResourceName(m_id, GL_UNIFORM, index, results[PROPERTY_NAME_LENGTH],
                                       nullptr, &uniform_name[0]);
-        result[uniform_name] = Program::ParamInfo {
+        m_constants[uniform_name] = Program::ParamInfo {
             (GLenum) results[PROPERTY_TYPE],
             (GLint) results[PROPERTY_LOCATION]
         };
 
         PHI_LOG(TRACE, "Program: found constant %s", uniform_name.c_str());
     }
-    return result;
 }
-
-} // namespace
 
 void Program::Link() {
     for (const auto &shader : m_shaders) {
@@ -158,8 +153,8 @@ void Program::Link() {
     if (status == GL_FALSE) {
         throw logic_error("Cannot link program");
     }
-    m_constants = DiscoverProgramConstants(m_id);
     PHI_LOG(TRACE, "Program: linked program (ID=%u)", m_id);
+    DiscoverConstants();
 }
 
 } // namespace phi
