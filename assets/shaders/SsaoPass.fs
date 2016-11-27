@@ -70,9 +70,6 @@ vec4 GetPosition(in vec2 uv) {
     return P /= P.w;
 }
 
-#define ANGLE_FIX
-#define LOG_FIX
-
 void main() {
     const vec3 N = GetNormal(UV);
     const vec4 P = GetPosition(UV);
