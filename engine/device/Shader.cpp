@@ -3,11 +3,17 @@
 
 #include "io/File.h"
 
-#include <vector>
 #include <stdexcept>
+#include <iostream>
 
 namespace phi {
 using namespace std;
+
+std::vector<std::string> Shader::m_global_includes = {};
+
+void Shader::AddGlobalInclude(const std::string &file) {
+    m_global_includes.push_back(file);
+}
 
 void Shader::Destroy() {
     if (m_id) {
@@ -43,13 +49,10 @@ Shader::~Shader() noexcept {
 }
 
 void Shader::Compile() {
-    // One should define more global headers to include automatically if needed.
-    static const char *global_headers[] = {
-        "assets/shaders/Layout.h"
-    };
     std::vector<std::string> source_strings;
-    for (const char *header : global_headers) {
-        source_strings.push_back(phi::io::FileContents(header));
+    for (const std::string &global_include : m_global_includes) {
+        std::cout << global_include << std::endl;
+        source_strings.push_back(phi::io::FileContents(global_include));
     }
     std::vector<const GLchar *> sources;
     std::vector<GLint> lengths;
