@@ -1,4 +1,4 @@
-#line 1 "Outline.fs"
+#line 1 //Outline.fs
 layout(location=0) out vec4 FragColor;
 
 uniform sampler2D ObjectMask;

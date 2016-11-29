@@ -1,4 +1,4 @@
-#line 1 "QuadTexture.fs"
+#line 1 //QuadTexture.fs
 layout(location=0) out vec4 out_FragColor;
 uniform sampler2D Image;
 

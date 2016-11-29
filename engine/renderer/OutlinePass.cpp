@@ -6,7 +6,7 @@
 namespace phi {
 namespace {
 const char *prepass_contour_shader = R"(
-    #line 1 "OutlineContourShader"
+    #line 1 // "OutlineContourShader"
     layout(location=0) out vec4 FragColor;
 
     void main() {

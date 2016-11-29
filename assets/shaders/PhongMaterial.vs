@@ -1,4 +1,4 @@
-#line 1 "PhongMaterial.vs"
+#line 1 //PhongMaterial.vs
 layout(location = POSITION) in vec4 in_Position;
 layout(location = NORMAL) in vec3 in_Normal;
 

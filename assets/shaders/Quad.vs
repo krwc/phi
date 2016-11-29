@@ -1,4 +1,4 @@
-#line 1 "Quad.vs"
+#line 1 //Quad.vs
 layout(location=POSITION) in vec2 in_Position;
 out vec2 UV;
 

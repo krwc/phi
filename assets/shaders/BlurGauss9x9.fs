@@ -1,4 +1,4 @@
-#line 1 "BlurGauss9x9.fs"
+#line 1 //BlurGauss9x9.fs
 layout(location=0) out vec4 FragColor;
 uniform sampler2D Texture;
 uniform vec2 InvSize;
