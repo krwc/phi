@@ -1,4 +1,4 @@
-#line 1 "ShadowPass.vs"
+#line 1 //ShadowPass.vs
 layout(location=POSITION) in vec4 in_Position;
 uniform mat4 ProjViewModelMatrix;
 

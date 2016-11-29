@@ -1,4 +1,4 @@
-#line 1 "ShadowPass.fs"
+#line 1 //ShadowPass.fs
 
 void main() {
 }

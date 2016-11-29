@@ -1,4 +1,4 @@
-#line 1 "PhongMaterial.h"
+#line 1 //PhongMaterial.h
 layout(location = 0) out vec4 out_Normal;
 layout(location = 1) out vec4 out_Diffuse;
 layout(location = 2) out vec4 out_Specular;
