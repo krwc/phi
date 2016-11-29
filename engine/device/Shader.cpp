@@ -4,7 +4,6 @@
 #include "io/File.h"
 
 #include <stdexcept>
-#include <iostream>
 
 namespace phi {
 using namespace std;
@@ -51,7 +50,6 @@ Shader::~Shader() noexcept {
 void Shader::Compile() {
     std::vector<std::string> source_strings;
     for (const std::string &global_include : m_global_includes) {
-        std::cout << global_include << std::endl;
         source_strings.push_back(phi::io::FileContents(global_include));
     }
     std::vector<const GLchar *> sources;
