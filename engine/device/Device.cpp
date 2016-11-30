@@ -100,6 +100,7 @@ Device::Device(const phi::ProcLoader &loader,
         : m_vao(GL_NONE), m_state() {
     LoadProcedures(loader);
     Shader::AddGlobalInclude("assets/shaders/Layout.h");
+    Shader::AddGlobalInclude("assets/shaders/Material.h");
 
     CheckedCall(phi::glCreateVertexArrays, 1, &m_vao);
     SetDepthTest(true);

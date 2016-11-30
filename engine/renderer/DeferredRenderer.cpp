@@ -41,7 +41,9 @@ void DeferredRenderer::BindGlobals(phi::Program &program,
         program.SetConstant("g_InvViewMatrix", glm::inverse(view));
     }
     if (program.FindConstant("g_InvViewModelMatrix")) {
-        program.SetConstant("g_InvViewModelMatrix", glm::inverse(view * model));
+        program.SetConstant("g_InvViewModelMatrix",
+                            glm::transpose(glm::inverse(glm::mat3(view)
+                                                        * glm::mat3(model))));
     }
     if (program.FindConstant("g_ModelMatrix")) {
         program.SetConstant("g_ModelMatrix", model);
