@@ -16,12 +16,12 @@ namespace phi {
 class Program : public virtual Resource {
     void Destroy();
 
-public:
     struct ParamInfo {
         GLenum type;
         GLint location;
     };
 
+public:
     Program(const Program &) = delete;
     Program &operator=(const Program &) = delete;
 
@@ -53,15 +53,13 @@ public:
     }
 
     const ParamInfo *FindConstant(const std::string &name) const;
-    const ParamInfo *FindAttribute(const std::string &name) const;
-
 private:
     GLuint m_id;
 
     std::map<std::string, struct ParamInfo> m_constants;
-    std::map<std::string, struct ParamInfo> m_attributes;
     std::vector<Shader> m_shaders;
 
+    void DiscoverConstants();
     void SetConstant(GLint location, GLenum type, const void *value);
 
 };
