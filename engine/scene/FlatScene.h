@@ -30,13 +30,13 @@ public:
     virtual const phi::Camera *GetCamera() const {
         return m_camera;
     }
-    virtual const std::vector<phi::Entity *> &GetEntities() const {
+    virtual const phi::AnyRange<phi::Entity *> GetEntities() const {
         return m_entities;
     }
-    virtual const std::vector<phi::DirLight *> &GetDirLights() const {
+    virtual const phi::AnyRange<phi::DirLight *> GetDirLights() const {
         return m_dir_lights;
     }
-    virtual const std::vector<phi::PointLight *> &GetPointLights() const {
+    virtual const phi::AnyRange<phi::PointLight *> GetPointLights() const {
         return m_point_lights;
     }
 

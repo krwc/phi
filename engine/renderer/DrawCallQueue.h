@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "DrawCall.h"
+#include "utils/Types.h"
 
 namespace phi {
 class Renderer;
@@ -12,16 +13,15 @@ class DrawCallQueue {
 
 public:
     DrawCallQueue();
-    virtual ~DrawCallQueue() {}
+    ~DrawCallQueue() {}
 
     /** Inserts new DrawCall to the queue. */
-    virtual void Insert(phi::DrawCall &command);
+    void Insert(phi::DrawCall &command);
 
     /** Clears the queue. */
-    virtual void Flush();
+    void Flush();
 
-    // TODO: After implementing custom iterator interface this must be changed.
-    virtual const std::vector<phi::DrawCall> &GetDrawCalls() const {
+    const phi::AnyRange<phi::DrawCall> GetDrawCalls() const {
         return m_commands;
     }
 };

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "math/Math.h"
+#include "utils/Types.h"
 #include "device/Program.h"
 
 #include "RenderPass.h"
@@ -24,9 +25,9 @@ public:
         const phi::Texture2D *texture_normal;
         const phi::Texture2D *texture_diffuse;
         const phi::Texture2D *texture_ao;
-        const std::vector<phi::DirLight *> *dir_lights;
-        const std::vector<phi::PointLight *> *point_lights;
         const phi::Camera *camera;
+        phi::AnyRange<phi::DirLight *> dir_lights;
+        phi::AnyRange<phi::PointLight *> point_lights;
     };
 
     enum ShadowFiltering {

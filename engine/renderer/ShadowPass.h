@@ -12,6 +12,8 @@
 #include "scene/Light.h"
 #include "scene/OrthoCamera.h"
 
+#include "utils/Types.h"
+
 #include "math/AABB.h"
 
 #include "RenderPass.h"
@@ -42,7 +44,7 @@ public:
     struct Config {
         const phi::AABB *aabb;
         const phi::DirLight *light;
-        const std::vector<phi::DrawCall> *draw_calls;
+        phi::AnyRange<phi::DrawCall> draw_calls;
     };
 
     ShadowPass(phi::Device &device, uint32_t resolution);

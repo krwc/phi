@@ -80,8 +80,8 @@ void SimpleMesh::Render(phi::DrawCall &draw) {
     draw.vbo = GetVertexBuffer();
     draw.count = int(m_vertices.size());
     draw.offset = 0;
-    m_material->FillTextureBindings(draw.texture_bindings);
-    m_material->FillProgramConstants(draw.program_constants);
+    draw.program_constants = m_material->GetProgramConstants();
+    draw.texture_bindings = m_material->GetTextureBindings();
 }
 
 } // namespace phi
