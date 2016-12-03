@@ -3,8 +3,6 @@
 
 #include "device/Sampler.h"
 
-#include "io/File.h"
-
 #include <vector>
 #include <random>
 
@@ -28,12 +26,8 @@ void SsaoPass::InitNoiseTexture() {
 }
 
 void SsaoPass::InitProgram() {
-    m_program.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Quad.vs").c_str());
-    m_program.SetSource(
-            phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/SsaoPass.fs").c_str());
+    m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Quad.vs");
+    m_program.SetSourceFromFile(phi::ShaderType::Fragment, "assets/shaders/SsaoPass.fs");
     m_program.Link();
 }
 

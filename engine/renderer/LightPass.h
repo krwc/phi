@@ -50,6 +50,7 @@ private:
     const LightPass::Config *m_config;
     ShadowFiltering m_shadow_filtering;
 
+    void CompileProgram();
     void SetupLights();
 };
 

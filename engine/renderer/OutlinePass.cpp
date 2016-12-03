@@ -1,12 +1,10 @@
 #include "OutlinePass.h"
 #include "Common.h"
 
-#include "io/File.h"
-
 namespace phi {
 namespace {
 const char *prepass_contour_shader = R"(
-    #line 1 // "OutlineContourShader"
+    #version 430
     layout(location=0) out vec4 FragColor;
 
     void main() {
@@ -17,21 +15,13 @@ const char *prepass_contour_shader = R"(
 
 OutlinePass::OutlinePass(phi::DeferredRenderer &renderer)
         : m_renderer(renderer), m_entity(nullptr) {
-    m_prepass.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Passthrough.vs").c_str());
+    m_prepass.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Passthrough.vs");
     m_prepass.SetSource(phi::ShaderType::Fragment, prepass_contour_shader);
     m_prepass.Link();
 
-    m_outline.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Passthrough.vs").c_str());
-    m_outline.SetSource(
-            phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/Outline.fs").c_str());
+    m_outline.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Passthrough.vs");
+    m_outline.SetSourceFromFile(phi::ShaderType::Fragment, "assets/shaders/Outline.fs");
     m_outline.Link();
-
-
 
     const int w = renderer.GetDevice().GetViewport().w;
     const int h = renderer.GetDevice().GetViewport().h;

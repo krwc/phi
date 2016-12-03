@@ -1,3 +1,4 @@
+libs/mcpp
 build/*
 !build/.gitignore
 PhiEngine.config

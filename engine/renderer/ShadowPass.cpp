@@ -2,8 +2,6 @@
 
 #include "math/Rect2D.h"
 
-#include "io/File.h"
-
 namespace phi {
 
 ShadowPass<phi::DirLight>::ShadowPass(phi::Device &device, uint32_t resolution)
@@ -15,12 +13,8 @@ ShadowPass<phi::DirLight>::ShadowPass(phi::Device &device, uint32_t resolution)
     m_fbo.SetDepthAttachment(phi::DepthAttachment{ &m_depth });
     assert(m_fbo.IsReady());
     // FIXME: use program cache.
-    m_depth_program.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/ShadowPass.vs").c_str());
-    m_depth_program.SetSource(
-            phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/ShadowPass.fs").c_str());
+    m_depth_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/ShadowPass.vs");
+    m_depth_program.SetSourceFromFile(phi::ShaderType::Fragment, "assets/shaders/ShadowPass.fs");
     m_depth_program.Link();
 }
 

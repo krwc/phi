@@ -1,6 +1,8 @@
 #include "Program.h"
 #include "Utils.h"
 
+#include "utils/ShaderPreprocessor.h"
+
 namespace phi {
 using namespace std;
 
@@ -82,7 +84,7 @@ void Program::SetConstant(GLint location, GLenum type, const void *data) {
     }
 }
 
-void Program::SetSource(ShaderType type, const char *source) {
+void Program::SetSource(ShaderType type, const std::string &source) {
     m_shaders.emplace_back(type, source);
     try {
         m_shaders.back().Compile();
@@ -93,6 +95,10 @@ void Program::SetSource(ShaderType type, const char *source) {
         m_shaders.pop_back();
         throw logic_error("Compilation failure");
     }
+}
+
+void Program::SetSourceFromFile(ShaderType type, const std::string &filename) {
+    SetSource(type, phi::ShaderPreprocessor(filename).Preprocess());
 }
 
 void Program::DiscoverConstants() {

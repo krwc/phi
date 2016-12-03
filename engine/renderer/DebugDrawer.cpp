@@ -11,8 +11,6 @@
 #include "scene/Camera.h"
 #include "scene/DummyCamera.h"
 
-#include "io/File.h"
-
 #include <vector>
 
 namespace phi {
@@ -33,20 +31,12 @@ DebugDrawer::DebugDrawer(phi::Device &device)
                 DebugDrawer::BUFFER_SIZE),
           m_debug_program(),
           m_quad_program() {
-    m_debug_program.SetSource(
-            ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Debug.vs").c_str());
-    m_debug_program.SetSource(
-            ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/Debug.fs").c_str());
+    m_debug_program.SetSourceFromFile(ShaderType::Vertex, "assets/shaders/Debug.vs");
+    m_debug_program.SetSourceFromFile(ShaderType::Fragment, "assets/shaders/Debug.fs");
     m_debug_program.Link();
 
-    m_quad_program.SetSource(
-            ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Quad.vs").c_str());
-    m_quad_program.SetSource(
-            ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/QuadTexture.fs").c_str());
+    m_quad_program.SetSourceFromFile(ShaderType::Vertex, "assets/shaders/Quad.vs");
+    m_quad_program.SetSourceFromFile(ShaderType::Fragment, "assets/shaders/QuadTexture.fs");
     m_quad_program.Link();
 }
 
