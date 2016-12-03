@@ -11,6 +11,8 @@
 
 #include "renderer/Material.h"
 
+#include <boost/container/static_vector.hpp>
+
 namespace phi {
 
 class PhongMaterial final : public phi::Material {
@@ -22,8 +24,8 @@ class PhongMaterial final : public phi::Material {
         const phi::Texture2D *diffuse;
         const phi::Texture2D *specular;
     } m_textures;
-    std::vector<phi::ProgramConstant> m_constants;
-    std::vector<phi::TextureBinding> m_texture_bindings;
+    boost::container::static_vector<phi::ProgramConstant, 2u> m_constants;
+    boost::container::static_vector<phi::TextureBinding, 2u> m_texture_bindings;
 
     void CompileProgram();
 
