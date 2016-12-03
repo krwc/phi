@@ -38,12 +38,17 @@ unique_ptr<Mesh> MeshImporter::FromFile(const string &file, const string &name) 
 
     for (unsigned i = 0; i < mesh->mNumFaces; ++i) {
         auto face = mesh->mFaces[i];
-        SimpleMesh::Vertex v;
+        SimpleMesh::Vertex v{};
         for (unsigned j = 0; j < face.mNumIndices; ++j) {
             v.position.w = 1.0f;
             for (unsigned k = 0; k < 3; ++k) {
                 v.position[k] = mesh->mVertices[face.mIndices[j]][k] - center[k];
                 v.normal[k] = mesh->mNormals[face.mIndices[j]][k];
+            }
+            if (mesh->HasTextureCoords(0)) {
+                for (unsigned k = 0; k < 2; ++k) {
+                    v.uv[k] = mesh->mTextureCoords[0][face.mIndices[j]][k];
+                }
             }
             result->AppendVertex(v);
         }

@@ -9,8 +9,8 @@ class Program;
 class Sampler;
 
 struct TextureBinding {
-    /** Sampler name used in the shader to access this texture */
-    const char *name;
+    /** Texture unit to which texture should be bound */
+    const int unit;
     /** Texture object to be bound */
     const phi::Texture *texture;
     /** Sampler object used to sample texture */

@@ -37,20 +37,27 @@ static void SetupSampleScene(phi::Scene &scene) {
     wall_l->SetScale({4, 1, 8});
     wall_l->SetPosition({-30, 6, 0});
 
+    static phi::Texture2D random_texture(256, 256, phi::TextureFormat::RGB_888);
+    std::vector<uint8_t> noise(3 * 256 * 256);
+    for (int i = 0; i < noise.size(); ++i) {
+        noise[i] = (rand() % 255);
+    }
+    random_texture.Write(0, 0, 0, 256, 256, noise.data());
+
     torus->SetScale({4, 4, 4});
 
     static auto green_material = std::make_unique<phi::PhongMaterial>();
-    green_material->SetDiffuse({0, 1, 0, 1});
+    green_material->SetDiffuseColor({1, 1, 1, 1});
     static auto red_material = std::make_unique<phi::PhongMaterial>();
-    red_material->SetDiffuse({1, 0, 0, 1});
+    red_material->SetDiffuseColor({1, 0, 0, 1});
     static auto pink_material = std::make_unique<phi::PhongMaterial>();
-    pink_material->SetDiffuse({0.6, 0.2, 0.4, 1});
+    pink_material->SetDiffuseColor({0.6, 0.2, 0.4, 1});
     static auto blue_material = std::make_unique<phi::PhongMaterial>();
-    blue_material->SetDiffuse({0.2, 0.2, 0.3, 1});
+    blue_material->SetDiffuseTexture(random_texture);
     static auto violet_material = std::make_unique<phi::PhongMaterial>();
-    violet_material->SetDiffuse({0.4, 0., 0.6, 1});
+    violet_material->SetDiffuseColor({0.4, 0., 0.6, 1});
     static auto bunny_material = std::make_unique<phi::PhongMaterial>();
-    bunny_material->SetDiffuse({0.9, 0.9, 0.9, 1});
+    bunny_material->SetDiffuseColor({0.9, 0.9, 0.9, 1});
 
     box->SetMaterial(red_material.get());
     plane_h->SetMaterial(pink_material.get());

@@ -3,8 +3,7 @@
 #include <vector>
 
 #include "DataBinding.h"
-
-#include "utils/ProgramCache.h"
+#include "utils/Types.h"
 
 namespace phi {
 class Renderer;
@@ -14,24 +13,23 @@ enum class MaterialId {
 };
 
 class Material {
-protected:
-    static phi::ProgramCache g_cache;
-
 public:
     virtual ~Material() {}
 
     /**
-     * Fills passed vector with textures used by this material.
+     * Should be called just before rendering.
      */
-    virtual void
-    FillTextureBindings(std::vector<phi::TextureBinding> &) const = 0;
+    virtual void OnRender() {}
 
     /**
-     * Fills passed vector with constant names and pointers to the data where
-     * their values are stored.
+     * @returns iterator to texture bindings used by this material.
      */
-    virtual void
-    FillProgramConstants(std::vector<phi::ProgramConstant> &) const = 0;
+    virtual phi::AnyRange<phi::TextureBinding> GetTextureBindings() const = 0;
+
+    /**
+     * @returns iterator to program constants used by this material.
+     */
+    virtual phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const = 0;
 
     /**
      * @returns Pointer to the program being utilized by this material.

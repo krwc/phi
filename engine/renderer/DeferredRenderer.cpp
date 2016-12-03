@@ -71,7 +71,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         phi::ShadowPass<phi::DirLight>::Config config{};
         config.aabb = &scene.GetAABB();
         config.light = m_shadow_casters[0];
-        config.draw_calls = &draw_calls;
+        config.draw_calls = draw_calls;
         m_shadow_pass.Setup(config);
         m_shadow_pass.Run();
     }
@@ -87,8 +87,8 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         config.texture_normal = m_normal.get();
         config.texture_diffuse = m_color.get();
         config.texture_ao = &m_ssao_pass.GetAoTexture();
-        config.point_lights = &scene.GetPointLights();
-        config.dir_lights = &scene.GetDirLights();
+        config.point_lights = scene.GetPointLights();
+        config.dir_lights = scene.GetDirLights();
         config.camera = camera;
         m_light_pass.Setup(config);
         m_device.SetDepthWrite(false);
@@ -120,12 +120,11 @@ void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
     for (const phi::ProgramConstant &constant : draw_call.program_constants) {
         draw_call.program->SetConstant(constant.name, constant.value);
     }
-    uint32_t texture_unit = 0;
     for (const phi::TextureBinding &binding : draw_call.texture_bindings) {
         assert(binding.sampler);
         assert(binding.texture);
-        m_device.BindTexture(texture_unit, binding.texture);
-        m_device.BindSampler(texture_unit, binding.sampler);
+        m_device.BindTexture(binding.unit, binding.texture);
+        m_device.BindSampler(binding.unit, binding.sampler);
     }
     m_device.BindLayout(draw_call.layout);
     m_device.BindVbo(draw_call.vbo);

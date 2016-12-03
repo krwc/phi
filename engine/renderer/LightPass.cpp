@@ -43,38 +43,37 @@ std::string ArrayMember(const std::string &name, uint32_t index) {
 }
 
 void LightPass::SetupLights() {
-    m_program.SetConstant("g_LightInfo.NumDirLights",
-                          static_cast<int>(m_config->dir_lights->size()));
     const glm::mat4 view = m_config->camera->GetViewMatrix();
 
-    for (uint32_t i = 0; i < m_config->dir_lights->size(); ++i) {
-        auto &&item = ArrayMember("g_LightInfo.Dir", i);
+    uint32_t dir_light_idx = 0u;
+    for (const phi::DirLight *light : m_config->dir_lights) {
+        auto &&item = ArrayMember("g_LightInfo.Dir", dir_light_idx);
         // Transform light direction to view space.
-        const glm::vec4 position =
-                glm::vec4((*m_config->dir_lights)[i]->GetPosition(), 0.0f);
+        const glm::vec4 position = glm::vec4(light->GetPosition(), 0.0f);
         const glm::vec3 direction = glm::normalize(glm::vec3(view * position));
         m_program.SetConstant(item + LIGHT_PARAM_DIRECTION, -direction);
-        m_program.SetConstant(item + LIGHT_PARAM_COLOR,
-                              (*m_config->dir_lights)[i]->GetColor());
+        m_program.SetConstant(item + LIGHT_PARAM_COLOR, light->GetColor());
+        ++dir_light_idx;
     }
 
-    m_program.SetConstant("g_LightInfo.NumPointLights",
-                          int(m_config->point_lights->size()));
-    for (uint32_t i = 0; i < m_config->point_lights->size(); ++i) {
-        auto &&item = ArrayMember("g_LightInfo.Point", i);
-        const glm::vec4 position =
-                glm::vec4((*m_config->point_lights)[i]->GetPosition(), 1.0f);
+    uint32_t point_light_idx = 0u;
+    for (const phi::PointLight *light : m_config->point_lights) {
+        auto &&item = ArrayMember("g_LightInfo.Point", point_light_idx);
+        const glm::vec4 position = glm::vec4(light->GetPosition(), 1.0f);
         const glm::vec3 view_position = glm::vec3(view * position);
         m_program.SetConstant(item + LIGHT_PARAM_POSITION, view_position);
         m_program.SetConstant(item + LIGHT_PARAM_COLOR,
-                              (*m_config->point_lights)[i]->GetColor());
+                              light->GetColor());
         m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_CONSTANT,
-                              (*m_config->point_lights)[i]->GetConstantAttenuation());
+                              light->GetConstantAttenuation());
         m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_LINEAR,
-                              (*m_config->point_lights)[i]->GetLinearAttenuation());
+                              light->GetLinearAttenuation());
         m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_QUADRATIC,
-                              (*m_config->point_lights)[i]->GetQuadraticAttenuation());
+                              light->GetQuadraticAttenuation());
+        ++point_light_idx;
     }
+    m_program.SetConstant("g_LightInfo.NumDirLights", dir_light_idx);
+    m_program.SetConstant("g_LightInfo.NumPointLights", point_light_idx);
 }
 
 void LightPass::CompileProgram() {

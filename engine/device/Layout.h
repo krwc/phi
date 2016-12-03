@@ -51,7 +51,8 @@ public:
     /* NOTE: this should be keep up synchronized within assets/shaders/Layout.h */
     enum Location {
         Position = 0u,
-        Normal   = 1u
+        Normal   = 1u,
+        Texcoord = 2u
     };
 
     struct Entry {
