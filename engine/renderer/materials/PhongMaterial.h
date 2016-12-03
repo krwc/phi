@@ -27,8 +27,6 @@ class PhongMaterial final : public phi::Material {
     boost::container::static_vector<phi::ProgramConstant, 2u> m_constants;
     boost::container::static_vector<phi::TextureBinding, 2u> m_texture_bindings;
 
-    void CompileProgram();
-
 public:
     PhongMaterial();
 
@@ -38,7 +36,7 @@ public:
     void SetDiffuseTexture(const phi::Texture2D &texture);
     void SetSpecularTexture(const phi::Texture2D &texture);
 
-    void OnRender();
+    void Compile();
     phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;
     phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const;
 

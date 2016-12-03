@@ -20,7 +20,7 @@ enum {
     SPECULAR_TEXTURE_UNIT = 1
 };
 
-void PhongMaterial::CompileProgram() {
+void PhongMaterial::Compile() {
     if (!m_dirty) {
         return;
     }
@@ -48,10 +48,6 @@ void PhongMaterial::CompileProgram() {
     m_program.SetSource(phi::ShaderType::Fragment, spp.Preprocess());
     m_program.Link();
     m_dirty = false;
-}
-
-void PhongMaterial::OnRender() {
-    CompileProgram();
 }
 
 void PhongMaterial::SetDiffuseColor(const glm::vec4 &diffuse) {

@@ -17,17 +17,17 @@ public:
     virtual ~Material() {}
 
     /**
-     * Should be called just before rendering.
+     * Compiles material.
      */
-    virtual void OnRender() {}
+    virtual void Compile() {}
 
     /**
-     * @returns iterator to texture bindings used by this material.
+     * @returns texture bindings used by this material.
      */
     virtual phi::AnyRange<phi::TextureBinding> GetTextureBindings() const = 0;
 
     /**
-     * @returns iterator to program constants used by this material.
+     * @returns program constants used by this material.
      */
     virtual phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const = 0;
 
