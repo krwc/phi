@@ -15,7 +15,8 @@ SimpleMesh::~SimpleMesh() {}
 const Layout *SimpleMesh::GetLayout() const {
     static const Layout SimpleMeshLayout(sizeof(SimpleMesh::Vertex), {
         { phi::Layout::Position, phi::Layout::Float4, offsetof(SimpleMesh::Vertex, position) },
-        { phi::Layout::Normal  , phi::Layout::Float3, offsetof(SimpleMesh::Vertex, normal)   }
+        { phi::Layout::Normal  , phi::Layout::Float3, offsetof(SimpleMesh::Vertex, normal)   },
+        { phi::Layout::Texcoord, phi::Layout::Float2, offsetof(SimpleMesh::Vertex, uv)       }
     });
     return &SimpleMeshLayout;
 }
@@ -80,6 +81,7 @@ void SimpleMesh::Render(phi::DrawCall &draw) {
     draw.vbo = GetVertexBuffer();
     draw.count = int(m_vertices.size());
     draw.offset = 0;
+    m_material->OnRender();
     draw.program_constants = m_material->GetProgramConstants();
     draw.texture_bindings = m_material->GetTextureBindings();
 }

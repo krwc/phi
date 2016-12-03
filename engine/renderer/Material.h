@@ -17,6 +17,11 @@ public:
     virtual ~Material() {}
 
     /**
+     * Should be called just before rendering.
+     */
+    virtual void OnRender() {}
+
+    /**
      * @returns iterator to texture bindings used by this material.
      */
     virtual phi::AnyRange<phi::TextureBinding> GetTextureBindings() const = 0;

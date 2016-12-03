@@ -40,6 +40,7 @@ public:
     struct Vertex {
         glm::vec4 position;
         glm::vec3 normal;
+        glm::vec2 uv;
     };
 
     SimpleMesh(const std::string &name);

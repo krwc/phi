@@ -1,31 +1,47 @@
 #ifndef PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
 #define PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
+#include <array>
 #include <memory>
 #include <string>
 
 #include "math/Math.h"
 
 #include "device/Program.h"
+#include "device/Texture.h"
 
 #include "renderer/Material.h"
 
 namespace phi {
 
 class PhongMaterial final : public phi::Material {
-    glm::vec4 m_diffuse;
-    glm::vec4 m_specular;
-    std::shared_ptr<Program> m_program;
+    glm::vec4 m_diffuse_color;
+    glm::vec4 m_specular_color;
+    phi::Program m_program;
+    bool m_dirty;
+    struct {
+        const phi::Texture2D *diffuse;
+        const phi::Texture2D *specular;
+    } m_textures;
+    std::vector<phi::ProgramConstant> m_constants;
+    std::vector<phi::TextureBinding> m_texture_bindings;
+
+    void CompileProgram();
 
 public:
     PhongMaterial();
 
-    void SetDiffuse(const glm::vec4 &diffuse);
-    void SetSpecular(const glm::vec4 &specular);
-    virtual void FillTextureBindings(std::vector<phi::TextureBinding> &) const;
-    virtual void FillProgramConstants(std::vector<phi::ProgramConstant> &) const;
+    void SetDiffuseColor(const glm::vec4 &diffuse);
+    void SetSpecularColor(const glm::vec4 &specular);
+
+    void SetDiffuseTexture(const phi::Texture2D &texture);
+    void SetSpecularTexture(const phi::Texture2D &texture);
+
+    void OnRender();
+    phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;
+    phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const;
 
     virtual phi::Program *GetProgram() {
-        return m_program.get();
+        return &m_program;
     }
 
     virtual phi::MaterialId GetId() const {
