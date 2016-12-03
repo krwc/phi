@@ -19,6 +19,10 @@ ShaderPreprocessor::ShaderPreprocessor(const std::string &filename,
 std::string ShaderPreprocessor::Preprocess() {
     std::vector<const char *> argv = {
         "",
+#ifdef INTEL_WORKAROUNDS
+        "-P",
+        "-C",
+#endif
         "-I",
         m_include_dir.c_str(),
         m_filename.c_str()
