@@ -31,8 +31,6 @@ include_directories(${MCPP_INCLUDES})
 
 file(GLOB_RECURSE PHI_SRC_CPP *.cpp)
 
-find_package(Threads)
-
 add_library(PhiEngine STATIC ${PHI_SRC_CPP})
 target_link_libraries(PhiEngine ${GL_LIBRARIES} ${ASSIMP_LIBRARIES} ${MCPP_LIBRARIES})
 add_dependencies(PhiEngine mcpp)
