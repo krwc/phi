@@ -39,7 +39,7 @@ static void SetupSampleScene(phi::Scene &scene) {
 
     static phi::Texture2D random_texture(256, 256, phi::TextureFormat::RGB_888);
     std::vector<uint8_t> noise(3 * 256 * 256);
-    for (int i = 0; i < noise.size(); ++i) {
+    for (unsigned i = 0; i < noise.size(); ++i) {
         noise[i] = (rand() % 255);
     }
     random_texture.Write(0, 0, 0, 256, 256, noise.data());
