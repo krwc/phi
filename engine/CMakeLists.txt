@@ -25,6 +25,8 @@ add_subdirectory(utils)
 add_subdirectory(math)
 add_subdirectory(io)
 
+find_package(Boost REQUIRED)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(../libs)
 include_directories(${MCPP_INCLUDES})
