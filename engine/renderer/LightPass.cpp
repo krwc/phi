@@ -124,7 +124,7 @@ void LightPass::Run() {
 
 void LightPass::SetShadowFiltering(phi::LightPass::ShadowFiltering filtering) {
     m_shadow_filtering = filtering;
-    SetupProgram();
+    CompileProgram();
 }
 
 phi::LightPass::ShadowFiltering LightPass::GetShadowFiltering() const {
