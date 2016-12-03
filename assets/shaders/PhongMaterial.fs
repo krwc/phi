@@ -1,6 +1,6 @@
 #include "Material.h"
 
-out GBufferBlock GBuffer;
+GBUFFER_OUT_DECLARATION()
 
 #if !defined(ENABLE_DIFFUSE_TEXTURE)
 uniform vec4 Diffuse;
@@ -19,16 +19,16 @@ in vec4 Position;
 in vec2 UV;
 
 void main() {
-    GBuffer.Normal = vec4(Normal, 1);
+    GBUFFER_OUT_NORMAL(vec4(Normal, 1));
 #if !defined(ENABLE_DIFFUSE_TEXTURE)
-    GBuffer.Diffuse = Diffuse;
+    GBUFFER_OUT_DIFFUSE(Diffuse);
 #else
-    GBuffer.Diffuse = texture(DiffuseTexture, UV);
+    GBUFFER_OUT_DIFFUSE(texture(DiffuseTexture, UV));
 #endif
 
 #if !defined(ENABLE_SPECULAR_TEXTURE)
-    GBuffer.Specular = Specular;
+    GBUFFER_OUT_SPECULAR(Specular);
 #else
-    GBuffer.Specular = texture(SpecularTexture, UV);
+    GBUFFER_OUT_SPECULAR(texture(SpecularTexture, UV));
 #endif
 }
