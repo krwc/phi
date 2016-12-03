@@ -1,4 +1,5 @@
-#line 1 //PhongMaterial.vs
+#include "Layout.h"
+
 layout(location = POSITION) in vec4 in_Position;
 layout(location = NORMAL) in vec3 in_Normal;
 

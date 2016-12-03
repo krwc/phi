@@ -10,7 +10,7 @@
 #include "scene/Camera.h"
 #include "scene/Light.h"
 
-#include "io/File.h"
+#include "utils/ShaderPreprocessor.h"
 
 namespace phi {
 
@@ -19,13 +19,7 @@ LightPass::LightPass(phi::Device &device)
           m_program(),
           m_config(),
           m_shadow_filtering(LightPass::PCF_5x5) {
-    m_program.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Quad.vs").c_str());
-    m_program.SetSource(
-            phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/LightPass.fs").c_str());
-    m_program.Link();
+    CompileProgram();
 }
 
 void LightPass::Setup(const phi::LightPass::Config &config) {
@@ -83,6 +77,21 @@ void LightPass::SetupLights() {
     }
 }
 
+void LightPass::CompileProgram() {
+    phi::ShaderPreprocessor spp("assets/shaders/LightPass.fs");
+    if (m_shadow_filtering == LightPass::PCF_5x5) {
+        spp.Define("SHADOW_FILTERING_PCF_5x5");
+    } else if (m_shadow_filtering == LightPass::PCF_9x9) {
+        spp.Define("SHADOW_FILTERING_PCF_9x9");
+    } else {
+        spp.Define("SHADOW_FILTERING_PCF_3x3");
+    }
+    m_program = phi::Program{};
+    m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Quad.vs");
+    m_program.SetSource(phi::ShaderType::Fragment, spp.Preprocess());
+    m_program.Link();
+}
+
 void LightPass::Run() {
     const float texel_size = 1.0f / m_config->texture_shadow->GetWidth();
     m_device.BindProgram(&m_program);
@@ -107,7 +116,6 @@ void LightPass::Run() {
     m_program.SetConstant("g_ShadowMatrix", m_config->shadow_matrix * inv_view);
     m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config->camera->GetProjMatrix()));
     m_program.SetConstant("g_DepthTexelSize", texel_size);
-    m_program.SetConstant("g_ShadowFiltering", static_cast<int>(m_shadow_filtering));
     SetupLights();
     m_device.BindLayout(&Common::QuadLayout());
     m_device.BindVbo(&Common::QuadVbo());
@@ -116,6 +124,7 @@ void LightPass::Run() {
 
 void LightPass::SetShadowFiltering(phi::LightPass::ShadowFiltering filtering) {
     m_shadow_filtering = filtering;
+    SetupProgram();
 }
 
 phi::LightPass::ShadowFiltering LightPass::GetShadowFiltering() const {

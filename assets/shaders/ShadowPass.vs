@@ -1,4 +1,5 @@
-#line 1 //ShadowPass.vs
+#include "Layout.h"
+
 layout(location=POSITION) in vec4 in_Position;
 uniform mat4 ProjViewModelMatrix;
 

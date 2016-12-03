@@ -8,12 +8,6 @@
 namespace phi {
 using namespace std;
 
-std::vector<std::string> Shader::m_global_includes = {};
-
-void Shader::AddGlobalInclude(const std::string &file) {
-    m_global_includes.push_back(file);
-}
-
 void Shader::Destroy() {
     if (m_id) {
         PHI_LOG(INFO, "Shader: deleted shader (ID=%u)", m_id);
@@ -36,7 +30,7 @@ Shader::Shader(Shader &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
-Shader::Shader(ShaderType type, const char *source) noexcept
+Shader::Shader(ShaderType type, const std::string &source) noexcept
         : m_id(CheckedCall(phi::glCreateShader, (GLenum) type)),
           m_type(type),
           m_source(source) {
@@ -48,21 +42,9 @@ Shader::~Shader() noexcept {
 }
 
 void Shader::Compile() {
-    std::vector<std::string> source_strings;
-    for (const std::string &global_include : m_global_includes) {
-        source_strings.push_back(phi::io::FileContents(global_include));
-    }
-    std::vector<const GLchar *> sources;
-    std::vector<GLint> lengths;
-    for (const std::string &source : source_strings) {
-        sources.push_back(source.c_str());
-        lengths.push_back(source.length());
-    }
-    sources.push_back(m_source);
-    lengths.push_back(strlen(m_source));
-
-    CheckedCall(phi::glShaderSource, m_id, sources.size(), sources.data(),
-                lengths.data());
+    GLint length = static_cast<GLint>(m_source.length());
+    const char *source = m_source.c_str();
+    CheckedCall(phi::glShaderSource, m_id, 1, &source, &length);
     int status, log_length;
     CheckedCall(phi::glCompileShader, m_id);
     CheckedCall(phi::glGetShaderiv, m_id, GL_COMPILE_STATUS, &status);
@@ -72,8 +54,6 @@ void Shader::Compile() {
         compilation_log.resize(log_length - 1, '\0');
         CheckedCall(phi::glGetShaderInfoLog, m_id, log_length - 1, &log_length,
                     &compilation_log[0]);
-
-        PHI_LOG(ERROR, "Shader compilation failed:\n%s\n", m_source);
         throw invalid_argument(compilation_log);
     }
 }

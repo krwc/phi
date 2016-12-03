@@ -18,10 +18,7 @@ class Shader : virtual public Resource {
 
     GLuint m_id;
     ShaderType m_type;
-    const char *m_source;
-
-    /** List of global includes appended before actually compiled shader */
-    static std::vector<std::string> m_global_includes;
+    std::string m_source;
 
 public:
     Shader(const Shader &) = delete;
@@ -29,7 +26,7 @@ public:
 
     Shader &operator=(Shader &&);
     Shader(Shader &&);
-    Shader(ShaderType type, const char *source) noexcept;
+    Shader(ShaderType type, const std::string &source) noexcept;
     virtual ~Shader() noexcept;
     virtual void Compile();
 
@@ -40,12 +37,6 @@ public:
     virtual GLuint GetId() const {
         return m_id;
     }
-
-    /**
-     * Appends @p file to a global include list. Later on, shader
-     * sources will be enriched with contents of these global include files.
-     */
-    static void AddGlobalInclude(const std::string &file);
 };
 
 } // namespace phi

@@ -5,8 +5,6 @@
 #include "device/Buffer.h"
 #include "device/Sampler.h"
 
-#include "io/File.h"
-
 namespace phi {
 
 BlurPass::BlurPass(phi::Device &device, const phi::BlurPass::Config &config)
@@ -27,12 +25,8 @@ BlurPass::BlurPass(phi::Device &device, const phi::BlurPass::Config &config)
     m_inv_size = glm::vec2(1.0f / m_width, 1.0f / m_height);
     SetRadius(config.radius);
 
-    m_program.SetSource(
-            phi::ShaderType::Vertex,
-            phi::io::FileContents("assets/shaders/Quad.vs").c_str());
-    m_program.SetSource(
-            phi::ShaderType::Fragment,
-            phi::io::FileContents("assets/shaders/BlurGauss9x9.fs").c_str());
+    m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Quad.vs");
+    m_program.SetSourceFromFile(phi::ShaderType::Fragment, "assets/shaders/BlurGauss9x9.fs");
     m_program.Link();
 }
 

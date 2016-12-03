@@ -1,4 +1,5 @@
-#line 1 //PhongMaterial.h
+#include "Material.h"
+
 out GBufferBlock GBuffer;
 
 uniform vec4 Diffuse;

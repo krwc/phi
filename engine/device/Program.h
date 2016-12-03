@@ -45,8 +45,10 @@ public:
         }
     }
 
-    virtual void SetSource(ShaderType type, const char *source);
-    virtual void Link();
+    void SetSource(ShaderType type, const std::string &source);
+    void SetSourceFromFile(ShaderType type, const std::string &filename);
+
+    void Link();
 
     virtual GLuint GetId() const {
         return m_id;

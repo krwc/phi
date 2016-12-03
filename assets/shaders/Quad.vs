@@ -1,4 +1,5 @@
-#line 1 //Quad.vs
+#include "Layout.h"
+
 layout(location=POSITION) in vec2 in_Position;
 out vec2 UV;
 
