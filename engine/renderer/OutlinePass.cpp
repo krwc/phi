@@ -78,8 +78,6 @@ void OutlinePass::Run() {
     glBlendEquation(GL_FUNC_ADD);
     device.BindProgram(&m_outline);
     m_outline.SetConstant("ProjViewModel", proj_view_model);
-    m_outline.SetConstant("ObjectMask", static_cast<int>(0));
-    m_outline.SetConstant("SceneDepth", static_cast<int>(1));
     device.Draw(draw_call.primitive, draw_call.offset, draw_call.count);
     glDisable(GL_BLEND);
 }

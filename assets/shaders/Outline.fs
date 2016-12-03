@@ -1,7 +1,6 @@
-layout(location=0) out vec4 FragColor;
-
-uniform sampler2D ObjectMask;
-uniform sampler2D SceneDepth;
+layout(location = 0) out vec4 FragColor;
+layout(binding = 0) uniform sampler2D ObjectMask;
+layout(binding = 1) uniform sampler2D SceneDepth;
 uniform vec3 OutlineColor = vec3(1, 0, 0);
 
 float GetMask(in ivec2 Coord) {
