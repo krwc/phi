@@ -85,9 +85,6 @@ void SsaoPass::Run() {
     m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
     m_program.SetConstant("g_ProjMatrix", m_config.camera->GetProjMatrix());
     m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config.camera->GetProjMatrix()));
-    m_program.SetConstant("g_TexNormal", static_cast<int>(0));
-    m_program.SetConstant("g_TexNoise", static_cast<int>(1));
-    m_program.SetConstant("g_TexDepth", static_cast<int>(2));
 
     m_device.BindLayout(&Common::QuadLayout());
     m_device.BindVbo(&Common::QuadVbo());

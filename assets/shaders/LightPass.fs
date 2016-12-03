@@ -55,12 +55,11 @@ uniform LightInfo g_LightInfo;
 uniform mat4 g_ShadowMatrix;
 uniform mat4 g_InvProjMatrix;
 uniform float g_DepthTexelSize = 1.0f/2048;
-uniform sampler2DShadow g_TexShadow;
-uniform sampler2D g_TexDepth;
-uniform sampler2D g_TexDiffuse;
-uniform sampler2D g_TexSpecular;
-uniform sampler2D g_TexNormal;
-uniform sampler2D g_TexAo;
+layout(binding = 0) uniform sampler2D g_TexDepth;
+layout(binding = 1) uniform sampler2D g_TexNormal;
+layout(binding = 2) uniform sampler2D g_TexDiffuse;
+layout(binding = 3) uniform sampler2D g_TexAo;
+layout(binding = 4) uniform sampler2DShadow g_TexShadow;
 
 in vec2 UV;
 

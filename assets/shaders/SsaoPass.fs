@@ -1,9 +1,7 @@
-layout(location=0) out vec4 FragColor;
-
-uniform sampler2D g_TexNormal;
-uniform sampler2D g_TexNoise;
-uniform sampler2D g_TexDepth;
-uniform sampler2D g_TexPosition;
+layout(location = 0) out vec4 FragColor;
+layout(binding = 0) uniform sampler2D g_TexNormal;
+layout(binding = 1) uniform sampler2D g_TexNoise;
+layout(binding = 2) uniform sampler2D g_TexDepth;
 
 uniform float g_Radius = 0.9f;
 uniform float g_Power = 1.5f;
