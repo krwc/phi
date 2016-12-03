@@ -2,6 +2,7 @@ include(FindPkgConfig)
 pkg_search_module(ASSIMP REQUIRED assimp)
 pkg_search_module(GL REQUIRED gl)
 
+option(INTEL_WORKAROUNDS "Enables/Disables Intel driver workarounds" OFF)
 include(ExternalProject)
 
 set(MCPP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs/mcpp")
@@ -34,5 +35,8 @@ include_directories(${MCPP_INCLUDES})
 file(GLOB_RECURSE PHI_SRC_CPP *.cpp)
 
 add_library(PhiEngine STATIC ${PHI_SRC_CPP})
+if(INTEL_WORKAROUNDS)
+    add_definitions(-DINTEL_WORKAROUNDS)
+endif()
 target_link_libraries(PhiEngine ${GL_LIBRARIES} ${ASSIMP_LIBRARIES} ${MCPP_LIBRARIES})
 add_dependencies(PhiEngine mcpp)
