@@ -22,10 +22,13 @@ class PhongMaterial final : public phi::Material {
     bool m_dirty;
     struct {
         const phi::Texture2D *diffuse;
+        float diffuse_uv_scale;
         const phi::Texture2D *specular;
+        float specular_uv_scale;
+        const phi::Texture2D *normal;
     } m_textures;
-    boost::container::static_vector<phi::ProgramConstant, 2u> m_constants;
-    boost::container::static_vector<phi::TextureBinding, 2u> m_texture_bindings;
+    boost::container::static_vector<phi::ProgramConstant, 3u> m_constants;
+    boost::container::static_vector<phi::TextureBinding, 3u> m_texture_bindings;
 
 public:
     PhongMaterial();
@@ -33,8 +36,9 @@ public:
     void SetDiffuseColor(const glm::vec4 &diffuse);
     void SetSpecularColor(const glm::vec4 &specular);
 
-    void SetDiffuseTexture(const phi::Texture2D &texture);
-    void SetSpecularTexture(const phi::Texture2D &texture);
+    void SetDiffuseTexture(const phi::Texture2D &texture, float scale = 1.0f);
+    void SetSpecularTexture(const phi::Texture2D &texture, float scale = 1.0f);
+    void SetNormalTexture(const phi::Texture2D &texture);
 
     void Compile();
     phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;

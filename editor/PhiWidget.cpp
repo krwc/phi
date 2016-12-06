@@ -38,19 +38,38 @@ static void SetupSampleScene(phi::Scene &scene) {
     wall_l->SetScale({4, 1, 8});
     wall_l->SetPosition({-30, 6, 0});
 
+    static std::unique_ptr<phi::Texture2D> brick =
+            phi::TextureImporter::FromFile("assets/textures/brick.jpg");
     static std::unique_ptr<phi::Texture2D> brick1 =
             phi::TextureImporter::FromFile("assets/textures/brick1.jpg");
+    static std::unique_ptr<phi::Texture2D> wood =
+            phi::TextureImporter::FromFile("assets/textures/wood.jpg");
+    static std::unique_ptr<phi::Texture2D> brick_normal =
+            phi::TextureImporter::FromFile("assets/textures/brick_normalmap.jpg");
+    static std::unique_ptr<phi::Texture2D> brick1_normal =
+            phi::TextureImporter::FromFile("assets/textures/brick1_normalmap.jpg");
+    static std::unique_ptr<phi::Texture2D> wood_normal =
+            phi::TextureImporter::FromFile("assets/textures/wood_normalmap.jpg");
 
+    brick1->GenerateMipmaps();
+    brick->GenerateMipmaps();
+    wood->GenerateMipmaps();
+    wood_normal->GenerateMipmaps();
+    brick1_normal->GenerateMipmaps();
+    brick_normal->GenerateMipmaps();
     torus->SetScale({4, 4, 4});
 
     static auto green_material = std::make_unique<phi::PhongMaterial>();
-    green_material->SetDiffuseColor({1, 1, 1, 1});
+    green_material->SetDiffuseTexture(*brick.get(), 20.0f);
+    green_material->SetNormalTexture(*brick_normal.get());
     static auto red_material = std::make_unique<phi::PhongMaterial>();
     red_material->SetDiffuseColor({1, 0, 0, 1});
     static auto pink_material = std::make_unique<phi::PhongMaterial>();
-    pink_material->SetDiffuseColor({0.6, 0.2, 0.4, 1});
+    pink_material->SetDiffuseTexture(*wood.get(), 15.0f);
+    pink_material->SetNormalTexture(*wood_normal.get());
     static auto blue_material = std::make_unique<phi::PhongMaterial>();
-    blue_material->SetDiffuseTexture(*brick1.get());
+    blue_material->SetDiffuseTexture(*brick1.get(), 20.0f);
+    blue_material->SetNormalTexture(*brick1_normal.get());
     static auto violet_material = std::make_unique<phi::PhongMaterial>();
     violet_material->SetDiffuseColor({0.4, 0., 0.6, 1});
     static auto bunny_material = std::make_unique<phi::PhongMaterial>();
@@ -209,7 +228,7 @@ void PhiWidget::handleInput() {
         phi::DirLight *sun = *m_context->GetScene().GetDirLights().begin();
         glm::vec3 P = sun->GetPosition();
         glm::quat rotx = glm::rotate(glm::quat(), glm::radians(-dy * 0.2f), glm::vec3(1, 0, 0));
-        glm::quat roty = glm::rotate(glm::quat(), glm::radians(-dx * 0.2f), glm::vec3(0, 1, 0));
+        glm::quat roty = glm::rotate(glm::quat(), glm::radians(+dx * 0.2f), glm::vec3(0, 1, 0));
         P = glm::mat3_cast(rotx * roty) * P;
         sun->SetPosition(P);
     }

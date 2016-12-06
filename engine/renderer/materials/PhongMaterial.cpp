@@ -17,7 +17,8 @@ PhongMaterial::PhongMaterial()
 
 enum {
     DIFFUSE_TEXTURE_UNIT = 0,
-    SPECULAR_TEXTURE_UNIT = 1
+    SPECULAR_TEXTURE_UNIT = 1,
+    NORMAL_TEXTURE_UNIT = 2
 };
 
 void PhongMaterial::Compile() {
@@ -30,8 +31,9 @@ void PhongMaterial::Compile() {
     if (m_textures.diffuse) {
         spp.Define("ENABLE_DIFFUSE_TEXTURE");
         m_texture_bindings.push_back({
-            DIFFUSE_TEXTURE_UNIT, m_textures.diffuse, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D()
+            DIFFUSE_TEXTURE_UNIT, m_textures.diffuse, &phi::Samplers<phi::WrapMode::Repeat>::Trilinear2D()
         });
+        m_constants.push_back({ "DiffuseUvScale", &m_textures.diffuse_uv_scale });
     } else {
         m_constants.push_back({ "Diffuse", &m_diffuse_color });
     }
@@ -40,8 +42,15 @@ void PhongMaterial::Compile() {
         m_texture_bindings.push_back({
             SPECULAR_TEXTURE_UNIT, m_textures.specular, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D()
         });
+        m_constants.push_back({ "SpecularUvScale", &m_textures.specular_uv_scale });
     } else {
         m_constants.push_back({ "Specular", &m_specular_color });
+    }
+    if (m_textures.normal) {
+        spp.Define("ENABLE_NORMAL_MAPPING");
+        m_texture_bindings.push_back(
+                { NORMAL_TEXTURE_UNIT, m_textures.normal,
+                  &phi::Samplers<phi::WrapMode::Repeat>::Trilinear2D() });
     }
     m_program = phi::Program{};
     m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/PhongMaterial.vs");
@@ -62,13 +71,20 @@ void PhongMaterial::SetSpecularColor(const glm::vec4 &specular) {
     m_dirty = true;
 }
 
-void PhongMaterial::SetDiffuseTexture(const phi::Texture2D &texture) {
+void PhongMaterial::SetDiffuseTexture(const phi::Texture2D &texture, float scale) {
     m_textures.diffuse = &texture;
+    m_textures.diffuse_uv_scale = scale;
     m_dirty = true;
 }
 
-void PhongMaterial::SetSpecularTexture(const phi::Texture2D &texture) {
+void PhongMaterial::SetSpecularTexture(const phi::Texture2D &texture, float scale) {
     m_textures.specular = &texture;
+    m_textures.specular_uv_scale = scale;
+    m_dirty = true;
+}
+
+void PhongMaterial::SetNormalTexture(const phi::Texture2D &texture) {
+    m_textures.normal = &texture;
     m_dirty = true;
 }
 
