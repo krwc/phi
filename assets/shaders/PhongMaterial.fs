@@ -16,8 +16,9 @@ uniform float SpecularUvScale = 1.0f;
 uniform vec4 Specular;
 #endif
 
-#if defined(ENABLE_NORMAL_MAPPING)
+#if defined(ENABLE_NORMALMAP_TEXTURE)
 layout(binding = 2) uniform sampler2D NormalTexture;
+uniform float NormalmapUvScale = 1.0f;
 #endif
 
 in vec3 Normal;
@@ -26,14 +27,15 @@ in vec2 UV;
 uniform mat4 g_ViewModelMatrix;
 
 void main() {
-#if defined(ENABLE_NORMAL_MAPPING)
-    vec3 N = normalize(2.0f * texture(NormalTexture, DiffuseUvScale * UV).xyz - 1.0f);
-    vec3 Q1 = dFdx(Position.xyz);
-    vec3 Q2 = dFdy(Position.xyz);
-    vec2 tc1 = dFdx(DiffuseUvScale * UV);
-    vec2 tc2 = dFdy(DiffuseUvScale * UV);
-    vec3 T = normalize(tc2.y * Q1 - tc1.y * Q2);
-    vec3 B = normalize(tc2.x * Q1 - tc1.x * Q2);
+#if defined(ENABLE_NORMALMAP_TEXTURE)
+    vec3 N = normalize(2.0f * texture(NormalTexture, NormalmapUvScale * UV).xyz - 1.0f);
+    // TODO: Meh, probably slow, geometry shaders for the rescue!
+    vec3 dP_dx = dFdx(Position.xyz);
+    vec3 dP_dy = dFdy(Position.xyz);
+    vec2 dx = dFdx(NormalmapUvScale * UV);
+    vec2 dy = dFdy(NormalmapUvScale * UV);
+    vec3 T = normalize(dy.y * dP_dx - dx.y * dP_dy);
+    vec3 B = normalize(dy.x * dP_dx - dx.x * dP_dy);
     mat3 TBN = mat3(T, B, Normal);
     GBUFFER_OUT_NORMAL(vec4(TBN * N, 1));
 #else

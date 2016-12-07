@@ -80,10 +80,16 @@ public:
         return m_id;
     }
 
+    virtual bool HasMipmaps() const {
+        return false;
+    }
+
     virtual void GenerateMipmaps() = 0;
 };
 
 class Texture2D : public Texture {
+    bool m_has_mipmaps;
+
 public:
     Texture2D &operator=(Texture2D &&) = default;
     Texture2D(Texture2D &&) = default;
@@ -92,6 +98,9 @@ public:
 
     virtual void Write(int level, int x, int y, int w, int h, const void *data);
     virtual void GenerateMipmaps();
+    virtual bool HasMipmaps() const {
+        return m_has_mipmaps;
+    }
 };
 
 } // namespace phi

@@ -59,26 +59,42 @@ static void SetupSampleScene(phi::Scene &scene) {
     brick_normal->GenerateMipmaps();
     torus->SetScale({4, 4, 4});
 
-    static auto green_material = std::make_unique<phi::PhongMaterial>();
-    green_material->SetDiffuseTexture(*brick.get(), 20.0f);
-    green_material->SetNormalTexture(*brick_normal.get());
-    static auto red_material = std::make_unique<phi::PhongMaterial>();
-    red_material->SetDiffuseColor({1, 0, 0, 1});
-    static auto pink_material = std::make_unique<phi::PhongMaterial>();
-    pink_material->SetDiffuseTexture(*wood.get(), 15.0f);
-    pink_material->SetNormalTexture(*wood_normal.get());
-    static auto blue_material = std::make_unique<phi::PhongMaterial>();
-    blue_material->SetDiffuseTexture(*brick1.get(), 20.0f);
-    blue_material->SetNormalTexture(*brick1_normal.get());
-    static auto violet_material = std::make_unique<phi::PhongMaterial>();
-    violet_material->SetDiffuseColor({0.4, 0., 0.6, 1});
-    static auto bunny_material = std::make_unique<phi::PhongMaterial>();
-    bunny_material->SetDiffuseColor({0.9, 0.9, 0.9, 1});
+    phi::PhongMaterial::Config brick_material_config{};
+    brick_material_config.diffuse = brick.get();
+    brick_material_config.diffuse_uv_scale = 20.0f;
+    brick_material_config.normal = brick_normal.get();
+    brick_material_config.normal_uv_scale = 20.0f;
+    static auto brick_material =
+            std::make_unique<phi::PhongMaterial>(brick_material_config);
+
+    static auto red_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 1, 0, 0, 1 } });
+
+    phi::PhongMaterial::Config wood_material_config{};
+    wood_material_config.diffuse = wood.get();
+    wood_material_config.diffuse_uv_scale = 15.0f;
+    wood_material_config.normal = wood_normal.get();
+    wood_material_config.normal_uv_scale = 15.0f;
+    static auto wood_material =
+            std::make_unique<phi::PhongMaterial>(wood_material_config);
+
+    phi::PhongMaterial::Config brick1_material_config{};
+    brick1_material_config.diffuse = brick1.get();
+    brick1_material_config.diffuse_uv_scale = 20.0f;
+    brick1_material_config.normal = brick1_normal.get();
+    brick1_material_config.normal_uv_scale = 20.0f;
+    static auto brick1_material =
+            std::make_unique<phi::PhongMaterial>(brick1_material_config);
+
+    static auto violet_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 0.4, 0.0, 0.6, 1 } });
+    static auto bunny_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 0.9, 0.9, 0.9, 1 } });
 
     box->SetMaterial(red_material.get());
-    plane_h->SetMaterial(pink_material.get());
-    plane_v->SetMaterial(blue_material.get());
-    wall_l->SetMaterial(green_material.get());
+    plane_h->SetMaterial(wood_material.get());
+    plane_v->SetMaterial(brick1_material.get());
+    wall_l->SetMaterial(brick_material.get());
     torus->SetMaterial(violet_material.get());
     bunny->SetMaterial(bunny_material.get());
 
