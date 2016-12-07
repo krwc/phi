@@ -125,7 +125,8 @@ size_t TexturePixelSize(TextureFormat format) {
 } // namespace
 
 Texture2D::Texture2D(int width, int height, TextureFormat format)
-        : Texture({ TextureType::Texture2D, format, 1, width, height }) {
+        : Texture({ TextureType::Texture2D, format, 1, width, height }),
+          m_has_mipmaps(false) {
     GLint current = GL_NONE;
     CheckedCall(phi::glGetIntegerv, GL_TEXTURE_BINDING_2D, &current);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, m_id);
@@ -163,6 +164,7 @@ void Texture2D::GenerateMipmaps() {
     CheckedCall(phi::glGenerateMipmap, GL_TEXTURE_2D);
     CheckedCall(phi::glBindTexture, GL_TEXTURE_2D, current);
     PHI_LOG(TRACE, "Texture2D: generated mipmaps");
+    m_has_mipmaps = true;
 }
 
 } // namespace phi

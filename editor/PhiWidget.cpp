@@ -8,6 +8,7 @@
 #include "engine/renderer/DebugDrawer.h"
 
 #include "engine/utils/MeshImporter.h"
+#include "engine/utils/TextureImporter.h"
 
 #include "engine/math/Ray.h"
 
@@ -37,32 +38,63 @@ static void SetupSampleScene(phi::Scene &scene) {
     wall_l->SetScale({4, 1, 8});
     wall_l->SetPosition({-30, 6, 0});
 
-    static phi::Texture2D random_texture(256, 256, phi::TextureFormat::RGB_888);
-    std::vector<uint8_t> noise(3 * 256 * 256);
-    for (unsigned i = 0; i < noise.size(); ++i) {
-        noise[i] = (rand() % 255);
-    }
-    random_texture.Write(0, 0, 0, 256, 256, noise.data());
+    static std::unique_ptr<phi::Texture2D> brick =
+            phi::TextureImporter::FromFile("assets/textures/brick.jpg");
+    static std::unique_ptr<phi::Texture2D> brick1 =
+            phi::TextureImporter::FromFile("assets/textures/brick1.jpg");
+    static std::unique_ptr<phi::Texture2D> wood =
+            phi::TextureImporter::FromFile("assets/textures/wood.jpg");
+    static std::unique_ptr<phi::Texture2D> brick_normal =
+            phi::TextureImporter::FromFile("assets/textures/brick_normalmap.jpg");
+    static std::unique_ptr<phi::Texture2D> brick1_normal =
+            phi::TextureImporter::FromFile("assets/textures/brick1_normalmap.jpg");
+    static std::unique_ptr<phi::Texture2D> wood_normal =
+            phi::TextureImporter::FromFile("assets/textures/wood_normalmap.jpg");
 
+    brick1->GenerateMipmaps();
+    brick->GenerateMipmaps();
+    wood->GenerateMipmaps();
+    wood_normal->GenerateMipmaps();
+    brick1_normal->GenerateMipmaps();
+    brick_normal->GenerateMipmaps();
     torus->SetScale({4, 4, 4});
 
-    static auto green_material = std::make_unique<phi::PhongMaterial>();
-    green_material->SetDiffuseColor({1, 1, 1, 1});
-    static auto red_material = std::make_unique<phi::PhongMaterial>();
-    red_material->SetDiffuseColor({1, 0, 0, 1});
-    static auto pink_material = std::make_unique<phi::PhongMaterial>();
-    pink_material->SetDiffuseColor({0.6, 0.2, 0.4, 1});
-    static auto blue_material = std::make_unique<phi::PhongMaterial>();
-    blue_material->SetDiffuseTexture(random_texture);
-    static auto violet_material = std::make_unique<phi::PhongMaterial>();
-    violet_material->SetDiffuseColor({0.4, 0., 0.6, 1});
-    static auto bunny_material = std::make_unique<phi::PhongMaterial>();
-    bunny_material->SetDiffuseColor({0.9, 0.9, 0.9, 1});
+    phi::PhongMaterial::Config brick_material_config{};
+    brick_material_config.diffuse = brick.get();
+    brick_material_config.diffuse_uv_scale = 20.0f;
+    brick_material_config.normal = brick_normal.get();
+    brick_material_config.normal_uv_scale = 20.0f;
+    static auto brick_material =
+            std::make_unique<phi::PhongMaterial>(brick_material_config);
+
+    static auto red_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 1, 0, 0, 1 } });
+
+    phi::PhongMaterial::Config wood_material_config{};
+    wood_material_config.diffuse = wood.get();
+    wood_material_config.diffuse_uv_scale = 15.0f;
+    wood_material_config.normal = wood_normal.get();
+    wood_material_config.normal_uv_scale = 15.0f;
+    static auto wood_material =
+            std::make_unique<phi::PhongMaterial>(wood_material_config);
+
+    phi::PhongMaterial::Config brick1_material_config{};
+    brick1_material_config.diffuse = brick1.get();
+    brick1_material_config.diffuse_uv_scale = 20.0f;
+    brick1_material_config.normal = brick1_normal.get();
+    brick1_material_config.normal_uv_scale = 20.0f;
+    static auto brick1_material =
+            std::make_unique<phi::PhongMaterial>(brick1_material_config);
+
+    static auto violet_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 0.4, 0.0, 0.6, 1 } });
+    static auto bunny_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 0.9, 0.9, 0.9, 1 } });
 
     box->SetMaterial(red_material.get());
-    plane_h->SetMaterial(pink_material.get());
-    plane_v->SetMaterial(blue_material.get());
-    wall_l->SetMaterial(green_material.get());
+    plane_h->SetMaterial(wood_material.get());
+    plane_v->SetMaterial(brick1_material.get());
+    wall_l->SetMaterial(brick_material.get());
     torus->SetMaterial(violet_material.get());
     bunny->SetMaterial(bunny_material.get());
 
@@ -100,7 +132,8 @@ PhiWidget::PhiWidget(QWidget *widget)
         : QOpenGLWidget(widget),
           m_camera(std::make_unique<phi::FreeLookCamera>()),
           m_selected_entity(nullptr),
-          m_rotate(false) {
+          m_rotate(false),
+          m_rotate_light(false) {
     setFocusPolicy(Qt::StrongFocus);
 }
 
@@ -162,12 +195,16 @@ void PhiWidget::mousePressEvent(QMouseEvent *event) {
         emit EntityPicked(m_selected_entity);
     } else if (event->button() == Qt::RightButton) {
         m_rotate = true;
+    } else if (event->button() == Qt::MiddleButton) {
+        m_rotate_light = true;
     }
 }
 
 void PhiWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::RightButton) {
         m_rotate = false;
+    } else if (event->button() == Qt::MiddleButton) {
+        m_rotate_light = false;
     }
 }
 
@@ -201,9 +238,15 @@ void PhiWidget::handleInput() {
     int dy = m_mouse_position.y - y;
 
     if (m_rotate) {
-        // FIXME: this doesn't work well with rotations somehow
         m_camera->RotateX(-dy * 0.2);
         m_camera->RotateY(-dx * 0.2);
+    } else if (m_rotate_light) {
+        phi::DirLight *sun = *m_context->GetScene().GetDirLights().begin();
+        glm::vec3 P = sun->GetPosition();
+        glm::quat rotx = glm::rotate(glm::quat(), glm::radians(-dy * 0.2f), glm::vec3(1, 0, 0));
+        glm::quat roty = glm::rotate(glm::quat(), glm::radians(+dx * 0.2f), glm::vec3(0, 1, 0));
+        P = glm::mat3_cast(rotx * roty) * P;
+        sun->SetPosition(P);
     }
 
     m_mouse_position.x = x;

@@ -26,6 +26,7 @@ class PhiWidget : public QOpenGLWidget {
     QSet<int> m_pressed_keys;
     // True if rotation via mouse movement should be performed.
     bool m_rotate;
+    bool m_rotate_light;
     // Valid if mouse position is being tracked by the widget.
     struct {
         int x, y;

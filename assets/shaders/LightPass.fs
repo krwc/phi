@@ -21,6 +21,20 @@ struct LightInfo {
     PointLight Point[NUM_MAX_DIR_LIGHTS];
 };
 
+layout(location=0) out vec4 FragColor;
+
+uniform LightInfo g_LightInfo;
+uniform mat4 g_ShadowMatrix;
+uniform mat4 g_InvProjMatrix;
+uniform float g_DepthTexelSize = 1.0f/2048;
+layout(binding = 0) uniform sampler2D g_TexDepth;
+layout(binding = 1) uniform sampler2D g_TexNormal;
+layout(binding = 2) uniform sampler2D g_TexDiffuse;
+layout(binding = 3) uniform sampler2D g_TexAo;
+layout(binding = 4) uniform sampler2DShadow g_TexShadow;
+
+in vec2 UV;
+
 vec3 ComputeDirLightIntensity(in LightInfo Info, in vec3 Normal) {
     vec3 Result = vec3(0,0,0);
     for (uint i = 0; i < Info.NumDirLights; ++i) {
@@ -48,20 +62,6 @@ vec3 ComputePointLightIntensity(in LightInfo Info,
     }
     return Result;
 }
-
-layout(location=0) out vec4 FragColor;
-
-uniform LightInfo g_LightInfo;
-uniform mat4 g_ShadowMatrix;
-uniform mat4 g_InvProjMatrix;
-uniform float g_DepthTexelSize = 1.0f/2048;
-layout(binding = 0) uniform sampler2D g_TexDepth;
-layout(binding = 1) uniform sampler2D g_TexNormal;
-layout(binding = 2) uniform sampler2D g_TexDiffuse;
-layout(binding = 3) uniform sampler2D g_TexAo;
-layout(binding = 4) uniform sampler2DShadow g_TexShadow;
-
-in vec2 UV;
 
 #define PCF_IMPL(R, Size)                                                 \
     float I = 0.0f;                                                       \

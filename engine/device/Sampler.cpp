@@ -10,7 +10,7 @@ Sampler::Sampler(const phi::Sampler::Config2D &config) : m_id(GL_NONE) {
     CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MIN_FILTER,
                 (GLenum) config.min_filter);
     CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_MAG_FILTER,
-                (GLenum) config.min_filter);
+                (GLenum) config.mag_filter);
     CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_S,
                 (GLenum) config.wrap_u);
     CheckedCall(phi::glSamplerParameteri, m_id, GL_TEXTURE_WRAP_T,

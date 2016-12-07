@@ -11,48 +11,58 @@
 
 #include "renderer/Material.h"
 
+#include "utils/ShaderPreprocessor.h"
+
 #include <boost/container/static_vector.hpp>
 
 namespace phi {
 
 class PhongMaterial final : public phi::Material {
-    glm::vec4 m_diffuse_color;
-    glm::vec4 m_specular_color;
-    phi::Program m_program;
-    bool m_dirty;
-    struct {
+public:
+    struct Config {
+        /* Solid diffuse color -- used if diffuse texture not specified */
+        glm::vec4 diffuse_color;
+        /* Solid specular color -- used if specular texture not specified */
+        glm::vec4 specular_color;
         const phi::Texture2D *diffuse;
         const phi::Texture2D *specular;
-    } m_textures;
-    boost::container::static_vector<phi::ProgramConstant, 2u> m_constants;
-    boost::container::static_vector<phi::TextureBinding, 2u> m_texture_bindings;
+        const phi::Texture2D *normal;
+        float diffuse_uv_scale;
+        float specular_uv_scale;
+        float normal_uv_scale;
+    };
 
-    void CompileProgram();
+    PhongMaterial(const phi::PhongMaterial::Config &config);
 
-public:
-    PhongMaterial();
+    void Compile();
+    void Setup(const phi::PhongMaterial::Config &config);
 
-    void SetDiffuseColor(const glm::vec4 &diffuse);
-    void SetSpecularColor(const glm::vec4 &specular);
-
-    void SetDiffuseTexture(const phi::Texture2D &texture);
-    void SetSpecularTexture(const phi::Texture2D &texture);
-
-    void OnRender();
     phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;
     phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const;
 
-    virtual phi::Program *GetProgram() {
+    phi::Program *GetProgram() {
         return &m_program;
     }
 
-    virtual phi::MaterialId GetId() const {
+    phi::MaterialId GetId() const {
         return phi::MaterialId::Phong;
     }
 
-    virtual std::string GetName() const {
+    std::string GetName() const {
         return "mat_phong";
     }
+
+private:
+    phi::Program m_program;
+    PhongMaterial::Config m_config;
+    bool m_dirty;
+    boost::container::static_vector<phi::ProgramConstant, 4u> m_constants;
+    boost::container::static_vector<phi::TextureBinding, 4u> m_textures;
+
+    void EnableTexture(int texture_unit,
+                       const phi::Texture2D *texture,
+                       const float *scale,
+                       phi::ShaderPreprocessor &);
 };
 
 } // namespace phi

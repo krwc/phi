@@ -7,41 +7,39 @@
 
 namespace phi {
 
-PhongMaterial::PhongMaterial()
-        : m_diffuse_color(1, 1, 1, 1),
-          m_specular_color(0, 0, 0, 1),
-          m_program(),
-          m_dirty(true),
-          m_textures(),
-          m_constants() {}
+PhongMaterial::PhongMaterial(const phi::PhongMaterial::Config &config)
+        : m_program(), m_config(), m_dirty(true) {
+    Setup(config);
+}
 
-enum {
-    DIFFUSE_TEXTURE_UNIT = 0,
-    SPECULAR_TEXTURE_UNIT = 1
+enum TextureUnit {
+    TEXTURE_UNIT_DIFFUSE = 0u,
+    TEXTURE_UNIT_SPECULAR = 1u,
+    TEXTURE_UNIT_NORMALMAP = 2u
 };
 
-void PhongMaterial::CompileProgram() {
+void PhongMaterial::Compile() {
     if (!m_dirty) {
         return;
     }
-    m_texture_bindings.clear();
     m_constants.clear();
+    m_textures.clear();
+
     phi::ShaderPreprocessor spp("assets/shaders/PhongMaterial.fs");
-    if (m_textures.diffuse) {
-        spp.Define("ENABLE_DIFFUSE_TEXTURE");
-        m_texture_bindings.push_back({
-            DIFFUSE_TEXTURE_UNIT, m_textures.diffuse, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D()
-        });
+    if (m_config.diffuse) {
+        EnableTexture(TEXTURE_UNIT_DIFFUSE, m_config.diffuse, &m_config.diffuse_uv_scale, spp);
     } else {
-        m_constants.push_back({ "Diffuse", &m_diffuse_color });
+        m_constants.push_back({ "Diffuse", &m_config.diffuse_color });
     }
-    if (m_textures.specular) {
-        spp.Define("ENABLE_SPECULAR_TEXTURE");
-        m_texture_bindings.push_back({
-            SPECULAR_TEXTURE_UNIT, m_textures.specular, &phi::Samplers<phi::WrapMode::ClampToEdge>::Bilinear2D()
-        });
+
+    if (m_config.specular) {
+        EnableTexture(TEXTURE_UNIT_SPECULAR, m_config.diffuse, &m_config.specular_uv_scale, spp);
     } else {
-        m_constants.push_back({ "Specular", &m_specular_color });
+        m_constants.push_back({ "Specular", &m_config.specular_color });
+    }
+
+    if (m_config.normal) {
+        EnableTexture(TEXTURE_UNIT_NORMALMAP, m_config.normal, &m_config.normal_uv_scale, spp);
     }
     m_program = phi::Program{};
     m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/PhongMaterial.vs");
@@ -50,34 +48,47 @@ void PhongMaterial::CompileProgram() {
     m_dirty = false;
 }
 
-void PhongMaterial::OnRender() {
-    CompileProgram();
-}
-
-void PhongMaterial::SetDiffuseColor(const glm::vec4 &diffuse) {
-    m_diffuse_color = diffuse;
-    m_textures.diffuse = nullptr;
+void PhongMaterial::Setup(const phi::PhongMaterial::Config &config) {
+    m_config = config;
     m_dirty = true;
 }
 
-void PhongMaterial::SetSpecularColor(const glm::vec4 &specular) {
-    m_specular_color = specular;
-    m_textures.specular = nullptr;
-    m_dirty = true;
+namespace {
+
+struct ParamMapping {
+    TextureUnit unit;
+    std::string feature_name;
+    std::string uv_scale_name;
+} material_parameters[] = {
+    { TEXTURE_UNIT_DIFFUSE, "ENABLE_DIFFUSE_TEXTURE", "DiffuseUvScale" },
+    { TEXTURE_UNIT_SPECULAR, "ENABLE_SPECULAR_TEXTURE", "SpecularUvScale" },
+    { TEXTURE_UNIT_NORMALMAP, "ENABLE_NORMALMAP_TEXTURE", "NormalmapUvScale" }
+};
+
 }
 
-void PhongMaterial::SetDiffuseTexture(const phi::Texture2D &texture) {
-    m_textures.diffuse = &texture;
-    m_dirty = true;
-}
-
-void PhongMaterial::SetSpecularTexture(const phi::Texture2D &texture) {
-    m_textures.specular = &texture;
-    m_dirty = true;
+void PhongMaterial::EnableTexture(int texture_unit,
+                                  const phi::Texture2D *texture,
+                                  const float *scale,
+                                  phi::ShaderPreprocessor &preprocessor) {
+    const phi::Sampler *sampler;
+    if (texture->HasMipmaps()) {
+        sampler = &phi::Samplers<phi::WrapMode::Repeat>::Trilinear2D();
+    } else {
+        sampler = &phi::Samplers<phi::WrapMode::Repeat>::Bilinear2D();
+    }
+    m_textures.push_back({ static_cast<int>(texture_unit), texture, sampler });
+    for (const ParamMapping &mapping : material_parameters) {
+        if (texture_unit == mapping.unit) {
+            m_constants.push_back({ mapping.uv_scale_name.c_str(), scale });
+            preprocessor.Define(mapping.feature_name);
+            break;
+        }
+    }
 }
 
 phi::AnyRange<phi::TextureBinding> PhongMaterial::GetTextureBindings() const {
-    return m_texture_bindings;
+    return m_textures;
 }
 
 phi::AnyRange<phi::ProgramConstant> PhongMaterial::GetProgramConstants() const {
