@@ -9,7 +9,6 @@ DrawCall::DrawCall()
           layout(nullptr),
           vbo(nullptr),
           ibo(nullptr),
-          program_constants(),
           texture_bindings(),
           count(-1),
           offset(-1) {}

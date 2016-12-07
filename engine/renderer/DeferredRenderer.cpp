@@ -117,9 +117,6 @@ void DeferredRenderer::Execute(const phi::DrawCall &draw_call,
     m_device.BindProgram(draw_call.program);
     BindGlobals(*draw_call.program, camera.GetProjMatrix(),
                 camera.GetViewMatrix(), draw_call.transform);
-    for (const phi::ProgramConstant &constant : draw_call.program_constants) {
-        draw_call.program->SetConstant(constant.name, constant.value);
-    }
     for (const phi::TextureBinding &binding : draw_call.texture_bindings) {
         assert(binding.sampler);
         assert(binding.texture);

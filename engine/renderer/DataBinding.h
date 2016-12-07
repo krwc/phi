@@ -17,16 +17,6 @@ struct TextureBinding {
     const phi::Sampler *sampler;
 };
 
-struct ProgramConstant {
-    /** Name of the constant in the shader */
-    const char *name;
-    /** Pointer to the value of the constant */
-    const void *value;
-
-    ProgramConstant(const char *name, const void *value)
-            : name(name), value(value) {}
-};
-
 } // namespace phi
 
 #endif

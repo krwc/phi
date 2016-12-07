@@ -76,6 +76,7 @@ private:
     void InitNoiseTexture();
     void InitProgram();
     void InitFbo();
+    void UpdateConstants();
 };
 
 } // namespace phi
