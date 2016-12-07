@@ -19,7 +19,7 @@ DeferredRenderer::DeferredRenderer(phi::Device &device)
           m_shadow_casters(),
           m_ssao_pass(device),
           m_light_pass(device),
-          m_shadow_pass(device, 2048) {
+          m_shadow_pass(device, 1024) {
     const auto &viewport = device.GetViewport();
     Resize(viewport.w, viewport.h);
 }
