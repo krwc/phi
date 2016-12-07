@@ -40,6 +40,15 @@ void SsaoPass::InitFbo() {
     assert(m_fbo->IsReady());
 }
 
+void SsaoPass::UpdateConstants() {
+    m_program.SetConstant("g_Radius", m_properties.radius);
+    m_program.SetConstant("g_Power", m_properties.power);
+    m_program.SetConstant("g_Bias", m_properties.bias);
+    m_program.SetConstant("g_Strength", m_properties.strength);
+    m_program.SetConstant("g_ScreenSize", m_screen_size);
+    m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
+}
+
 SsaoPass::SsaoPass(phi::Device &device)
         : m_device(device), m_program() {
     InitNoiseTexture();
@@ -76,13 +85,7 @@ void SsaoPass::Run() {
     m_device.BindFrameBuffer(m_fbo.get());
     m_device.SetViewport({ 0, 0, m_config.fbo_width, m_config.fbo_height });
     m_device.BindProgram(&m_program);
-    m_program.SetConstant("g_Radius", m_properties.radius);
-    m_program.SetConstant("g_Power", m_properties.power);
-    m_program.SetConstant("g_Bias", m_properties.bias);
-    m_program.SetConstant("g_Strength", m_properties.strength);
 
-    m_program.SetConstant("g_ScreenSize", m_screen_size);
-    m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
     m_program.SetConstant("g_ProjMatrix", m_config.camera->GetProjMatrix());
     m_program.SetConstant("g_InvProjMatrix", glm::inverse(m_config.camera->GetProjMatrix()));
 
@@ -105,18 +108,22 @@ void SsaoPass::Run() {
 
 void SsaoPass::SetRadius(float radius) {
     m_properties.radius = radius;
+    UpdateConstants();
 }
 
 void SsaoPass::SetPower(float power) {
     m_properties.power = power;
+    UpdateConstants();
 }
 
 void SsaoPass::SetBias(float bias) {
     m_properties.bias = bias;
+    UpdateConstants();
 }
 
 void SsaoPass::SetStrength(float strength) {
     m_properties.strength = strength;
+    UpdateConstants();
 }
 
 } // namespace phi

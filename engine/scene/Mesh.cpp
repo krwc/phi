@@ -82,7 +82,6 @@ void SimpleMesh::Render(phi::DrawCall &draw) {
     draw.count = int(m_vertices.size());
     draw.offset = 0;
     m_material->Compile();
-    draw.program_constants = m_material->GetProgramConstants();
     draw.texture_bindings = m_material->GetTextureBindings();
 }
 

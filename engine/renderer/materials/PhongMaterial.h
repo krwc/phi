@@ -1,8 +1,8 @@
 #ifndef PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
 #define PHI_RENDERER_MATERIALS_PHONG_MATERIAL_H
-#include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "math/Math.h"
 
@@ -12,8 +12,6 @@
 #include "renderer/Material.h"
 
 #include "utils/ShaderPreprocessor.h"
-
-#include <boost/container/static_vector.hpp>
 
 namespace phi {
 
@@ -38,7 +36,6 @@ public:
     void Setup(const phi::PhongMaterial::Config &config);
 
     phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;
-    phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const;
 
     phi::Program *GetProgram() {
         return &m_program;
@@ -56,13 +53,8 @@ private:
     phi::Program m_program;
     PhongMaterial::Config m_config;
     bool m_dirty;
-    boost::container::static_vector<phi::ProgramConstant, 4u> m_constants;
-    boost::container::static_vector<phi::TextureBinding, 4u> m_textures;
+    std::vector<phi::TextureBinding> m_textures;
 
-    void EnableTexture(int texture_unit,
-                       const phi::Texture2D *texture,
-                       const float *scale,
-                       phi::ShaderPreprocessor &);
 };
 
 } // namespace phi

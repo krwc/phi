@@ -23,7 +23,6 @@ struct DrawCall {
     const phi::Layout *layout;
     const phi::Buffer *vbo;
     const phi::Buffer *ibo;
-    phi::AnyRange<phi::ProgramConstant> program_constants;
     phi::AnyRange<phi::TextureBinding> texture_bindings;
     /* Number of primitives to draw. */
     int count;

@@ -27,11 +27,6 @@ public:
     virtual phi::AnyRange<phi::TextureBinding> GetTextureBindings() const = 0;
 
     /**
-     * @returns program constants used by this material.
-     */
-    virtual phi::AnyRange<phi::ProgramConstant> GetProgramConstants() const = 0;
-
-    /**
      * @returns Pointer to the program being utilized by this material.
      */
     virtual phi::Program *GetProgram() = 0;
