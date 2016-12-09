@@ -16,8 +16,7 @@ namespace {
 
 enum TextureUnit {
     TEXTURE_UNIT_DIFFUSE = 0u,
-    TEXTURE_UNIT_SPECULAR = 1u,
-    TEXTURE_UNIT_NORMALMAP = 2u
+    TEXTURE_UNIT_NORMALMAP = 1u
 };
 
 void EnableTexture(TextureUnit texture_unit,
@@ -46,10 +45,6 @@ void PhongMaterial::Compile() {
         spp.Define("ENABLE_DIFFUSE_TEXTURE");
         EnableTexture(TEXTURE_UNIT_DIFFUSE, m_config.diffuse, m_textures);
     }
-    if (m_config.specular) {
-        spp.Define("ENABLE_SPECULAR_TEXTURE");
-        EnableTexture(TEXTURE_UNIT_SPECULAR, m_config.specular, m_textures);
-    }
     if (m_config.normal) {
         spp.Define("ENABLE_NORMALMAP_TEXTURE");
         EnableTexture(TEXTURE_UNIT_NORMALMAP, m_config.normal, m_textures);
@@ -64,14 +59,10 @@ void PhongMaterial::Compile() {
     } else {
         m_program.SetConstant("Diffuse", m_config.diffuse_color);
     }
-    if (m_config.specular) {
-        m_program.SetConstant("SpecularUvScale", m_config.specular_uv_scale);
-    } else {
-        m_program.SetConstant("Specular", m_config.specular_color);
-    }
     if (m_config.normal) {
         m_program.SetConstant("NormalmapUvScale", m_config.normal_uv_scale);
     }
+    m_program.SetConstant("SpecularPower", m_config.specular_power);
 
     m_dirty = false;
 }

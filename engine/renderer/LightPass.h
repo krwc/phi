@@ -20,10 +20,9 @@ public:
     struct Config {
         glm::mat4 shadow_matrix;
         const phi::Texture2D *texture_depth;
-        const phi::Texture2D *texture_shadow;
-        const phi::Texture2D *texture_position;
         const phi::Texture2D *texture_normal;
         const phi::Texture2D *texture_diffuse;
+        const phi::Texture2D *texture_shadow;
         const phi::Texture2D *texture_ao;
         const phi::Camera *camera;
         phi::AnyRange<phi::DirLight *> dir_lights;

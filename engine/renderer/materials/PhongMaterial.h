@@ -18,23 +18,32 @@ namespace phi {
 class PhongMaterial final : public phi::Material {
 public:
     struct Config {
-        /* Solid diffuse color -- used if diffuse texture not specified */
-        glm::vec4 diffuse_color;
-        /* Solid specular color -- used if specular texture not specified */
-        glm::vec4 specular_color;
+        /**
+         * Solid diffuse color -- used if diffuse texture not specified
+         */
+        glm::vec3 diffuse_color;
+        /**
+         * Specular power exponent. Should be >= 1.0f, or otherwise specular
+         * will not be applied.
+         */
+        float specular_power;
+        /**
+         * Diffuse texture. If set, Config#diffuse_color will not have any effect.
+         */
         const phi::Texture2D *diffuse;
-        const phi::Texture2D *specular;
+        /**
+         * Normalmap texture. If set, bumpmapping will be used to perturb surface
+         * normals.
+         */
         const phi::Texture2D *normal;
+        /** Repetitiveness factor of diffuse texture */
         float diffuse_uv_scale;
-        float specular_uv_scale;
+        /** Repetitiveness factor of normalmap texture */
         float normal_uv_scale;
     };
-
     PhongMaterial(const phi::PhongMaterial::Config &config);
-
     void Compile();
     void Setup(const phi::PhongMaterial::Config &config);
-
     phi::AnyRange<phi::TextureBinding> GetTextureBindings() const;
 
     phi::Program *GetProgram() {

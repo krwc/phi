@@ -35,6 +35,7 @@ const std::string POINT_LIGHT_PARAM_ATT_QUADRATIC = ".AttenuationQuadratic";
 const std::string LIGHT_PARAM_DIRECTION = ".Direction";
 const std::string LIGHT_PARAM_POSITION = ".Position";
 const std::string LIGHT_PARAM_COLOR = ".Color";
+const std::string LIGHT_PARAM_SPECULAR = ".Specular";
 
 std::string ArrayMember(const std::string &name, uint32_t index) {
     return name + "[" + std::to_string(index) + "]";
@@ -53,6 +54,8 @@ void LightPass::SetupLights() {
         const glm::vec3 direction = glm::normalize(glm::vec3(view * position));
         m_program.SetConstant(item + LIGHT_PARAM_DIRECTION, -direction);
         m_program.SetConstant(item + LIGHT_PARAM_COLOR, light->GetColor());
+        m_program.SetConstant(item + LIGHT_PARAM_SPECULAR,
+                              (float)light->GetSpecular());
         ++dir_light_idx;
     }
 
@@ -70,6 +73,8 @@ void LightPass::SetupLights() {
                               light->GetLinearAttenuation());
         m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_QUADRATIC,
                               light->GetQuadraticAttenuation());
+        m_program.SetConstant(item + LIGHT_PARAM_SPECULAR,
+                              (float)light->GetSpecular());
         ++point_light_idx;
     }
     m_program.SetConstant("g_LightInfo.NumDirLights", dir_light_idx);

@@ -5,15 +5,21 @@ using namespace glm;
 
 Light::Light(const vec3 &position,
              const vec3 &color,
-             bool casting_shadows)
+             bool casting_shadows,
+             bool specular)
         : m_position(position),
           m_color(color),
-          m_casting_shadows(casting_shadows) {}
+          m_casting_shadows(casting_shadows),
+          m_specular(specular) {}
 
-Light::Light() : Light({0,0,0}, {1,1,1}, false) {}
+Light::Light() : Light({0,0,0}, {1,1,1}, false, false) {}
 
 void Light::SetColor(const glm::vec3 &color) {
     m_color = color;
+}
+
+void Light::SetSpecular(bool enabled) {
+    m_specular = enabled;
 }
 
 void Light::SetPosition(const glm::vec3 &position) {
@@ -34,6 +40,10 @@ void Light::SetShadowCasting(bool enabled) {
 
 bool Light::IsCastingShadows() const {
     return m_casting_shadows;
+}
+
+bool Light::GetSpecular() const {
+    return m_specular;
 }
 
 PointLight::PointLight()

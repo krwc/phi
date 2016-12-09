@@ -6,20 +6,15 @@ GBUFFER_OUT_DECLARATION()
 layout(binding = 0) uniform sampler2D DiffuseTexture;
 uniform float DiffuseUvScale = 1.0f;
 #else
-uniform vec4 Diffuse;
-#endif
-
-#if defined(ENABLE_SPECULAR_TEXTURE)
-layout(binding = 1) uniform sampler2D SpecularTexture;
-uniform float SpecularUvScale = 1.0f;
-#else
-uniform vec4 Specular;
+uniform vec3 Diffuse;
 #endif
 
 #if defined(ENABLE_NORMALMAP_TEXTURE)
-layout(binding = 2) uniform sampler2D NormalTexture;
+layout(binding = 1) uniform sampler2D NormalTexture;
 uniform float NormalmapUvScale = 1.0f;
 #endif
+
+uniform float SpecularPower = 0.0f;
 
 in vec3 Normal;
 in vec4 Position;
@@ -48,9 +43,5 @@ void main() {
     GBUFFER_OUT_DIFFUSE(Diffuse);
 #endif
 
-#if defined(ENABLE_SPECULAR_TEXTURE)
-    GBUFFER_OUT_SPECULAR(texture(SpecularTexture, SpecularUvScale * UV));
-#else
-    GBUFFER_OUT_SPECULAR(Specular);
-#endif
+    GBUFFER_OUT_SPECULAR_POWER(SpecularPower);
 }
