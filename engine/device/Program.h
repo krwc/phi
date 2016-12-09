@@ -22,6 +22,8 @@ class Program : public virtual Resource {
     };
 
 public:
+    typedef Program::ParamInfo *ConstantRef;
+
     Program(const Program &) = delete;
     Program &operator=(const Program &) = delete;
 
@@ -31,15 +33,14 @@ public:
     virtual ~Program();
 
     template <typename T>
-    void SetConstant(const std::string &name, const T &value) {
-        SetConstant(name.c_str(), (const void *) &value);
+    void SetConstant(ConstantRef parameter, const T &value) {
+        SetConstant(parameter->location, parameter->type, (const void *) &value);
     }
 
-    void SetConstant(const char *name, const void *value) {
-        if (!m_id) {
-            throw std::logic_error("Shader not linked yet");
-        } else if (auto &&info = FindConstant(name)) {
-            SetConstant(info->location, info->type, value);
+    template <typename T>
+    void SetConstant(const std::string &name, const T &value) {
+        if (auto &&info = FindConstant(name)) {
+            SetConstant(info, value);
         } else {
             PHI_LOG(WARNING, "Shader: cannot set constant %s: not found", name);
         }
@@ -54,7 +55,8 @@ public:
         return m_id;
     }
 
-    const ParamInfo *FindConstant(const std::string &name) const;
+    Program::ConstantRef FindConstant(const std::string &name);
+
 private:
     GLuint m_id;
 

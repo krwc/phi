@@ -37,8 +37,8 @@ Program::~Program() {
     Destroy();
 }
 
-const Program::ParamInfo *Program::FindConstant(const string &name) const {
-    const auto &&it = m_constants.find(name);
+Program::ConstantRef Program::FindConstant(const string &name) {
+    auto &&it = m_constants.find(name);
     if (it != m_constants.end()) {
         return &it->second;
     }
