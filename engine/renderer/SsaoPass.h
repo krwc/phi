@@ -63,6 +63,7 @@ private:
     std::unique_ptr<phi::FrameBuffer> m_fbo;
     std::unique_ptr<phi::Texture2D> m_noise;
     std::unique_ptr<phi::Texture2D> m_ao_texture;
+    bool m_dirty;
     glm::vec2 m_screen_size;
     SsaoPass::Config m_config;
 

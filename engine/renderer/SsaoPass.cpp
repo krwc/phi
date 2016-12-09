@@ -47,10 +47,11 @@ void SsaoPass::UpdateConstants() {
     m_program.SetConstant("g_Strength", m_properties.strength);
     m_program.SetConstant("g_ScreenSize", m_screen_size);
     m_program.SetConstant("g_InvNoiseSize", 1.0f / NOISE_SIZE);
+    m_dirty = false;
 }
 
 SsaoPass::SsaoPass(phi::Device &device)
-        : m_device(device), m_program() {
+        : m_device(device), m_program(), m_dirty(true) {
     InitNoiseTexture();
     InitProgram();
 
@@ -79,6 +80,9 @@ void SsaoPass::SetCamera(const phi::Camera &camera) {
 }
 
 void SsaoPass::Run() {
+    if (m_dirty) {
+        UpdateConstants();
+    }
     const bool depth_write = m_device.GetDepthWrite();
     const bool depth_test = m_device.GetDepthTest();
     const phi::Rect2D viewport = m_device.GetViewport();
@@ -108,22 +112,22 @@ void SsaoPass::Run() {
 
 void SsaoPass::SetRadius(float radius) {
     m_properties.radius = radius;
-    UpdateConstants();
+    m_dirty = true;
 }
 
 void SsaoPass::SetPower(float power) {
     m_properties.power = power;
-    UpdateConstants();
+    m_dirty = true;
 }
 
 void SsaoPass::SetBias(float bias) {
     m_properties.bias = bias;
-    UpdateConstants();
+    m_dirty = true;
 }
 
 void SsaoPass::SetStrength(float strength) {
     m_properties.strength = strength;
-    UpdateConstants();
+    m_dirty = true;
 }
 
 } // namespace phi
