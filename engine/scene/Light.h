@@ -8,19 +8,23 @@ class Light {
     glm::vec3 m_position;
     glm::vec3 m_color;
     bool m_casting_shadows;
+    bool m_specular;
 
 public:
     Light(const glm::vec3 &position,
           const glm::vec3 &color,
-          bool casting_shadows);
+          bool casting_shadows,
+          bool specular);
     Light();
     virtual ~Light() {}
+    virtual void SetSpecular(bool enabled);
     virtual void SetColor(const glm::vec3 &color);
     virtual void SetPosition(const glm::vec3 &position);
     virtual const glm::vec3 &GetColor() const;
     virtual const glm::vec3 &GetPosition() const;
     virtual void SetShadowCasting(bool enabled);
     virtual bool IsCastingShadows() const;
+    virtual bool GetSpecular() const;
 };
 
 class DirLight : public Light {};

@@ -23,6 +23,10 @@ static void SetupSampleScene(phi::Scene &scene) {
     static auto wall_l = phi::MeshImporter::FromFile("assets/model/plane.obj", "wall_l");
     static auto torus = phi::MeshImporter::FromFile("assets/model/torus.obj", "torus");
     static auto bunny = phi::MeshImporter::FromFile("assets/model/bunny.obj", "bunny");
+    static auto sphere = phi::MeshImporter::FromFile("assets/model/sphere.obj", "sphere");
+
+    sphere->SetScale({3, 3, 3});
+    sphere->SetPosition({-18, -3, -1 });
 
     bunny->SetScale({80, 80, 80});
     bunny->SetPosition({16, -8, 0});
@@ -64,17 +68,18 @@ static void SetupSampleScene(phi::Scene &scene) {
     brick_material_config.diffuse_uv_scale = 20.0f;
     brick_material_config.normal = brick_normal.get();
     brick_material_config.normal_uv_scale = 20.0f;
+    brick_material_config.specular_power = 3.0f;
     static auto brick_material =
             std::make_unique<phi::PhongMaterial>(brick_material_config);
 
     static auto red_material = std::make_unique<phi::PhongMaterial>(
-            phi::PhongMaterial::Config{ { 1, 0, 0, 1 } });
+            phi::PhongMaterial::Config{ { 1, 0, 0 } });
 
     phi::PhongMaterial::Config wood_material_config{};
     wood_material_config.diffuse = wood.get();
-    wood_material_config.diffuse_uv_scale = 15.0f;
+    wood_material_config.diffuse_uv_scale = 25.0f;
     wood_material_config.normal = wood_normal.get();
-    wood_material_config.normal_uv_scale = 15.0f;
+    wood_material_config.normal_uv_scale = 25.0f;
     static auto wood_material =
             std::make_unique<phi::PhongMaterial>(wood_material_config);
 
@@ -86,10 +91,16 @@ static void SetupSampleScene(phi::Scene &scene) {
     static auto brick1_material =
             std::make_unique<phi::PhongMaterial>(brick1_material_config);
 
-    static auto violet_material = std::make_unique<phi::PhongMaterial>(
-            phi::PhongMaterial::Config{ { 0.4, 0.0, 0.6, 1 } });
+    phi::PhongMaterial::Config violet_material_config{};
+    violet_material_config.diffuse_color = { 0.4, 0.0, 0.6 };
+    violet_material_config.specular_power = 64.0;
+    static auto violet_material =
+            std::make_unique<phi::PhongMaterial>(violet_material_config);
     static auto bunny_material = std::make_unique<phi::PhongMaterial>(
-            phi::PhongMaterial::Config{ { 0.9, 0.9, 0.9, 1 } });
+            phi::PhongMaterial::Config{ { 0.9, 0.9, 0.9 } });
+
+    static auto blue_material = std::make_unique<phi::PhongMaterial>(
+            phi::PhongMaterial::Config{ { 0, 0, 0.5 }, 20.0f });
 
     box->SetMaterial(red_material.get());
     plane_h->SetMaterial(wood_material.get());
@@ -97,6 +108,7 @@ static void SetupSampleScene(phi::Scene &scene) {
     wall_l->SetMaterial(brick_material.get());
     torus->SetMaterial(violet_material.get());
     bunny->SetMaterial(bunny_material.get());
+    sphere->SetMaterial(blue_material.get());
 
     scene.AddEntity(plane_h.get());
     scene.AddEntity(plane_v.get());
@@ -104,11 +116,13 @@ static void SetupSampleScene(phi::Scene &scene) {
     scene.AddEntity(torus.get());
     scene.AddEntity(bunny.get());
     scene.AddEntity(wall_l.get());
+    scene.AddEntity(sphere.get());
 
     static auto sun = std::make_unique<phi::DirLight>();
     sun->SetPosition({10,15,-10});
     sun->SetColor({1,1,1});
     sun->SetShadowCasting(true);
+    sun->SetSpecular(true);
 
     static auto red_bulb = std::make_unique<phi::PointLight>();
     red_bulb->SetPosition({0,4,8});

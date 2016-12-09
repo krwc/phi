@@ -1,25 +1,4 @@
-#define NUM_MAX_DIR_LIGHTS      8
-#define NUM_MAX_POINT_LIGHTS    8
-
-struct DirLight {
-    vec3 Direction;
-    vec3 Color;
-};
-
-struct PointLight {
-    vec3 Position;
-    vec3 Color;
-    float AttenuationConstant;
-    float AttenuationLinear;
-    float AttenuationQuadratic;
-};
-
-struct LightInfo {
-    int NumDirLights;
-    int NumPointLights;
-    DirLight Dir[NUM_MAX_DIR_LIGHTS];
-    PointLight Point[NUM_MAX_DIR_LIGHTS];
-};
+#include "Light.h"
 
 layout(location=0) out vec4 FragColor;
 
@@ -35,18 +14,38 @@ layout(binding = 4) uniform sampler2DShadow g_TexShadow;
 
 in vec2 UV;
 
-vec3 ComputeDirLightIntensity(in LightInfo Info, in vec3 Normal) {
+float ComputeSpecularIntensity(in vec3 Incidence,
+                               in vec3 Normal,
+                               in vec3 ViewRay,
+                               in float Power) {
+    vec3 Result = vec3(0,0,0);
+    vec3 R = reflect(Incidence, Normal);
+    float DotRV = max(dot(R, -ViewRay), 0.0f);
+    return pow(DotRV, Power);
+}
+
+vec3 ComputeDirLightIntensity(in LightInfo Info,
+                              in vec3 Normal,
+                              in vec3 ViewRay,
+                              in float SpecularPower) {
     vec3 Result = vec3(0,0,0);
     for (uint i = 0; i < Info.NumDirLights; ++i) {
         float I = max(0.0f, dot(Normal, -Info.Dir[i].Direction));
-        Result += I * Info.Dir[i].Color;
+        float S = 0.0f;
+        if (Info.Dir[i].Specular && SpecularPower >= 1.0f) {
+            S = ComputeSpecularIntensity(Info.Dir[i].Direction, Normal, ViewRay,
+                                         SpecularPower);
+        }
+        Result += (I + S) * Info.Dir[i].Color;
     }
     return Result;
 }
 
 vec3 ComputePointLightIntensity(in LightInfo Info,
                                 in vec3 Normal,
-                                in vec3 Point) {
+                                in vec3 Point,
+                                in vec3 ViewRay,
+                                in float SpecularPower) {
     vec3 Result = vec3(0,0,0);
     for (uint i = 0; i < Info.NumPointLights; ++i) {
         vec3 L = Info.Point[i].Position - Point;
@@ -58,7 +57,11 @@ vec3 ComputePointLightIntensity(in LightInfo Info,
                             + Info.Point[i].AttenuationLinear * D
                             + Info.Point[i].AttenuationQuadratic * D * D);
         float I = max(0.0, dot(Normal, L / D));
-        Result += I * A * Info.Point[i].Color;
+        float S = 0.0f;
+        if (Info.Point[i].Specular && SpecularPower >= 1.0f) {
+            S = ComputeSpecularIntensity(L, Normal, ViewRay, SpecularPower);
+        }
+        Result += A * (I + S) * Info.Point[i].Color;
     }
     return Result;
 }
@@ -111,15 +114,15 @@ vec4 GetPosition(in vec2 uv) {
     return P /= P.w;
 }
 
-vec4 GetNormal(vec2 uv) {
+vec4 GetNormal(in vec2 uv) {
     return texture(g_TexNormal, uv);
 }
 
-vec4 GetDiffuse(vec2 uv) {
+vec4 GetDiffuse(in vec2 uv) {
     return texture(g_TexDiffuse, uv);
 }
 
-float GetAo(vec2 uv) {
+float GetAo(in vec2 uv) {
     const vec2 Offset = 1.0f / textureSize(g_TexAo, 0).xy;
     float Result = 0.0f;
     for (float i = -0.5; i <= 0.5; i += 1.0) {
@@ -140,9 +143,13 @@ void main() {
     } else {
         float Ao = GetAo(UV);
         vec4 P = GetPosition(UV);
+        vec3 ViewRay = normalize(P.xyz);
         vec4 DiffuseColor = GetDiffuse(UV);
-        vec3 DirLightI = ComputeDirLightIntensity(g_LightInfo, N.xyz);
-        vec3 PointLightI = ComputePointLightIntensity(g_LightInfo, N.xyz, P.xyz);
+        float SpecularPower = DiffuseColor.w;
+        vec3 DirLightI = ComputeDirLightIntensity(g_LightInfo, N.xyz, ViewRay,
+                                                  SpecularPower);
+        vec3 PointLightI = ComputePointLightIntensity(g_LightInfo, N.xyz, P.xyz,
+                                                      ViewRay, SpecularPower);
 
         vec4 ShadowCoord = g_ShadowMatrix * P;
         vec3 I = (1.0f - ShadowIntensity(g_ShadowMatrix * P, N.xyz,
