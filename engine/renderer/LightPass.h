@@ -1,6 +1,7 @@
 #ifndef PHI_LIGHT_PASS_H
 #define PHI_LIGHT_PASS_H
 #include <vector>
+#include <array>
 
 #include "math/Math.h"
 #include "utils/Types.h"
@@ -49,6 +50,24 @@ private:
     phi::Program m_program;
     const LightPass::Config *m_config;
     ShadowFiltering m_shadow_filtering;
+
+    struct PointLightConstants {
+        phi::Program::ConstantRef color;
+        phi::Program::ConstantRef position;
+        phi::Program::ConstantRef specular;
+        phi::Program::ConstantRef attenuation_constant;
+        phi::Program::ConstantRef attenuation_linear;
+        phi::Program::ConstantRef attenuation_quadratic;
+    };
+
+    struct DirLightConstants {
+        phi::Program::ConstantRef color;
+        phi::Program::ConstantRef specular;
+        phi::Program::ConstantRef direction;
+    };
+
+    std::array<PointLightConstants, 8u> m_point_light_constants;
+    std::array<DirLightConstants, 8u> m_dir_light_constants;
 
     void CompileProgram();
     void SetupLights();

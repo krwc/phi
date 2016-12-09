@@ -26,59 +26,54 @@ void LightPass::Setup(const phi::LightPass::Config &config) {
     m_config = &config;
 }
 
-namespace {
-
-const std::string POINT_LIGHT_PARAM_ATT_CONSTANT = ".AttenuationConstant";
-const std::string POINT_LIGHT_PARAM_ATT_LINEAR = ".AttenuationLinear";
-const std::string POINT_LIGHT_PARAM_ATT_QUADRATIC = ".AttenuationQuadratic";
-
-const std::string LIGHT_PARAM_DIRECTION = ".Direction";
-const std::string LIGHT_PARAM_POSITION = ".Position";
-const std::string LIGHT_PARAM_COLOR = ".Color";
-const std::string LIGHT_PARAM_SPECULAR = ".Specular";
-
-std::string ArrayMember(const std::string &name, uint32_t index) {
-    return name + "[" + std::to_string(index) + "]";
-}
-
-}
-
 void LightPass::SetupLights() {
     const glm::mat4 view = m_config->camera->GetViewMatrix();
 
     uint32_t dir_light_idx = 0u;
     for (const phi::DirLight *light : m_config->dir_lights) {
-        auto &&item = ArrayMember("g_LightInfo.Dir", dir_light_idx);
         // Transform light direction to view space.
         const glm::vec4 position = glm::vec4(light->GetPosition(), 0.0f);
         const glm::vec3 direction = glm::normalize(glm::vec3(view * position));
-        m_program.SetConstant(item + LIGHT_PARAM_DIRECTION, -direction);
-        m_program.SetConstant(item + LIGHT_PARAM_COLOR, light->GetColor());
-        m_program.SetConstant(item + LIGHT_PARAM_SPECULAR,
-                              (float)light->GetSpecular());
+        m_program.SetConstant(m_dir_light_constants[dir_light_idx].direction,
+                              -direction);
+        m_program.SetConstant(m_dir_light_constants[dir_light_idx].color,
+                              light->GetColor());
+        m_program.SetConstant(m_dir_light_constants[dir_light_idx].specular,
+                              (float) light->GetSpecular());
         ++dir_light_idx;
     }
 
     uint32_t point_light_idx = 0u;
     for (const phi::PointLight *light : m_config->point_lights) {
-        auto &&item = ArrayMember("g_LightInfo.Point", point_light_idx);
         const glm::vec4 position = glm::vec4(light->GetPosition(), 1.0f);
         const glm::vec3 view_position = glm::vec3(view * position);
-        m_program.SetConstant(item + LIGHT_PARAM_POSITION, view_position);
-        m_program.SetConstant(item + LIGHT_PARAM_COLOR,
+        m_program.SetConstant(m_point_light_constants[point_light_idx].position,
+                              view_position);
+        m_program.SetConstant(m_point_light_constants[point_light_idx].color,
                               light->GetColor());
-        m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_CONSTANT,
+        m_program.SetConstant(m_point_light_constants[point_light_idx].attenuation_constant,
                               light->GetConstantAttenuation());
-        m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_LINEAR,
+        m_program.SetConstant(m_point_light_constants[point_light_idx].attenuation_linear,
                               light->GetLinearAttenuation());
-        m_program.SetConstant(item + POINT_LIGHT_PARAM_ATT_QUADRATIC,
+        m_program.SetConstant(m_point_light_constants[point_light_idx].attenuation_quadratic,
                               light->GetQuadraticAttenuation());
-        m_program.SetConstant(item + LIGHT_PARAM_SPECULAR,
-                              (float)light->GetSpecular());
+        m_program.SetConstant(m_point_light_constants[point_light_idx].specular,
+                              (float) light->GetSpecular());
+
         ++point_light_idx;
     }
     m_program.SetConstant("g_LightInfo.NumDirLights", dir_light_idx);
     m_program.SetConstant("g_LightInfo.NumPointLights", point_light_idx);
+}
+
+namespace {
+
+std::string $(const std::string &array_name,
+              uint32_t index,
+              const std::string &array_member) {
+    return array_name + "[" + std::to_string(index) + "]." + array_member;
+}
+
 }
 
 void LightPass::CompileProgram() {
@@ -94,6 +89,32 @@ void LightPass::CompileProgram() {
     m_program.SetSourceFromFile(phi::ShaderType::Vertex, "assets/shaders/Quad.vs");
     m_program.SetSource(phi::ShaderType::Fragment, spp.Preprocess());
     m_program.Link();
+
+    for (size_t i = 0u; i < m_dir_light_constants.size(); ++i) {
+        static const char *dir_light_array = "g_LightInfo.Dir";
+        m_dir_light_constants[i].color =
+                m_program.FindConstant($(dir_light_array, i, "Color"));
+        m_dir_light_constants[i].direction =
+                m_program.FindConstant($(dir_light_array, i, "Direction"));
+        m_dir_light_constants[i].specular =
+                m_program.FindConstant($(dir_light_array, i, "Specular"));
+    }
+
+    for (size_t i = 0u; i < m_point_light_constants.size(); ++i) {
+        static const char *point_light_array = "g_LightInfo.Point";
+        m_point_light_constants[i].color =
+                m_program.FindConstant($(point_light_array, i, "Color"));
+        m_point_light_constants[i].position =
+                m_program.FindConstant($(point_light_array, i, "Position"));
+        m_point_light_constants[i].specular =
+                m_program.FindConstant($(point_light_array, i, "Specular"));
+        m_point_light_constants[i].attenuation_constant =
+                m_program.FindConstant($(point_light_array, i, "AttenuationConstant"));
+        m_point_light_constants[i].attenuation_linear =
+                m_program.FindConstant($(point_light_array, i, "AttenuationLinear"));
+        m_point_light_constants[i].attenuation_quadratic =
+                m_program.FindConstant($(point_light_array, i, "AttenuationQuadratic"));
+    }
 }
 
 void LightPass::Run() {
