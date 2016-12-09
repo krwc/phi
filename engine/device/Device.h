@@ -53,7 +53,7 @@ public:
      */
     void BlitDepthBuffer(const phi::FrameBuffer *src);
 
-#warning "FIXME: this is an ugly hack"
+    // FIXME: this is an ugly hack"
     void SetDefaultFrameBuffer(GLuint index);
 
     /**
