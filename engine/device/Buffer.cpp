@@ -44,19 +44,26 @@ Buffer::Buffer(Buffer &&other) : m_id(GL_NONE) {
     *this = move(other);
 }
 
-Buffer::Buffer(BufferType type,
-               BufferHint usage,
-               const void *data,
-               size_t size)
-        : m_type(type), m_id(GL_NONE), m_size(size) {
+Buffer::Buffer(BufferType type, BufferHint usage, const void *data, size_t size)
+        : m_type(type), m_hint(usage), m_id(GL_NONE), m_size(size) {
     CheckedCall(phi::glCreateBuffers, 1, &m_id);
-    CheckedCall(phi::glNamedBufferData, m_id, size, data, (GLenum) usage);
+    CheckedCall(phi::glNamedBufferData, m_id, size, data, (GLenum) m_hint);
     PHI_LOG(TRACE, "%s buffer: created (ID=%u) of size %u",
             BufferTypeString(m_type), m_id, size);
 }
 
 Buffer::~Buffer() {
     Destroy();
+}
+
+void Buffer::Fill(const void *data, size_t size) {
+    assert(size != 0u);
+    if (size > m_size) {
+        CheckedCall(phi::glNamedBufferData, m_id, size, data, (GLenum) m_hint);
+        m_size = size;
+    } else {
+        UpdateData(data, size, 0);
+    }
 }
 
 void Buffer::UpdateData(const void *data, size_t size, size_t offset) {
