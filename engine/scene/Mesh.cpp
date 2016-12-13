@@ -27,9 +27,13 @@ Material *SimpleMesh::GetMaterial() const {
 
 Buffer *SimpleMesh::GetVertexBuffer() {
     if (m_dirty) {
-        m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferHint::Static,
-                                    m_vertices.data(),
-                                    m_vertices.size() * sizeof(Vertex));
+        if (!m_vbo) {
+            m_vbo = make_unique<Buffer>(BufferType::Vertex, BufferHint::Static,
+                                        m_vertices.data(),
+                                        m_vertices.size() * sizeof(Vertex));
+        } else {
+            m_vbo->Fill(m_vertices.data(), m_vertices.size() * sizeof(Vertex));
+        }
         m_dirty = false;
     }
     return m_vbo.get();
@@ -42,6 +46,26 @@ AABB SimpleMesh::GetAABB() const {
 void SimpleMesh::AppendVertex(const SimpleMesh::Vertex &vertex) {
     m_vertices.push_back(vertex);
     m_box.Cover(vertex.position);
+    m_dirty = true;
+}
+
+void SimpleMesh::ComputeNormals() {
+    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+        glm::vec3 p0 = glm::vec3(m_vertices[i + 0].position);
+        glm::vec3 p1 = glm::vec3(m_vertices[i + 1].position);
+        glm::vec3 p2 = glm::vec3(m_vertices[i + 2].position);
+
+        glm::vec3 N = glm::normalize(glm::cross(p0-p1, p0-p2));
+        m_vertices[i + 0].normal = N;
+        m_vertices[i + 1].normal = N;
+        m_vertices[i + 2].normal = N;
+    }
+    m_dirty = true;
+}
+
+void SimpleMesh::Reset() {
+    m_vertices.clear();
+    m_box = phi::AABB{};
     m_dirty = true;
 }
 

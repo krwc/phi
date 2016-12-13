@@ -53,6 +53,10 @@ public:
 
     virtual void SetMaterial(phi::Material *);
     void AppendVertex(const SimpleMesh::Vertex &);
+    /** Calculates normals of currently appended vertices */
+    void ComputeNormals();
+    /** Resets contents of the mesh removing all of its vertices. */
+    void Reset();
     virtual void Render(phi::DrawCall &);
 
     virtual const std::string &GetName() const {
