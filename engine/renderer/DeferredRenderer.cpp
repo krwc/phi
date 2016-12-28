@@ -107,7 +107,7 @@ void DeferredRenderer::Render(phi::Scene &scene) {
         auto dt = T.ElapsedTimeUs<float>() / 1000;
         auto avg = T.AvgUs<float>() / 1000;
         auto max = T.MaxUs<float>() / 1000;
-        printf("dt=%.4fms, avg=%.4fms, max=%.4fms\n", dt, avg, max);
+        PHI_LOG(INFO, "dt=%.4fms, avg=%.4fms, max=%.4fms", dt, avg, max);
     }
 #endif
 }
